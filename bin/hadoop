@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 DESC="hadoop service script"
 SCRIPTNAME="hadoop"
 

@@ -10,12 +10,12 @@ source $SCRIPT_PATH/$SCRIPT_NAME
 source $CONF_PATH/$ENV_NAME
 
 case "$1" in
-    deploy_nodes)
+    create)
         echo "deploy_nodes"
         add_nodes $CONF_PATH/$SLAVES_CONF_NAME
         ;;
     *)
-        echo "Usage [deploy_nodes]" >&2
+        echo "Usage [create]" >&2
         exit 3
         ;;
 esac

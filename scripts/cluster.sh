@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 CONF_PATH="`dirname $0`/../conf/"
 
@@ -47,7 +48,7 @@ function config_repo(){
 
 function add_node(){
   echo "Add node with hostname $1, IP $2, username $3 and password $4"
-  setup_login_without_password
+  setup_login_without_password $1 $2 $3 $4
 }
 
 function add_nodes(){
