@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+SCRIPT_PATH="`dirname $0`/../scripts"
+SCRIPT_NAME="cluster.sh"
+
+source $SCRIPT_PATH/$SCRIPT_NAME
+
+case "$1" in
+    deploy_nodes)
+        echo "deploy_nodes"
+        add_nodes
+        ;;
+    *)
+        echo "Usage [deploy_nodes]" >&2
+        exit 3
+        ;;
+esac
+
+exit 0
