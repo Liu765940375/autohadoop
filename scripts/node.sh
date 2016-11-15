@@ -4,6 +4,22 @@ CONF_PATH="`dirname $0`/../conf/"
 
 function setup_login_without_password(){
   echo "setup_login_without_password"
+
+  echo $2 $1 >> /etc/hosts
+  user=$3
+  node=$1
+  rsafile=~/.ssh/id_rsa
+  if [ ! -f "$rsafile" ]
+  then
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+  fi
+
+  cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+  chmod 600 ~/.ssh/authorized_keys
+
+  ssh-copy-id -i ~/.ssh/id_rsa.pub $user@$node
+
 }
 
 function config_repo(){
