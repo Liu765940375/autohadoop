@@ -62,6 +62,3 @@ function add_nodes(){
 
   # deploy configurations to all nodes
 }
-
-source $CONF_PATH/env.sh
-add_nodes $CONF_PATH/$SLAVES_CONF_NAME

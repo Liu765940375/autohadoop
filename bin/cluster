@@ -3,12 +3,16 @@
 SCRIPT_PATH="`dirname $0`/../scripts"
 SCRIPT_NAME="cluster.sh"
 
+CONF_PATH="`dirname $0`/../conf"
+ENV_NAME="env.sh"
+
 source $SCRIPT_PATH/$SCRIPT_NAME
+source $CONF_PATH/$ENV_NAME
 
 case "$1" in
     deploy_nodes)
         echo "deploy_nodes"
-        add_nodes
+        add_nodes $CONF_PATH/$SLAVES_CONF_NAME
         ;;
     *)
         echo "Usage [deploy_nodes]" >&2
