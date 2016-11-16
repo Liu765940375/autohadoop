@@ -11,6 +11,8 @@ case "$1" in
         ;;
     create)
         echo "Create hadoop infrastructure"
+        source ../conf/env.sh
+        python ../scripts/config.py ../conf/core-site.xml.template ../conf/$CORE_SITE_CONF_NAME ../conf/core-site.xml
         ;;
     restart)
         echo "Restart hadoop service"

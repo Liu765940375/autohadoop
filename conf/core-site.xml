@@ -1,0 +1,22 @@
+<configuration>
+	<property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://10.239.47.45:8020</value>
+    </property>
+	
+     <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/home/program/hadoop-2.6.4/tmp</value>
+    </property>
+
+	<property>
+        <name>hadoop.proxyuser.root.groups</name>
+        <value>*</value>
+    </property>
+
+	<property>
+        <name>hadoop.proxyuser.root.hosts</name>
+        <value>*</value>
+    </property>
+
+</configuration>
