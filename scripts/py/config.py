@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import sys
+import os.path
 import xml.etree.cElementTree as ET
 
 def get_custom_configs (filename, custom_configs):
@@ -17,9 +18,18 @@ if __name__ == "__main__":
     output_filename = sys.argv[3]
     default_configs = {}
     custom_configs = {}
+    doc = ET.parse(default_config_filename)
+    root = doc.getroot();
+
+    # No custom file exsit
+    if os.path.isfile(custom_config_filename) == False:
+        tree = ET.ElementTree(root)
+        with open(output_filename, "w") as f:
+            tree.write(f)
+        sys.exit(0)
+
 
     get_custom_configs(custom_config_filename, custom_configs)
-
     doc = ET.parse(default_config_filename)
     root = doc.getroot();
     properties = root.getchildren()
@@ -42,7 +52,6 @@ if __name__ == "__main__":
 
         default_configs[key] = value
 
-
     for key, val in custom_configs.iteritems():
         prop = ET.Element('property')
         name = ET.SubElement(prop, "name")
@@ -54,3 +63,4 @@ if __name__ == "__main__":
     tree = ET.ElementTree(root)
     with open(output_filename, "w") as f:
         tree.write(f)
+    sys.exit(0)
