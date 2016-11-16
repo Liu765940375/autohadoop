@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONF_PATH="`dirname $0`"
-echo $CONF_PATH
+
 # the path to the tool configuration
 export SLAVES_CONF_NAME="slaves.property"
 export CORE_SITE_PATH="$CONF_PATH/core-site.xml"

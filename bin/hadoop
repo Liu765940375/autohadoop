@@ -2,6 +2,8 @@
 set -x
 DESC="hadoop service script"
 SCRIPTNAME="hadoop"
+SCRIPT_PATH="`dirname $0`/../scripts"
+CONF_PATH="`dirname $0`/../conf"
 
 case "$1" in
     start)
@@ -12,6 +14,9 @@ case "$1" in
         ;;
     create)
         echo "Create hadoop infrastructure"
+        source $CONF_PATH/env.sh
+        source $SCRIPT_PATH/hadoop.sh         
+        deploy_hadoop
         ;;
     restart)
         echo "Restart hadoop service"
