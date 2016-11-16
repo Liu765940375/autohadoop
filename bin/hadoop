@@ -1,5 +1,4 @@
 #!/bin/bash
-PARAMS=$1
 DESC="hadoop service script"
 SCRIPTNAME="hadoop"
 
@@ -8,7 +7,7 @@ case "$1" in
         echo "Starting hadoop service"
         ;;
     stop)
-        echo "Stoping hadoop service"
+        echo "Stopping hadoop service"
         ;;
     create)
         echo "Create hadoop infrastructure"
