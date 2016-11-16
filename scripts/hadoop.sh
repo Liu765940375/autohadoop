@@ -3,8 +3,6 @@
 SCRIPT_PATH="`dirname $0`/../scripts"
 CONFIG_SCRIPT=$SCRIPT_PATH/py/config.py
 
-source ../conf/env.sh
-
 function gen_hadoop_conf(){
     echo "gen_hadoop_conf"
 }
