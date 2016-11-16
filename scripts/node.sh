@@ -22,6 +22,25 @@ function setup_login_without_password(){
 
 }
 
+function get_hardware_info(){
+  echo "CPU info"
+  pssh -i -h /home/hosts.txt  cat /proc/cpuinfo
+  echo "Memory info"
+  pssh -i -h /home/hosts.txt  free -m
+  echo "Disk info"
+  pssh -i -h /home/hosts.txt  fdisk -l
+}
+
+function install_pssh(){
+  wget http://bdpe833n2/software/pssh-2.3.1.tar.gz
+  tar -zxvf pssh-2.3.1.tar.gz
+  cd pssh-2.3.1/
+  python setup.py build
+  python setup.py install
+# you can add the hostname or IP in hosts.txt
+  vim hosts.txt
+}
+
 function config_repo(){
   echo "config_repo"
 }
