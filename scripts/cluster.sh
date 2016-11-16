@@ -44,6 +44,35 @@ function install_pssh(){
 
 function config_repo(){
   echo "config_repo"
+  #install httpd
+  yum -y install httpd
+
+  DEFAULTDIR1="\"/var/www/html\""
+  DEFAULTDIR2="\"/var/www\""
+  DIR="\"${1:-/srv/my/repo}\""
+  DEF_FILE="/etc/httpd/conf/httpd.conf"
+  PSSH_HOST="${2:-/home/hosts.txt}"
+
+  sed -i "s%$DEFAULTDIR1%$DIR%g" $DEF_FILE
+  sed -i "s%$DEFAULTDIR2%$DIR%g" $DEF_FILE
+  sed -i 's/#ServerName[[:space:]]www.example.com:80/ServerName localhost:80/g' $DEF_FILE
+
+  mkdir -p $DIR
+
+  mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.origin
+  chcon -R -t httpd_sys_content_t $DIR
+  chmod 755 $DIR
+  systemctl stop firewalld.service
+  systemctl enable httpd.service
+  systemctl start httpd.service 
+
+  # install createrepo
+  yum -y install createrepo
+  createrepo $DIR
+
+  #before this command you should confirm the machine have installed pssh
+  echo -e "[bdperepo]\nname = This is my repo\nbaseurl = http://10.239.47.53/" > /etc/yum.repos.d/bdperepo.repo
+  pscp -h $PSSH_HOST /etc/yum.repos.d/bdperepo.repo /etc/yum.repos.d/
 }
 
 function add_node(){
