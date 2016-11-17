@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import sys
 import os
 import paramiko
 import glob
@@ -119,12 +119,22 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
         tree.write(f)
 
 if __name__ == '__main__':
+    mode = sys.argv[1]
+    component = sys.argv[2]
+    version = sys.argv[3]
+
     current_path = os.path.dirname(os.path.abspath(__file__))
     script_path = os.path.dirname(current_path)
     project_path = os.path.dirname(script_path)
     config_path = project_path + "/conf"
     package_path = project_path +"/packages"
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
+
+    package = component + "-" + version + ".tar.gz";
+
+    # Download component
+    download_url = "http://10.239.47.53/hadoop"
+    os.system("wget -P " + package_path + " " + download_url + "/" + package)
 
     # Generate configration XML files
     for config_file in config_file_names:

@@ -12,12 +12,12 @@ case "$1" in
     stop)
         echo "Stopping hadoop service"
         ;;
-    create)
-        echo "Create hadoop infrastructure"
-        source $CONF_PATH/env.sh
-        source $SCRIPT_PATH/hadoop.sh         
-        deploy_hadoop
-        ;;
+#    create)
+#        echo "Create hadoop infrastructure"
+#        source $CONF_PATH/env.sh
+#        source $SCRIPT_PATH/hadoop.sh         
+#        deploy_hadoop
+#        ;;
     restart)
         echo "Restart hadoop service"
         ;;
