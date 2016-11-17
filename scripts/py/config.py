@@ -30,8 +30,6 @@ if __name__ == "__main__":
 
 
     get_custom_configs(custom_config_filename, custom_configs)
-    doc = ET.parse(default_config_filename)
-    root = doc.getroot();
     properties = root.getchildren()
     for prop in properties:
         attributes = prop.getchildren()
