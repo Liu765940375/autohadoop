@@ -25,6 +25,27 @@ function setup_login_without_password(){
   sshpass -p $password ssh-copy-id -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa.pub $user@$hostname
 }
 
+function setup_hadoop_environment(){
+  package_path="`dirname $0`/../packages"
+  hadoop_tar_name=$(ls $package_path | grep hadoop-.*.tar.gz)
+  hadoop_version=$(basename $hadoop_tar_name .tar.gz)
+
+  hadoop_tar=/opt/${hadoop_version}.tar.gz
+  #if [ ! -f $hadoop_tar ]
+  #then
+    #wget -P /opt http://10.239.47.53/hadoop/${hadoop_version}.tar.gz
+  #fi
+  username=$3
+  hostname=$1
+
+  scp $hadoop_tar $username@$hostname:/opt
+  ssh $username@$hostname 'tar -zxvf '$hadoop_tar' -C /opt'
+  ssh $username@$hostname 'rm -rf '$hadoop_tar''
+
+  CONF_PATH="`dirname $0`/../conf"
+  scp -r $CONF_PATH/* $username@$hostname:/opt/$hadoop_version/etc/hadoop
+}
+
 function get_hardware_info(){
   echo "CPU info"
   pssh -i -h /home/hosts.txt  cat /proc/cpuinfo
@@ -80,6 +101,7 @@ function config_repo(){
 function add_node(){
   echo "Add node with hostname $1, IP $2, username $3 and password $4"
   setup_login_without_password $1 $2 $3 $4
+  setup_hadoop_environment $1 $2 $3 $4
 }
 
 function add_nodes(){
