@@ -8,19 +8,19 @@ function setup_login_without_password(){
 
   echo $2 $1 >> /etc/hosts
   user=$3
-  node=$1
+  hostname=$1
   rsafile=~/.ssh/id_rsa
   if [ ! -f "$rsafile" ]
   then
     ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
   fi
-
   cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-
   chmod 600 ~/.ssh/authorized_keys
 
-  ssh-copy-id -i ~/.ssh/id_rsa.pub $user@$node
-
+  wget http://10.239.47.53/software/sshpass-1.05-5.el7.x86_64.rpm
+  rpm -ivh sshpass-1.05-5.el7.x86_64.rpm
+  rm -rf sshpass-1.05-5.el7.x86_64.rpm
+  sshpass -p $password ssh-copy-id -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa.pub $user@$hostname
 }
 
 function get_hardware_info(){
