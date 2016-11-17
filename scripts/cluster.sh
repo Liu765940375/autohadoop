@@ -7,9 +7,11 @@ function setup_login_without_password(){
   echo "setup_login_without_password"
 
   echo $2 $1 >> /etc/hosts
-  user=$3
   hostname=$1
+  user=$3
+  password=$4
   rsafile=~/.ssh/id_rsa
+
   if [ ! -f "$rsafile" ]
   then
     ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
