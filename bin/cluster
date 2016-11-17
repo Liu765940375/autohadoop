@@ -6,13 +6,20 @@ SCRIPT_NAME="cluster.sh"
 CONF_PATH="`dirname $0`/../conf"
 ENV_NAME="env.sh"
 
+
+PACKAGE_PATH="`dirname $0`/../packages"
+
 source $SCRIPT_PATH/$SCRIPT_NAME
 source $CONF_PATH/$ENV_NAME
 
 case "$1" in
     create)
         echo "deploy_nodes"
-        add_nodes $CONF_PATH/$SLAVES_CONF_NAME
+	mkdir -p $PACKAGE_PATH
+	if [ ! -f hadoop-2.7.3.tar.gz ]; then
+    		wget -P $PACKAGE_PATH http://10.239.47.53/hadoop/hadoop-2.7.3.tar.gz
+	fi
+        add_nodes $SLAVES_CONF_NAME
         ;;
     *)
         echo "Usage [create]" >&2

@@ -1,9 +1,12 @@
 #!/bin/bash
 
-CONF_PATH="`dirname $0`"
+if [ -z $CONF_PATH ]; then
+	CONF_PATH="`dirname $0`"
+fi
 
+export HADOOP_VERSION="2.7.3"
 # the path to the tool configuration
-export SLAVES_CONF_NAME="slaves.property"
+export SLAVES_CONF_NAME=$CONF_PATH/"slaves"
 export CORE_SITE_PATH="$CONF_PATH/core-site.xml"
 export HDFS_SITE_PATH="$CONF_PATH/hdfs-site.xml"
 export YARN_SITE_PATH="$CONF_PATH/yarn-site.xml"
