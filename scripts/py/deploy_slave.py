@@ -21,6 +21,15 @@ def ssh_execute(server, user, psw, cmd):
         print '...' + line.strip('\n')
     ssh.close()
 
+def ssh_copy(server, user, psw, src, dst):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.load_system_host_keys()
+    ssh.connect(server, username=user, password=psw)
+    sftp = ssh.open_sftp()
+    sftp.put(src, dst)
+    sftp.close()
+    ssh.close()
 
 def get_config(filename, key):
     doc = ET.parse(filename)
@@ -106,7 +115,6 @@ if __name__ == '__main__':
     script_path = os.path.dirname(current_path)
     project_path = os.path.dirname(script_path)
     config_path = project_path + "/conf/"
-
     config_files = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
 
     # Generate configration XML files
@@ -116,15 +124,12 @@ if __name__ == '__main__':
         target_config = config_path + config_file
         generate_configuration(template_config, custom_config, target_config)
 
-    #Get namenode and datanode dir
+    # Copy hadoop package to slave nodes
+    slaves = get_slaves(config_path + "slaves")
+
+    # Get namenode and datanode dir
     datanode_dir = get_config(config_path + "hdfs-site.xml", "dfs.namenode.name.dir").split(':')[1]
     namenode_dir = get_config(config_path + "hdfs-site.xml", "dfs.datanode.data.dir").split(':')[1]
-
-    print datanode_dir
-    print namenode_dir
-
-    ##
-    slaves = get_slaves(config_path+"slaves")
     cmd = "mkdir -p " + namenode_dir + ";"
     cmd += "mkdir -p " + datanode_dir + ";"
 
