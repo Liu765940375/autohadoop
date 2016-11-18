@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source ./conf/env.sh
 
 SCRIPT_PATH="`dirname $0`/../scripts"
 SCRIPT_NAME="cluster.sh"
@@ -22,7 +23,7 @@ case "$1" in
 	  mkdir -p $PACKAGE_PATH
         fi
 	if [ ! -f $HADOOP_TAR ]; then
-    		wget -P $PACKAGE_PATH http://10.239.47.53/hadoop/hadoop-${HADOOP_VERSION}.tar.gz
+    		wget -P $PACKAGE_PATH http://$DOWNLOAD_SERVER/hadoop/hadoop-${HADOOP_VERSION}.tar.gz
 	fi
         add_nodes $SLAVES_CONF_NAME
         ;;

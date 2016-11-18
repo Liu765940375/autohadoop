@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x
-
+source ../conf/env.sh
 CONF_PATH="`dirname $0`/../conf/"
 
 function setup_login_without_password(){
@@ -19,7 +19,7 @@ function setup_login_without_password(){
   cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
   chmod 600 ~/.ssh/authorized_keys
 
-  wget http://10.239.47.53/software/sshpass-1.05-5.el7.x86_64.rpm
+  wget http://$DOWNLOAD_SERVER/software/sshpass-1.05-5.el7.x86_64.rpm
   rpm -ivh sshpass-1.05-5.el7.x86_64.rpm
   rm -rf sshpass-1.05-5.el7.x86_64.rpm
   sshpass -p $password ssh-copy-id -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa.pub $user@$hostname
@@ -52,7 +52,7 @@ function get_hardware_info(){
 }
 
 function install_pssh(){
-  wget http://bdpe833n2/software/pssh-2.3.1.tar.gz
+  wget http://$DOWNLOAD_SERVER/software/pssh-2.3.1.tar.gz
   tar -zxvf pssh-2.3.1.tar.gz
   cd pssh-2.3.1/
   python setup.py build
@@ -90,7 +90,7 @@ function config_repo(){
   createrepo $DIR
 
   #before this command you should confirm the machine have installed pssh
-  echo -e "[bdperepo]\nname = This is my repo\nbaseurl = http://10.239.47.53/" > /etc/yum.repos.d/bdperepo.repo
+  echo -e "[bdperepo]\nname = This is my repo\nbaseurl = http://"$DOWNLOAD_SERVER/" > /etc/yum.repos.d/bdperepo.repo
   pscp -h $PSSH_HOST /etc/yum.repos.d/bdperepo.repo /etc/yum.repos.d/
 }
 

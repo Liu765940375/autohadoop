@@ -133,7 +133,8 @@ if __name__ == '__main__':
     package = component + "-" + version + ".tar.gz";
 
     # Download component
-    download_url = "http://10.239.47.53/hadoop"
+    download_server="10.239.47.53"
+    download_url = "http://"+download_server+"/hadoop"
     os.system("wget -P " + package_path + " " + download_url + "/" + package)
 
     # Generate configration XML files
