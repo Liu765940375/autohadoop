@@ -184,7 +184,13 @@ if __name__ == '__main__':
     slaves = get_slaves(os.path.join(config_path, "slaves"))
     setup_nopass(slaves)
 
+    # Download component package
+    download_server = "10.239.47.53"
     package = component + "-" + version + ".tar.gz";
+    download_url = "http://" + download_server + "/" + component
+    os.system("wget -P " + package_path + " " + download_url + "/" + package)
+
+    # TODO: only copy component package or all?
     path = package_path + "/*.tar.gz"
     packages = glob.glob(path)
     download_package_dist(slaves, packages, component)
