@@ -30,17 +30,13 @@ function setup_hadoop_environment(){
   hadoop_tar_name=$(ls $package_path | grep hadoop-.*.tar.gz)
   hadoop_version=$(basename $hadoop_tar_name .tar.gz)
 
-  hadoop_tar=/opt/${hadoop_version}.tar.gz
-  #if [ ! -f $hadoop_tar ]
-  #then
-    #wget -P /opt http://10.239.47.53/hadoop/${hadoop_version}.tar.gz
-  #fi
+  hadoop_tar=$package_path/${hadoop_version}.tar.gz
   username=$3
   hostname=$1
 
   scp $hadoop_tar $username@$hostname:/opt
-  ssh $username@$hostname 'tar -zxvf '$hadoop_tar' -C /opt'
-  ssh $username@$hostname 'rm -rf '$hadoop_tar''
+  ssh $username@$hostname 'tar -zxvf /opt/'${hadoop_version}'.tar.gz -C /opt'
+  ssh $username@$hostname 'rm -rf /opt/'${hadoop_version}'.tar.gz'
 
   CONF_PATH="`dirname $0`/../conf"
   scp -r $CONF_PATH/* $username@$hostname:/opt/$hadoop_version/etc/hadoop

@@ -12,12 +12,17 @@ PACKAGE_PATH="`dirname $0`/../packages"
 source $SCRIPT_PATH/$SCRIPT_NAME
 source $CONF_PATH/$ENV_NAME
 
+HADOOP_TAR="`dirname $0`/../packages/hadoop-${HADOOP_VERSION}.tar.gz"
+
 case "$1" in
     create)
         echo "deploy_nodes"
-	mkdir -p $PACKAGE_PATH
-	if [ ! -f hadoop-2.7.3.tar.gz ]; then
-    		wget -P $PACKAGE_PATH http://10.239.47.53/hadoop/hadoop-2.7.3.tar.gz
+        if [ ! -d $PACHAGE_PATH ]
+        then
+	  mkdir -p $PACKAGE_PATH
+        fi
+	if [ ! -f $HADOOP_TAR ]; then
+    		wget -P $PACKAGE_PATH http://10.239.47.53/hadoop/hadoop-${HADOOP_VERSION}.tar.gz
 	fi
         add_nodes $SLAVES_CONF_NAME
         ;;
