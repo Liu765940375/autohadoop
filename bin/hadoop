@@ -8,6 +8,8 @@ CONF_PATH="`dirname $0`/../conf"
 case "$1" in
     start)
         echo "Starting hadoop service"
+ 	$HADOOP_HOME/sbin/start-dfs.sh
+	$HADOOP_HOME/sbin/start-yarn.sh
         ;;
     stop)
         echo "Stopping hadoop service"

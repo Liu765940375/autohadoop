@@ -4,6 +4,7 @@ if [ -z $CONF_PATH ]; then
 	CONF_PATH="`dirname $0`"
 fi
 
+export JAVA_VERSION="8u112"
 export HADOOP_VERSION="2.7.3"
 # the path to the tool configuration
 export SLAVES_CONF_NAME=$CONF_PATH/"slaves"

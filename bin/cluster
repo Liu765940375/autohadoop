@@ -13,7 +13,8 @@ PACKAGE_PATH="`dirname $0`/../packages"
 source $SCRIPT_PATH/$SCRIPT_NAME
 source $CONF_PATH/$ENV_NAME
 
-HADOOP_TAR="`dirname $0`/../packages/hadoop-${HADOOP_VERSION}.tar.gz"
+HADOOP_TAR="$PACKAGE_PATH/hadoop-${HADOOP_VERSION}.tar.gz"
+JAVA_TAR="$PACKAGE_PATH/jdk-${JAVA_VERSION}-linux-x64.tar.gz"
 
 case "$1" in
     create)
@@ -22,10 +23,14 @@ case "$1" in
         then
 	  mkdir -p $PACKAGE_PATH
         fi
+        if [ ! -f $JAVA_TAR ]; then
+                wget -P $PACKAGE_PATH http://$DOWNLOAD_SERVER/software/jdk-${JAVA_VERSION}-linux-x64.tar.gz
+        fi
 	if [ ! -f $HADOOP_TAR ]; then
     		wget -P $PACKAGE_PATH http://$DOWNLOAD_SERVER/hadoop/hadoop-${HADOOP_VERSION}.tar.gz
 	fi
         add_nodes $SLAVES_CONF_NAME
+        $HADOOP_HOME/bin/hdfs namenode -format
         ;;
     *)
         echo "Usage [create]" >&2

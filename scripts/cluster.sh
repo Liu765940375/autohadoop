@@ -27,19 +27,55 @@ function setup_login_without_password(){
 
 function setup_hadoop_environment(){
   package_path="`dirname $0`/../packages"
+
   hadoop_tar_name=$(ls $package_path | grep hadoop-.*.tar.gz)
   hadoop_version=$(basename $hadoop_tar_name .tar.gz)
-
+  
+  java_tar_name=$(ls $package_path | grep jdk) 
+  java_tar=$package_path/$java_tar_name
   hadoop_tar=$package_path/${hadoop_version}.tar.gz
   username=$3
   hostname=$1
-
+  
+  scp $java_tar $username@$hostname:/opt
   scp $hadoop_tar $username@$hostname:/opt
+  ssh $username@$hostname 'tar -zxvf /opt/'${java_tar_name}' -C /opt'
+  ssh $username@$hostname 'rm -rf /opt/'${java_tar_name}''
+  JAVA_HOME=/opt/$(ssh $username@$hostname 'ls /opt | grep jdk')
+  ssh $username@$hostname 'echo "export JAVA_HOME='${JAVA_HOME}'" >> /etc/profile'
+  ssh $username@$hostname 'echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> /etc/profile'
+  ssh $username@$hostname 'echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /etc/profile  '
+
   ssh $username@$hostname 'tar -zxvf /opt/'${hadoop_version}'.tar.gz -C /opt'
   ssh $username@$hostname 'rm -rf /opt/'${hadoop_version}'.tar.gz'
-
+  
   CONF_PATH="`dirname $0`/../conf"
+  hdfs_config=$CONF_PATH/hdfs-site.xml.custom
+  while read line
+  do
+    dirname=$(echo $line|awk -F '=' '{print $1}')
+    dirpath=$(echo $line|awk -F '=' '{print $2}')
+    case $dirname in
+      "dfs.datanode.data.dir")
+        ssh $username@$hostname 'mkdir -p '$dirpath'' 
+        ;;
+      "dfs.namenode.name.dir")
+        ssh $username@$hostname 'mkdir -p '$dirpath''
+      ;;
+    *)
+      ;;
+    esac
+  done < $hdfs_config
+  
+  PY_PATH="`dirname $0`/../scripts/py" 
+  python $PY_PATH/generate_config.py $CONF_PATH/hdfs-site.xml.template $CONF_PATH/hdfs-site.xml.custom $CONF_PATH/hdfs-site.xml
+  python $PY_PATH/generate_config.py $CONF_PATH/core-site.xml.template $CONF_PATH/core-site.xml.custom $CONF_PATH/core-site.xml  
+  python $PY_PATH/generate_config.py $CONF_PATH/mapred-site.xml.template $CONF_PATH/mapred-site.xml.custom $CONF_PATH/mapred-site.xml
+  python $PY_PATH/generate_config.py $CONF_PATH/yarn-site.xml.template $CONF_PATH/yarn-site.xml.custom $CONF_PATH/yarn-site.xml
   scp -r $CONF_PATH/* $username@$hostname:/opt/$hadoop_version/etc/hadoop
+  ssh $username@$hostname 'echo "export HADOOP_HOME=/opt/'${hadoop_version}'" >> /etc/profile'
+  ssh $username@$hostname 'echo "export PATH=\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:\$PATH" >> /etc/profile'
+  source /etc/profile 
 }
 
 function get_hardware_info(){
