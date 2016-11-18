@@ -1,8 +1,10 @@
 #!/usr/bin/python
-import sys
+
 import os
+import sys
 import paramiko
 import glob
+import optparse
 import xml.etree.cElementTree as ET
 
 class Node:
@@ -18,7 +20,7 @@ def get_custom_configs (filename, custom_configs):
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
-def ssh_execute(node,  cmd):
+def ssh_execute(node, lcmd):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -70,6 +72,34 @@ def get_slaves(filename):
 
     return slaves
 
+def setup_config_dist(slaves, config_files, component):
+    print "distribute config xml for" + component
+    if component == "hadoop":
+        for file in config_files:
+            for node in slaves:
+                ssh_copy(node, file, "/opt/hadoop/etc/hadoop/" + os.path.basename(file))
+
+def download_package_dist(slaves, packages, component):
+    print "distrubte packages for " + component
+    for file in packages:
+        for node in slaves:
+            ssh_execute(node, "mkdir -p /opt")
+            ssh_copy(node, file, "/opt/" + os.path.basename(file))
+            ssh_execute(node, "cd /opt/; mkdir -p hadoop")
+            ssh_execute(node, "cd /opt/; tar zxf " + os.path.basename(file) + "-C /opt/hadoop --strip-components=1")
+
+def execute_command_dist(slaves, command, component):
+    print "Execute commands over slaves"
+    for node in slaves:
+        ssh_execute(node, command)
+
+def setup_env_dist(slaves, envs):
+    print "Setup Environment over slaves"
+
+    for node in slaves:
+        for key, value in envs.iteritems:
+            ssh_execute(node, "export " + key + "=" + value)
+
 def generate_configuration(config_template_file, custom_config_file, target_config_file):
     default_configs = {}
     custom_configs = {}
@@ -118,10 +148,30 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
     with open(target_config_file, "w") as f:
         tree.write(f)
 
+
+def setup_nopass(slaves):
+    home = os.path.expanduser("~")
+    rsa_file = home + "/.ssh/id_rsa.pub"
+    if not os.path.isfile(rsa_file):
+        os.system("ssh-keygen -t rsa -P '' -f " + rsa_file)
+
+    for node in slaves:
+        ssh_copy(node, rsa_file, "/tmp/id_rsa.pub")
+        ssh_execute(node, "cat /tmp/id_rsa.pub > ~/.ssh/authorized_keys")
+        ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
+
+
+
 if __name__ == '__main__':
-    mode = sys.argv[1]
-    component = sys.argv[2]
-    version = sys.argv[3]
+    parser = optparse.OptionParser()
+    parser.add_option("--version", dest="version", help="specify version")
+    parser.add_option("--mode", dest="mode", help="specify operation mode")
+    parser.add_option("--component", dest="component", help="specify which component you want to setup")
+
+    (options, args) = parser.parse_args()
+    component = options.component
+    version = options.version
+    mode = options.mode
 
     current_path = os.path.dirname(os.path.abspath(__file__))
     script_path = os.path.dirname(current_path)
@@ -130,12 +180,14 @@ if __name__ == '__main__':
     package_path = project_path +"/packages"
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
 
-    package = component + "-" + version + ".tar.gz";
+    # Distribute component package to slave nodes
+    slaves = get_slaves(os.path.join(config_path, "slaves"))
+    setup_nopass(slaves)
 
-    # Download component
-    download_server="10.239.47.53"
-    download_url = "http://"+download_server+"/hadoop"
-    os.system("wget -P " + package_path + " " + download_url + "/" + package)
+    package = component + "-" + version + ".tar.gz";
+    path = package_path + "/*.tar.gz"
+    packages = glob.glob(path)
+    download_package_dist(slaves, packages, component)
 
     # Generate configration XML files
     for config_file in config_file_names:
@@ -144,34 +196,17 @@ if __name__ == '__main__':
         target_config = os.path.join(config_path, config_file)
         generate_configuration(template_config, custom_config, target_config)
 
-    # Copy hadoop package to slave nodes
-    slaves = get_slaves(os.path.join(config_path, "slaves"))
-    path = package_path + "/*.tar.gz"
-    packages = glob.glob(path)
-
     path = config_path + "/*"
     final_config_files = glob.glob(path)
+    setup_config_dist(slaves, final_config_files, component)
 
-    path = package_path + "/hadoop*.tar.gz"
+    cmd = ""
+    # Generate command to execute on slave nodes
+    if component == "hadoop":
+        datanode_dir = get_config(os.path.join(config_path, "hdfs-site.xml"), "dfs.namenode.name.dir").split(':')[1]
+        namenode_dir = get_config(os.path.join(config_path, "hdfs-site.xml"), "dfs.datanode.data.dir").split(':')[1]
+        cmd = "mkdir -p " + namenode_dir + ";"
+        cmd += "mkdir -p " + datanode_dir + ";"
+    execute_command_dist(slaves, cmd, component)
 
-    # Get namenode and datanode dir
-    datanode_dir = get_config(os.path.join(config_path, "hdfs-site.xml"), "dfs.namenode.name.dir").split(':')[1]
-    namenode_dir = get_config(os.path.join(config_path, "hdfs-site.xml"), "dfs.datanode.data.dir").split(':')[1]
-    cmd = "mkdir -p " + namenode_dir + ";"
-    cmd += "mkdir -p " + datanode_dir + ";"
 
-    for node in slaves:
-        print "Start deploying" + node.hostname
-        print "Copy hadoop packages"
-        for file in packages:
-            ssh_execute(node, "mkdir -p /opt")
-            ssh_copy(node, file, "/opt/"+os.path.basename(file))
-            ssh_execute(node, "cd /opt/; mkdir -p hadoop" )
-            ssh_execute(node, "cd /opt/; tar zxf " + os.path.basename(file) + "-C /opt/hadoop --strip-components=1")
-
-        print "Copying hadoop configuration files..."
-        for file in final_config_files:
-            ssh_copy(node, file, "/opt/hadoop/etc/hadoop/" + os.path.basename(file))
-
-        print "Create directory for namenode and datanode dir..."
-        ssh_execute(node, cmd)

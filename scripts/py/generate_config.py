@@ -11,7 +11,7 @@ def get_custom_configs (filename, custom_configs):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print "Usage: config.py default.xml custom.txt output.xml"
+        print "Usage: generate_config.py abcd.xml.template abcd.xml.custom abcd.xml"
         sys.exit(1)
     default_config_filename = sys.argv[1]
     custom_config_filename = sys.argv[2]
