@@ -1,4 +1,4 @@
 HADOOP_HOME=/opt/hadoop
-JAVA_HOME=/opt/java
+JAVA_HOME=/opt/jdk
 JDK_VERSION=8u112
 HADOOP_VERSION=2.7.3

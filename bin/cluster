@@ -18,7 +18,7 @@ JAVA_TAR="$PACKAGE_PATH/jdk-${JAVA_VERSION}-linux-x64.tar.gz"
 case "$1" in
     create)
         echo "deploy_nodes"
-        $SCRIPT_PATH/py/deploy_slave.py --version=${HADOOP_VERSION} --component=hadoop
+        python $SCRIPT_PATH/py/deploy_slave.py --version=${HADOOP_VERSION} --component=hadoop
         #if [ ! -d $PACHAGE_PATH ]
         #then
 	    #    mkdir -p $PACKAGE_PATH
@@ -31,7 +31,7 @@ case "$1" in
 	    #fi
         #add_nodes $SLAVES_CONF_NAME
 	    # Format namenode
-	    source ~/.bashrc
+        source ~/.bashrc
         $HADOOP_HOME/bin/hdfs namenode -format
         ;;
     *)
