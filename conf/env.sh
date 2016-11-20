@@ -6,6 +6,7 @@ fi
 
 export JAVA_VERSION="8u112"
 export HADOOP_VERSION="2.7.3"
+export HADOOP_HOME=/opt/hadoop
 # the path to the tool configuration
 export SLAVES_CONF_NAME=$CONF_PATH/"slaves"
 export CORE_SITE_PATH="$CONF_PATH/core-site.xml"

@@ -20,7 +20,7 @@ def get_custom_configs (filename, custom_configs):
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
-def ssh_execute(node, lcmd):
+def ssh_execute(node, cmd):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -79,15 +79,15 @@ def setup_config_dist(slaves, config_files, component):
             for node in slaves:
                 ssh_copy(node, file, "/opt/hadoop/etc/hadoop/" + os.path.basename(file))
 
-def download_package_dist(slaves, packages, component):
-    print "distrubte packages for " + component
-    for file in packages:
-        for node in slaves:
-            ssh_execute(node, "mkdir -p /opt")
-            ssh_copy(node, file, "/opt/" + os.path.basename(file))
-            ssh_execute(node, "cd /opt/; mkdir -p " + component)
-            ssh_execute(node, "cd /opt/; tar zxf " + os.path.basename(file) +
-                        "-C /opt/" + component + " --strip-components=1")
+def download_package_dist(slaves, file, component):
+    print "distrubte package for " + component
+    for node in slaves:
+        ssh_execute(node, "mkdir -p /opt")
+        ssh_copy(node, file, "/opt/" + os.path.basename(file))
+        ssh_execute(node, "cd /opt/; mkdir -p " + component)
+        cmd = "tar zxf /opt/" + os.path.basename(file) +\
+              " -C /opt/" + component + " --strip-components=1"
+        ssh_execute(node, cmd)
 
 def execute_command_dist(slaves, command, component):
     print "Execute commands over slaves"
@@ -111,9 +111,9 @@ def setup_env_dist(slaves, envs):
     print "Setup Environment over slaves"
 
     for node in slaves:
-        for key, value in envs.iteritems:
+        for key, value in envs.iteritems():
             cmd = "export " + key + "=" + value
-            ssh_execute(node, "echo \"" + cmd + "\" > ~/.bashrc")
+            ssh_execute(node, "echo \"" + cmd + "\" >> ~/.bashrc")
 
 def generate_configuration(config_template_file, custom_config_file, target_config_file):
     default_configs = {}
@@ -209,7 +209,7 @@ if __name__ == '__main__':
 
     # Download and install JDK
     jdk_version = envs["JDK_VERSION"]
-    package = "jdk-" + jdk_version + ".tar.gz";
+    package = "jdk-" + jdk_version + "-linux-x64.tar.gz";
     if not os.path.isfile(os.path.join(package_path, package)):
         download_url = "http://" + download_server + "/software"
         os.system("wget -P " + package_path + " " + download_url + "/" + package)
@@ -217,7 +217,9 @@ if __name__ == '__main__':
     # TODO: only copy component package or all?
     path = package_path + "/*.tar.gz"
     packages = glob.glob(path)
-    download_package_dist(slaves, packages, component)
+    for pkg in packages:
+        component = os.path.basename(pkg).split('-')[0]
+        download_package_dist(slaves, pkg, component)
 
     # Generate configration XML files
     for config_file in config_file_names:
@@ -241,5 +243,5 @@ if __name__ == '__main__':
 
     # PATH
     for node in slaves:
-        cmd="echo \"export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin > ~/.bashrc\""
+        cmd="echo \"export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin\" >> ~/.bashrc"
         ssh_execute(node, cmd)
