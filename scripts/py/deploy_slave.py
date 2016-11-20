@@ -75,7 +75,7 @@ def get_slaves(filename):
     return slaves
 
 def setup_config_dist(slaves, config_files, component):
-    print "distribute config xml for" + component
+    print "Distribute config xml for " + component
     if component == "hadoop":
         for file in config_files:
             for node in slaves:
@@ -197,7 +197,10 @@ if __name__ == '__main__':
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
 
     # Distribute component package to slave nodes
-    slaves = get_slaves(os.path.join(config_path, "slaves"))
+    slaves = get_slaves(os.path.join(config_path, "slaves.property"))
+    with open(os.path.join(config_path, "slaves"), "w") as f:
+        for node in slaves:
+            f.write(node.ip + "\n")
     setup_nopass(slaves)
 
     # setup ENV
@@ -222,8 +225,8 @@ if __name__ == '__main__':
     path = package_path + "/*.tar.gz"
     packages = glob.glob(path)
     for pkg in packages:
-        component = os.path.basename(pkg).split('-')[0]
-        download_package_dist(slaves, pkg, component)
+        module = os.path.basename(pkg).split('-')[0]
+        download_package_dist(slaves, pkg, module)
 
     # Generate configration XML files
     for config_file in config_file_names:
