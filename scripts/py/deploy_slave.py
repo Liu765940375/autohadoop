@@ -64,6 +64,8 @@ def get_slaves(filename):
         return slaves
     with open(filename) as f:
         for line in f:
+            if line.startswith('#') or not line.split():
+                continue
             val = line.split()
             if len(val) != 4:
                 print "Wrong format of slave config"
@@ -102,6 +104,8 @@ def get_env_list(filename):
         return envs
     with open(filename) as f:
         for line in f:
+            if line.startswith('#') or not line.split():
+                continue
             key, value = line.partition("=")[::2]
             envs[key.strip()] = value.strip()
 
