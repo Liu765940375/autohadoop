@@ -85,20 +85,35 @@ def download_package_dist(slaves, packages, component):
         for node in slaves:
             ssh_execute(node, "mkdir -p /opt")
             ssh_copy(node, file, "/opt/" + os.path.basename(file))
-            ssh_execute(node, "cd /opt/; mkdir -p hadoop")
-            ssh_execute(node, "cd /opt/; tar zxf " + os.path.basename(file) + "-C /opt/hadoop --strip-components=1")
+            ssh_execute(node, "cd /opt/; mkdir -p " + component)
+            ssh_execute(node, "cd /opt/; tar zxf " + os.path.basename(file) +
+                        "-C /opt/" + component + " --strip-components=1")
 
 def execute_command_dist(slaves, command, component):
     print "Execute commands over slaves"
     for node in slaves:
         ssh_execute(node, command)
 
+
+def get_env_list(filename):
+    envs = {}
+    print "Get env list from " + filename
+    if not os.path.isfile(filename):
+        return envs
+    with open(filename) as f:
+        for line in f:
+            key, value = line.partition("=")[::2]
+            envs[key.strip()] = value.strip()
+
+    return envs
+
 def setup_env_dist(slaves, envs):
     print "Setup Environment over slaves"
 
     for node in slaves:
         for key, value in envs.iteritems:
-            ssh_execute(node, "export " + key + "=" + value)
+            cmd = "export " + key + "=" + value
+            ssh_execute(node, "echo \"" + cmd + "\" > ~/.bashrc")
 
 def generate_configuration(config_template_file, custom_config_file, target_config_file):
     default_configs = {}
@@ -148,7 +163,6 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
     with open(target_config_file, "w") as f:
         tree.write(f)
 
-
 def setup_nopass(slaves):
     home = os.path.expanduser("~")
     rsa_file = home + "/.ssh/id_rsa.pub"
@@ -159,8 +173,6 @@ def setup_nopass(slaves):
         ssh_copy(node, rsa_file, "/tmp/id_rsa.pub")
         ssh_execute(node, "cat /tmp/id_rsa.pub > ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
-
-
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
@@ -184,11 +196,23 @@ if __name__ == '__main__':
     slaves = get_slaves(os.path.join(config_path, "slaves"))
     setup_nopass(slaves)
 
+    # setup ENV
+    envs = get_env_list(os.path.join(config_path, "env"))
+    setup_env_dist(slaves, envs)
+
     # Download component package
     download_server = "10.239.47.53"
     package = component + "-" + version + ".tar.gz";
-    download_url = "http://" + download_server + "/" + component
-    os.system("wget -P " + package_path + " " + download_url + "/" + package)
+    if not os.path.isfile(os.path.join(package_path, package)):
+        download_url = "http://" + download_server + "/" + component
+        os.system("wget -P " + package_path + " " + download_url + "/" + package)
+
+    # Download and install JDK
+    jdk_version = envs["JDK_VERSION"]
+    package = "jdk-" + jdk_version + ".tar.gz";
+    if not os.path.isfile(os.path.join(package_path, package)):
+        download_url = "http://" + download_server + "/software"
+        os.system("wget -P " + package_path + " " + download_url + "/" + package)
 
     # TODO: only copy component package or all?
     path = package_path + "/*.tar.gz"
@@ -206,8 +230,8 @@ if __name__ == '__main__':
     final_config_files = glob.glob(path)
     setup_config_dist(slaves, final_config_files, component)
 
+    # Create namenode and datanode direcotry on slave nodes
     cmd = ""
-    # Generate command to execute on slave nodes
     if component == "hadoop":
         datanode_dir = get_config(os.path.join(config_path, "hdfs-site.xml"), "dfs.namenode.name.dir").split(':')[1]
         namenode_dir = get_config(os.path.join(config_path, "hdfs-site.xml"), "dfs.datanode.data.dir").split(':')[1]
@@ -215,4 +239,7 @@ if __name__ == '__main__':
         cmd += "mkdir -p " + datanode_dir + ";"
     execute_command_dist(slaves, cmd, component)
 
-
+    # PATH
+    for node in slaves:
+        cmd="echo \"export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin > ~/.bashrc\""
+        ssh_execute(node, cmd)
