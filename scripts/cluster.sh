@@ -1,6 +1,5 @@
 #!/bin/bash
 set -x
-source ../conf/env.sh
 CONF_PATH="`dirname $0`/../conf/"
 
 function setup_login_without_password(){
@@ -36,20 +35,23 @@ function setup_hadoop_environment(){
   hadoop_tar=$package_path/${hadoop_version}.tar.gz
   username=$3
   hostname=$1
-  
+ 
+  ssh $username@$hostname 'mkdir -p /opt'
   scp $java_tar $username@$hostname:/opt
   scp $hadoop_tar $username@$hostname:/opt
-  ssh $username@$hostname 'tar -zxvf /opt/'${java_tar_name}' -C /opt'
+  ssh $username@$hostname 'tar -zxf /opt/'${java_tar_name}' -C /opt'
   ssh $username@$hostname 'rm -rf /opt/'${java_tar_name}''
   JAVA_HOME=/opt/$(ssh $username@$hostname 'ls /opt | grep jdk')
-  ssh $username@$hostname 'echo "export JAVA_HOME='${JAVA_HOME}'" >> /etc/profile'
-  ssh $username@$hostname 'echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> /etc/profile'
-  ssh $username@$hostname 'echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> /etc/profile  '
+  ssh $username@$hostname 'echo "export JAVA_HOME='${JAVA_HOME}'" >> ~/.bashrc'
+  ssh $username@$hostname 'echo "export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:\$JAVA_HOME/lib/tools.jar" >> ~/.bashrc'
+  ssh $username@$hostname 'echo "export PATH=\$JAVA_HOME/bin:\$PATH" >> ~/.bashrc'
 
-  ssh $username@$hostname 'tar -zxvf /opt/'${hadoop_version}'.tar.gz -C /opt'
+  ssh $username@$hostname 'tar -zxf /opt/'${hadoop_version}'.tar.gz -C /opt'
   ssh $username@$hostname 'rm -rf /opt/'${hadoop_version}'.tar.gz'
   
   CONF_PATH="`dirname $0`/../conf"
+
+  #TODO namenode and datanode dir should read from final config xml
   hdfs_config=$CONF_PATH/hdfs-site.xml.custom
   while read line
   do
@@ -73,9 +75,9 @@ function setup_hadoop_environment(){
   python $PY_PATH/generate_config.py $CONF_PATH/mapred-site.xml.template $CONF_PATH/mapred-site.xml.custom $CONF_PATH/mapred-site.xml
   python $PY_PATH/generate_config.py $CONF_PATH/yarn-site.xml.template $CONF_PATH/yarn-site.xml.custom $CONF_PATH/yarn-site.xml
   scp -r $CONF_PATH/* $username@$hostname:/opt/$hadoop_version/etc/hadoop
-  ssh $username@$hostname 'echo "export HADOOP_HOME=/opt/'${hadoop_version}'" >> /etc/profile'
-  ssh $username@$hostname 'echo "export PATH=\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:\$PATH" >> /etc/profile'
-  source /etc/profile 
+  ssh $username@$hostname 'echo "export HADOOP_HOME=/opt/'${hadoop_version}'" >> ~/.bashrc'
+  ssh $username@$hostname 'echo "export PATH=\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:\$PATH" >> ~/.bashrc'
+  #ssh $username@$hostname 'env | grep HOME'
 }
 
 function get_hardware_info(){
@@ -126,25 +128,24 @@ function config_repo(){
   createrepo $DIR
 
   #before this command you should confirm the machine have installed pssh
-  echo -e "[bdperepo]\nname = This is my repo\nbaseurl = http://"$DOWNLOAD_SERVER/" > /etc/yum.repos.d/bdperepo.repo
+  #echo -e "[bdperepo]\nname = This is my repo\nbaseurl = http://"$DOWNLOAD_SERVER/" > /etc/yum.repos.d/bdperepo.repo
   pscp -h $PSSH_HOST /etc/yum.repos.d/bdperepo.repo /etc/yum.repos.d/
 }
 
 function add_node(){
   echo "Add node with hostname $1, IP $2, username $3 and password $4"
-  setup_login_without_password $1 $2 $3 $4
-  setup_hadoop_environment $1 $2 $3 $4
+#  setup_login_without_password $1 $2 $3 $4
+#  setup_hadoop_environment $1 $2 $3 $4
 }
 
 function add_nodes(){
   while IFS='' read -r line || [[ -n "$line" ]]; do
-    if [[ ${line:0:1} != \# ]];then
+    # TODO line with first space etc, filter empty line
+    if [[ ${line:0:1} != '#' ]]
+    then
       IFS=' ' read -r -a node <<< "$line"
-      echo "Add node with hostname ${node[0]}, IP ${node[1]}, username ${node[2]} and password ${node[3]}"
       add_node ${node[@]}
     fi
   done < "$1"
-
-
-  # deploy configurations to all nodes
 }
+

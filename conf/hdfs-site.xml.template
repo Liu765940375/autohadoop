@@ -27,19 +27,7 @@
         </property>
         <property>
                 <name>dfs.replication</name>
-                <value>3</value>
-        </property>
-        <property>
-                <name>dfs.nameservices</name>
-                <value>bdpe611n1</value>
-        </property>
-        <property>
-                <name>dfs.namenode.secondary.http-address</name>
-                <value>bdpe611n1:50090</value>
-        </property>
-        <property>
-                <name>dfs.webhdfs.enabled</name>
-                <value>true</value>
+                <value>1</value>
         </property>
         <property>
                 <name>dfs.permissions</name>

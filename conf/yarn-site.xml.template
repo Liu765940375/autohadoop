@@ -15,9 +15,10 @@
 <configuration>
 
 <!-- Site specific YARN configuration properties -->
+	<!--
 	<property>
                 <name>yarn.resourcemanager.hostname</name>
-                <value>bdpe611n1</value>
+                <value>bdpe611n2</value>
         </property>
         <property>
                 <name>yarn.nodemanager.aux-services</name>
@@ -25,67 +26,40 @@
         </property>
         <property>
                 <name>yarn.resourcemanager.address</name>
-                <value>bdpe611n1:8032</value>
+                <value>bdpe611n2:8032</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.scheduler.address</name>
-                <value>bdpe611n1:8030</value>
+                <value>bdpe611n2:8030</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.resource-tracker.address</name>
-                <value>bdpe611n1:8031</value>
+                <value>bdpe611n2:8031</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.admin.address</name>
-                <value>bdpe611n1:8033</value>
+                <value>bdpe611n2:8033</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.webapp.address</name>
-                <value>bdpe611n1:8088</value>
+                <value>bdpe611n2:8088</value>
         </property>
+	-->
         <property>
                 <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
                 <value>org.apache.hadoop.mapred.ShuffleHandler</value>
         </property>
         <property>
                 <name>yarn.nodemanager.resource.memory-mb</name>
-                <value>49152</value>
+                <value>20480</value>
         </property>
 	<property>
                 <name>yarn.nodemanager.resource.cpu-vcores</name>
-                <value>40</value>
+                <value>30</value>
         </property>
         <property>
                 <name>yarn.scheduler.maximum-allocation-mb</name>
-                <value>49152</value>
+                <value>20000</value>
         </property>
-
-	
-
-	<!--<property>
-        <name>spark.authenticate</name>
-        <value>true</value>
-    </property>
-
-    <property>
-        <name>spark.authenticate.secret</name>
-        <value>123</value>
-    </property>
-
-    <property>
-        <name>spark.authenticate.enableSaslEncryption</name>
-        <value>true</value>
-    </property>
-
-    <property>
-        <name>spark.shuffle.service.enabled</name>
-        <value>true</value>
-    </property>
-
-    <property>
-        <name>spark.authenticate.sasl.encryption.aes.enabled</name>
-        <value>true</value>
-    </property>
--->
 
 </configuration>
