@@ -128,8 +128,8 @@ def setup_env_dist(slaves, envs, component):
     for node in slaves:
         for key, value in envs.iteritems():
             cmd = "echo \"export " + key + "=" + value + "\"> /opt/" + component + "rc";
-            cmd += "echo \". /opt/hadooprc\" >> ~/.bashrc"
             ssh_execute(node, cmd)
+        ssh_execute(node, "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc")
 
 
 def generate_configuration(config_template_file, custom_config_file, target_config_file):
