@@ -39,6 +39,17 @@ def ssh_copy(node, src, dst):
     sftp.close()
     ssh.close()
 
+def setup_nopass(slaves):
+    home = os.path.expanduser("~")
+    rsa_file = home + "/.ssh/id_rsa.pub"
+    if not os.path.isfile(rsa_file):
+        os.system("ssh-keygen -t rsa -P '' -f " + rsa_file)
+
+    for node in slaves:
+        ssh_copy(node, rsa_file, "/tmp/id_rsa.pub")
+        ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
+        ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
+
 def get_config(filename, key):
     doc = ET.parse(filename)
     root = doc.getroot()
@@ -76,7 +87,7 @@ def get_slaves(filename):
     return slaves
 
 def setup_config_dist(slaves, config_files, component):
-    print "distribute config xml for" + component
+    print "Distribute config xml for " + component
     if component == "hadoop":
         for file in config_files:
             for node in slaves:
@@ -170,16 +181,7 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
     with open(target_config_file, "w") as f:
         tree.write(f)
 
-def setup_nopass(slaves):
-    home = os.path.expanduser("~")
-    rsa_file = home + "/.ssh/id_rsa.pub"
-    if not os.path.isfile(rsa_file):
-        os.system("ssh-keygen -t rsa -P '' -f " + rsa_file)
 
-    for node in slaves:
-        ssh_copy(node, rsa_file, "/tmp/id_rsa.pub")
-        ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
-        ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
@@ -205,7 +207,7 @@ if __name__ == '__main__':
 
     # Setup ENV on slave nodes
     envs = get_env_list(os.path.join(config_path, "env"))
-    setup_env_dist(slaves, envs)
+    setup_env_dist(slaves, envs, component)
 
     # Copy component package to slave nodes
     download_server = "10.239.47.53"
