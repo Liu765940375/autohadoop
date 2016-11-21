@@ -46,25 +46,28 @@ baseurl = file:///srv/my/repo/
 
 ## Cluster deploy
 #### The following instructions are using to setup a cluster environment
-###  Python package management software check, since python version on CentOS is 2.7.5, a bit too old.
+    Python package management software check, since python version on CentOS is 2.7.5, a bit too old.
     pip is package management of python, CentOS 7 can NOT install python-pip software directly. Use following
-    instruction to install pip and ssh library "paramiko"
-    ```
-    sudo yum -y install gcc epel-release python-pip python-devel.x86_64 libffi-devel.x86_64 openssl_devel.x86_64
-    pip install paramiko
-    ```
+    instruction to install pip and ssh library "paramiko".
+```
+yum -y install gcc epel-release python-pip python-devel.x86_64 libffi-devel.x86_64 openssl_devel.x86_64
+pip install paramiko
+```
 
-    Note: it would be better if you can replace the default centos repo with local repo, such as aliyun or 163 repo.
-    ```
-    wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
-    yum makecache
-    ```
+    Note: it would be better if you can replace the default centos repo with local repo, such as aliyun
+    or 163 repo.
+```
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+yum makecache
+```
 
 ###  Customize your cluster.
 1. Customize configuration in conf/*.custom via key/value pair.
 2. Specify you slave properties in conf/slaves.property.
-    ```
-    hostname ip username password
-    ```
+
+```
+hostname ip username password
+```
 3. Customize the environment key/value for cluster nodes in conf/env.
+
 4. run ```bin/cluster create``` to create the cluster
