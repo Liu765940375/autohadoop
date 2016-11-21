@@ -125,10 +125,9 @@ def get_env_list(filename):
 
 def setup_env_dist(slaves, envs, component):
     print "Setup Environment over slaves"
-
     for node in slaves:
         for key, value in envs.iteritems():
-            cmd = "echo \"export " + key + "=" + value + "\"> /opt" + component + "rc";
+            cmd = "echo \"export " + key + "=" + value + "\"> /opt/" + component + "rc";
             cmd += "echo \". /opt/hadooprc\" >> ~/.bashrc"
             ssh_execute(node, cmd)
 
@@ -202,7 +201,7 @@ if __name__ == '__main__':
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
 
     # Setup Nopass for slave nodes
-    slaves = get_slaves(os.path.join(config_path, "slaves"))
+    slaves = get_slaves(os.path.join(config_path, "slaves.property"))
     setup_nopass(slaves)
 
     # Setup ENV on slave nodes
