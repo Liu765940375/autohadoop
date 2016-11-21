@@ -1,1 +1,6 @@
 yarn-nodemanager.resource.cpu-vcores=20
+yarn.resourcemanager.address=10.239.47.34:8032
+yarn.resourcemanager.scheduler.address=10.239.47.34:8030
+yarn.resourcemanager.resource-tracker.address=10.239.47.34:8031
+yarn.resourcemanager.admin.address=10.239.47.34:8033
+yarn.resourcemanager.webapp.address=10.239.47.34:8088
