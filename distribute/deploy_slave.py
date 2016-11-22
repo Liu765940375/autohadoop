@@ -181,22 +181,7 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
     with open(target_config_file, "w") as f:
         tree.write(f)
 
-
-
-if __name__ == '__main__':
-    parser = optparse.OptionParser()
-    parser.add_option("--version", dest="version", help="specify version")
-    parser.add_option("--mode", dest="mode", help="specify operation mode")
-    parser.add_option("--component", dest="component", help="specify which component you want to setup")
-
-    (options, args) = parser.parse_args()
-    component = options.component
-    version = options.version
-    mode = options.mode
-
-    current_path = os.path.dirname(os.path.abspath(__file__))
-    script_path = os.path.dirname(current_path)
-    project_path = os.path.dirname(script_path)
+def deploy(component, version, project_path):
     config_path = project_path + "/conf"
     package_path = project_path +"/packages"
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
