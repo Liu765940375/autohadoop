@@ -3,7 +3,6 @@
 import os
 import paramiko
 import glob
-import optparse
 import xml.etree.cElementTree as ET
 
 class Node:
@@ -230,6 +229,17 @@ def deploy(component, version, project_path):
         ssh_execute(node, cmd)
 
     # Generate configration XML files
+    master = get_master_node(slaves)
+    yarn_custom_file = os.path.join(config_path, "yarn-site.xml.custom")
+    if not os.path.isfile(yarn_custom_file):
+        with open(yarn_custom_file, "w") as f:
+            f.wirte("yarn.resourcemanager,hostname="+master.ip+"\n")
+
+    core_custom_file = os.path.join(config_path, "core-site.xml.custom")
+    if not os.path.isfile(core_custom_file):
+        with open(core_custom_file, "w") as f:
+            f.write("fs.defaultFS=hdfs://"+master.ip+":9000")
+
     for config_file in config_file_names:
         template_config = os.path.join(config_path, config_file) + ".template"
         custom_config = os.path.join(config_path, config_file) + ".custom"
