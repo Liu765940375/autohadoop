@@ -7,11 +7,12 @@ import optparse
 import xml.etree.cElementTree as ET
 
 class Node:
-    def __init__(self, hostname, ip, username, password):
+    def __init__(self, hostname, ip, username, password, role):
         self.hostname = hostname
         self.ip = ip
         self.username = username
         self.password = password
+        self.role = role
 
 def get_custom_configs (filename, custom_configs):
     with open(filename) as f:
@@ -68,6 +69,11 @@ def get_config(filename, key):
                 break;
     return value
 
+def get_master_node(slaves):
+    for node in slaves:
+        if node.role == "master":
+            return node
+
 def get_slaves(filename):
     slaves = []
     if not os.path.isfile(filename):
@@ -81,7 +87,7 @@ def get_slaves(filename):
                 print "Wrong format of slave config"
                 break
             else:
-                node = Node(val[0], val[1], val[2], val[3])
+                node = Node(val[0], val[1], val[2], val[3], val[4])
                 slaves.append(node)
 
     return slaves

@@ -1,6 +1,6 @@
 import optparse
 import os
-import distribute.deploy_slave
+import distribute.deploy_slave as dist
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
@@ -17,9 +17,10 @@ if __name__ == '__main__':
     config_path = os.path.join(project_path, "conf")
     package_path = os.path.join(project_path, "packages")
 
-    distribute.deploy_slave.deploy(component, version, project_path)
+    dist.deploy(component, version, project_path)
 
-    #slaves = distribute.deploy_slave.get_slaves(os.path.join(config_path, "slaves.property"))
-    #master = get_master(slaves)
-    #distribute.deploy_slave.ssh_execute(master, "$HADOOPHOME/bin/hdfs namenode -format")
-    #distribute.deploy_slave.ssh_execute(master, "$HADOOPHOME/sbin/start-all.sh")
+    slaves = dist.get_slaves(os.path.join(config_path, "slaves.custom"))
+    master = dist.get_master_node(slaves)
+    dist.ssh_execute(master, "$HADOOPHOME/bin/hdfs namenode -format")
+    dist.ssh_execute(master, "$HADOOPHOME/sbin/stop-all.sh")
+    dist.ssh_execute(master, "$HADOOPHOME/sbin/start-all.sh")
