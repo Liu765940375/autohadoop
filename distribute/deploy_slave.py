@@ -42,12 +42,13 @@ def ssh_copy(node, src, dst):
 
 def setup_nopass(slaves):
     home = os.path.expanduser("~")
-    rsa_file = home + "/.ssh/id_rsa.pub"
-    if not os.path.isfile(rsa_file):
-        os.system("ssh-keygen -t rsa -P '' -f " + rsa_file)
+    privkey = os.path.join(home,  "/.ssh/id_rsa")
+    pubkey = privkey + ".pub"
+    os.system("ssh-keygen -t rsa -P '' -f " + privkey)
 
     for node in slaves:
-        ssh_copy(node, rsa_file, "/tmp/id_rsa.pub")
+        os.system("ssh-keyscan -H " + node.hostname + "," + node.ip + " >> ~/.ssh/known_hosts")
+        ssh_copy(node, pubkey, "/tmp/id_rsa.pub")
         ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
 
@@ -133,8 +134,8 @@ def setup_env_dist(slaves, envs, component):
     print "Setup Environment over slaves"
     cmd = ""
     for node in slaves:
+        cmd += "rm -f /opt/" + component + "rc;"
         for key, value in envs.iteritems():
-            cmd += "rm -f /opt/" + component + "rc;"
             cmd += "echo \"export " + key + "=" + value + "\">> /opt/" + component + "rc;"
         cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
         ssh_execute(node, cmd)

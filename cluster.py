@@ -34,6 +34,6 @@ if __name__ == '__main__':
     print "Running commands on master"
     slaves = dist.get_slaves(os.path.join(config_path, "slaves.custom"))
     master = dist.get_master_node(slaves)
-    dist.ssh_execute(master, "$HADOOPHOME/bin/hdfs namenode -format")
-    dist.ssh_execute(master, "$HADOOPHOME/sbin/stop-all.sh")
-    dist.ssh_execute(master, "$HADOOPHOME/sbin/start-all.sh")
+    dist.ssh_execute(master, "yes | $HADOOP_HOME/bin/hdfs namenode -format")
+    dist.ssh_execute(master, "$HADOOP_HOME/sbin/stop-all.sh")
+    dist.ssh_execute(master, "$HADOOP_HOME/sbin/start-all.sh")
