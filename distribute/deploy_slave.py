@@ -42,12 +42,14 @@ def ssh_copy(node, src, dst):
 
 def setup_nopass(slaves):
     home = os.path.expanduser("~")
-    privkey = os.path.join(home,  "/.ssh/id_rsa")
+    privkey = home + "/.ssh/id_rsa"
     pubkey = privkey + ".pub"
-    os.system("ssh-keygen -t rsa -P '' -f " + privkey)
+    if not os.path.isfile(pubkey):
+        os.system("ssh-keygen -t rsa -P '' -f " + privkey)
 
     for node in slaves:
-        os.system("ssh-keyscan -H " + node.hostname + "," + node.ip + " >> ~/.ssh/known_hosts")
+        os.system("ssh-keyscan -H " + node.hostname  + " >> ~/.ssh/known_hosts")
+        os.system("ssh-keyscan -H " + node.ip + " >> ~/.ssh/known_hosts")
         ssh_copy(node, pubkey, "/tmp/id_rsa.pub")
         ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
