@@ -50,8 +50,13 @@ baseurl = file:///srv/my/repo/
     pip is package management of python, CentOS 7 can NOT install python-pip software directly. Use following
     instruction to install pip and ssh library "paramiko".
 ```
-yum -y install gcc epel-release python-pip python-devel.x86_64 libffi-devel.x86_64 openssl_devel.x86_64
+
+yum -y install gcc python-devel.x86_64 libffi-devel.x86_64 openssl_devel.x86_64
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+python get-pip.py
 pip install paramiko
+
+
 ```
 
     Note: it would be better if you can replace the default centos repo with local repo, such as aliyun

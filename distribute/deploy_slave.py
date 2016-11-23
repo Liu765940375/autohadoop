@@ -83,7 +83,7 @@ def get_slaves(filename):
             if line.startswith('#') or not line.split():
                 continue
             val = line.split()
-            if len(val) != 4:
+            if len(val) != 5:
                 print "Wrong format of slave config"
                 break
             else:
@@ -134,6 +134,7 @@ def setup_env_dist(slaves, envs, component):
     cmd = ""
     for node in slaves:
         for key, value in envs.iteritems():
+            cmd += "rm -f /opt/" + component + "rc;"
             cmd += "echo \"export " + key + "=" + value + "\">> /opt/" + component + "rc;"
         cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
         ssh_execute(node, cmd)
@@ -194,6 +195,9 @@ def deploy(component, version, project_path):
 
     # Setup Nopass for slave nodes
     slaves = get_slaves(os.path.join(config_path, "slaves.custom"))
+    with open(os.path.join(config_path, "slaves"), "w") as f:
+        for node in slaves:
+            f.write(node.ip + "\n")
     setup_nopass(slaves)
 
     # Setup ENV on slave nodes
