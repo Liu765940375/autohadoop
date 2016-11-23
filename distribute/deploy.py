@@ -1,43 +1,9 @@
-#!/usr/bin/python
-
-import os
-import paramiko
 import glob
 import optparse
-import xml.etree.cElementTree as ET
+from node import Node
+from ssh import *
+from config import *
 
-class Node:
-    def __init__(self, hostname, ip, username, password):
-        self.hostname = hostname
-        self.ip = ip
-        self.username = username
-        self.password = password
-
-def get_custom_configs (filename, custom_configs):
-    with open(filename) as f:
-        for line in f:
-            key, value = line.partition("=")[::2]
-            custom_configs[key.strip()] = value.strip()
-
-def ssh_execute(node, cmd):
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.load_system_host_keys()
-    ssh.connect(node.ip, username=node.username,password=node.password)
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
-    for line in ssh_stdout:
-        print '...' + line.strip('\n')
-    ssh.close()
-
-def ssh_copy(node, src, dst):
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.load_system_host_keys()
-    ssh.connect(node.ip, username=node.username, password=node.password)
-    sftp = ssh.open_sftp()
-    sftp.put(src, dst)
-    sftp.close()
-    ssh.close()
 
 def setup_nopass(slaves):
     home = os.path.expanduser("~")
@@ -50,23 +16,6 @@ def setup_nopass(slaves):
         ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
 
-def get_config(filename, key):
-    doc = ET.parse(filename)
-    root = doc.getroot()
-    configs = root.getchildren()
-    value = ""
-    for config in configs:
-        attrs = config.getchildren()
-        if value != "":
-            break;
-        hit = False;
-        for attr in attrs:
-            if attr.tag == "name" and attr.text == key:
-                hit = True
-            if attr.tag == "value" and hit:
-                value = attr.text
-                break;
-    return value
 
 def get_slaves(filename):
     slaves = []
@@ -132,68 +81,7 @@ def setup_env_dist(slaves, envs, component):
         cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
         ssh_execute(node, cmd)
 
-
-def generate_configuration(config_template_file, custom_config_file, target_config_file):
-    default_configs = {}
-    custom_configs = {}
-
-    configs = ET.parse(config_template_file)
-    root = configs.getroot()
-
-    # No custom file exsit
-    if not os.path.isfile(custom_config_file):
-        tree = ET.ElementTree(root)
-        with open(target_config_file, "w") as f:
-            tree.write(f)
-        return
-
-    get_custom_configs(custom_config_file, custom_configs)
-
-    properties = root.getchildren()
-    for prop in properties:
-        attributes = prop.getchildren()
-        key = ""
-        value = ""
-        custom = False
-        for attribute in attributes:
-            if attribute.tag == "name":
-                key = attribute.text
-                if custom_configs.has_key(key):
-                    custom = True;
-
-            if attribute.tag == "value" and custom == True:
-                attribute.text = custom_configs[key]
-                value = attribute.text
-                custom_configs.pop(key, None)
-                custom = False
-
-        default_configs[key] = value
-
-    for key, val in custom_configs.iteritems():
-        prop = ET.Element('property')
-        name = ET.SubElement(prop, "name")
-        name.text = key
-        value = ET.SubElement(prop, "value")
-        value.text = val
-        root.append(prop)
-
-    tree = ET.ElementTree(root)
-    with open(target_config_file, "w") as f:
-        tree.write(f)
-
-
-
-if __name__ == '__main__':
-    parser = optparse.OptionParser()
-    parser.add_option("--version", dest="version", help="specify version")
-    parser.add_option("--mode", dest="mode", help="specify operation mode")
-    parser.add_option("--component", dest="component", help="specify which component you want to setup")
-
-    (options, args) = parser.parse_args()
-    component = options.component
-    version = options.version
-    mode = options.mode
-
+def deploy(version, component):
     current_path = os.path.dirname(os.path.abspath(__file__))
     script_path = os.path.dirname(current_path)
     project_path = os.path.dirname(script_path)
@@ -202,7 +90,7 @@ if __name__ == '__main__':
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
 
     # Setup Nopass for slave nodes
-    slaves = get_slaves(os.path.join(config_path, "slaves.custom"))
+    slaves = get_slaves(os.path.join(config_path, "slaves.property"))
     setup_nopass(slaves)
 
     # Setup ENV on slave nodes

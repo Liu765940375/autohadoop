@@ -2,4 +2,3 @@ HADOOP_HOME=/opt/hadoop
 JAVA_HOME=/opt/jdk
 JDK_VERSION=8u112
 HADOOP_VERSION=2.7.3
-SLAVES_CONF=slaves.property

@@ -7,11 +7,12 @@ import optparse
 import xml.etree.cElementTree as ET
 
 class Node:
-    def __init__(self, hostname, ip, username, password):
+    def __init__(self, hostname, ip, username, password, role):
         self.hostname = hostname
         self.ip = ip
         self.username = username
         self.password = password
+        self.role = role
 
 def get_custom_configs (filename, custom_configs):
     with open(filename) as f:
@@ -41,12 +42,15 @@ def ssh_copy(node, src, dst):
 
 def setup_nopass(slaves):
     home = os.path.expanduser("~")
-    rsa_file = home + "/.ssh/id_rsa.pub"
-    if not os.path.isfile(rsa_file):
-        os.system("ssh-keygen -t rsa -P '' -f " + rsa_file)
+    privkey = home + "/.ssh/id_rsa"
+    pubkey = privkey + ".pub"
+    if not os.path.isfile(pubkey):
+        os.system("ssh-keygen -t rsa -P '' -f " + privkey)
 
     for node in slaves:
-        ssh_copy(node, rsa_file, "/tmp/id_rsa.pub")
+        os.system("ssh-keyscan -H " + node.hostname  + " >> ~/.ssh/known_hosts")
+        os.system("ssh-keyscan -H " + node.ip + " >> ~/.ssh/known_hosts")
+        ssh_copy(node, pubkey, "/tmp/id_rsa.pub")
         ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
 
@@ -68,6 +72,11 @@ def get_config(filename, key):
                 break;
     return value
 
+def get_master_node(slaves):
+    for node in slaves:
+        if node.role == "master":
+            return node
+
 def get_slaves(filename):
     slaves = []
     if not os.path.isfile(filename):
@@ -77,11 +86,11 @@ def get_slaves(filename):
             if line.startswith('#') or not line.split():
                 continue
             val = line.split()
-            if len(val) != 4:
+            if len(val) != 5:
                 print "Wrong format of slave config"
                 break
             else:
-                node = Node(val[0], val[1], val[2], val[3])
+                node = Node(val[0], val[1], val[2], val[3], val[4])
                 slaves.append(node)
 
     return slaves
@@ -127,6 +136,7 @@ def setup_env_dist(slaves, envs, component):
     print "Setup Environment over slaves"
     cmd = ""
     for node in slaves:
+        cmd += "rm -f /opt/" + component + "rc;"
         for key, value in envs.iteritems():
             cmd += "echo \"export " + key + "=" + value + "\">> /opt/" + component + "rc;"
         cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
@@ -181,28 +191,16 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
     with open(target_config_file, "w") as f:
         tree.write(f)
 
-
-
-if __name__ == '__main__':
-    parser = optparse.OptionParser()
-    parser.add_option("--version", dest="version", help="specify version")
-    parser.add_option("--mode", dest="mode", help="specify operation mode")
-    parser.add_option("--component", dest="component", help="specify which component you want to setup")
-
-    (options, args) = parser.parse_args()
-    component = options.component
-    version = options.version
-    mode = options.mode
-
-    current_path = os.path.dirname(os.path.abspath(__file__))
-    script_path = os.path.dirname(current_path)
-    project_path = os.path.dirname(script_path)
+def deploy(component, version, project_path):
     config_path = project_path + "/conf"
     package_path = project_path +"/packages"
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
 
     # Setup Nopass for slave nodes
     slaves = get_slaves(os.path.join(config_path, "slaves.custom"))
+    with open(os.path.join(config_path, "slaves"), "w") as f:
+        for node in slaves:
+            f.write(node.ip + "\n")
     setup_nopass(slaves)
 
     # Setup ENV on slave nodes
