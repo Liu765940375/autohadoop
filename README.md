@@ -57,22 +57,13 @@ python get-pip.py
 pip install paramiko
 
 
-```
-
-    Note: it would be better if you can replace the default centos repo with local repo, such as aliyun
-    or 163 repo.
-```
-wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
-yum makecache
-```
-
 ###  Customize your cluster.
-1. Customize configuration in conf/*.custom via key/value pair.
-2. Specify you slave properties in conf/slaves.property.
+1. Customize configuration in conf/*.custom via key=value pair.
+2. Specify you slave in conf/slaves.custom.
 
 ```
-hostname ip username password
+hostname ip username password role
 ```
-3. Customize the environment key/value for cluster nodes in conf/env.
+3. Customize the environment key=value for cluster nodes in conf/env.
 
 4. run ```bin/cluster create``` to create the cluster
