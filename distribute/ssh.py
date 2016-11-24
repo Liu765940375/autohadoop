@@ -28,6 +28,10 @@ def setup_nopass(slaves):
     if not os.path.isfile(pubkey):
         os.system("ssh-keygen -t rsa -P '' -f " + privkey)
 
+    os.system("ssh-keyscan -H `hostname -f` > ~/.ssh/known_hosts")
+    os.system("ssh-keyscan -H 0.0.0.0 >> ~/.ssh/known_hosts")
+    os.system("ssh-keyscan -H 127.0.0.1 >> ~/.ssh/known_hosts")
+    os.system("ssh-keyscan -H localhost >> ~/.ssh/known_hosts")
     for node in slaves:
         os.system("ssh-keyscan -H " + node.hostname  + " >> ~/.ssh/known_hosts")
         os.system("ssh-keyscan -H " + node.ip + " >> ~/.ssh/known_hosts")
