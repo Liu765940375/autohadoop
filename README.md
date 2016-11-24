@@ -66,4 +66,7 @@ hostname ip username password role
 ```
 3. Customize the environment key=value for cluster nodes in conf/env.
 
-4. run ```bin/cluster create``` to create the cluster
+4. run following command to create the cluster
+```
+python cluster.py --version=2.7.3 --component=hadoop
+```
