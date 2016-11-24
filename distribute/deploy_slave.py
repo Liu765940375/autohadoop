@@ -1,98 +1,9 @@
-#!/usr/bin/python
-
-import os
-import paramiko
 import glob
-import xml.etree.cElementTree as ET
 
-class Node:
-    def __init__(self, hostname, ip, username, password, role):
-        self.hostname = hostname
-        self.ip = ip
-        self.username = username
-        self.password = password
-        self.role = role
+from node import *
+from ssh import *
+from config import *
 
-def get_custom_configs (filename, custom_configs):
-    with open(filename) as f:
-        for line in f:
-            key, value = line.partition("=")[::2]
-            custom_configs[key.strip()] = value.strip()
-
-def ssh_execute(node, cmd):
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.load_system_host_keys()
-    ssh.connect(node.ip, username=node.username,password=node.password)
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
-    for line in ssh_stdout:
-        print '...' + line.strip('\n')
-    ssh.close()
-
-def ssh_copy(node, src, dst):
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.load_system_host_keys()
-    ssh.connect(node.ip, username=node.username, password=node.password)
-    sftp = ssh.open_sftp()
-    sftp.put(src, dst)
-    sftp.close()
-    ssh.close()
-
-def setup_nopass(slaves):
-    home = os.path.expanduser("~")
-    privkey = home + "/.ssh/id_rsa"
-    pubkey = privkey + ".pub"
-    if not os.path.isfile(pubkey):
-        os.system("ssh-keygen -t rsa -P '' -f " + privkey)
-
-    for node in slaves:
-        os.system("ssh-keyscan -H " + node.hostname  + " >> ~/.ssh/known_hosts")
-        os.system("ssh-keyscan -H " + node.ip + " >> ~/.ssh/known_hosts")
-        ssh_copy(node, pubkey, "/tmp/id_rsa.pub")
-        ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
-        ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
-
-def get_config(filename, key):
-    doc = ET.parse(filename)
-    root = doc.getroot()
-    configs = root.getchildren()
-    value = ""
-    for config in configs:
-        attrs = config.getchildren()
-        if value != "":
-            break;
-        hit = False;
-        for attr in attrs:
-            if attr.tag == "name" and attr.text == key:
-                hit = True
-            if attr.tag == "value" and hit:
-                value = attr.text
-                break;
-    return value
-
-def get_master_node(slaves):
-    for node in slaves:
-        if node.role == "master":
-            return node
-
-def get_slaves(filename):
-    slaves = []
-    if not os.path.isfile(filename):
-        return slaves
-    with open(filename) as f:
-        for line in f:
-            if line.startswith('#') or not line.split():
-                continue
-            val = line.split()
-            if len(val) != 5:
-                print "Wrong format of slave config"
-                break
-            else:
-                node = Node(val[0], val[1], val[2], val[3], val[4])
-                slaves.append(node)
-
-    return slaves
 
 def setup_config_dist(slaves, config_files, component):
     print "Distribute config xml for " + component
@@ -141,57 +52,8 @@ def setup_env_dist(slaves, envs, component):
         cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
         ssh_execute(node, cmd)
 
-
-def generate_configuration(config_template_file, custom_config_file, target_config_file):
-    default_configs = {}
-    custom_configs = {}
-
-    configs = ET.parse(config_template_file)
-    root = configs.getroot()
-
-    # No custom file exsit
-    if not os.path.isfile(custom_config_file):
-        tree = ET.ElementTree(root)
-        with open(target_config_file, "w") as f:
-            tree.write(f)
-        return
-
-    get_custom_configs(custom_config_file, custom_configs)
-
-    properties = root.getchildren()
-    for prop in properties:
-        attributes = prop.getchildren()
-        key = ""
-        value = ""
-        custom = False
-        for attribute in attributes:
-            if attribute.tag == "name":
-                key = attribute.text
-                if custom_configs.has_key(key):
-                    custom = True;
-
-            if attribute.tag == "value" and custom == True:
-                attribute.text = custom_configs[key]
-                value = attribute.text
-                custom_configs.pop(key, None)
-                custom = False
-
-        default_configs[key] = value
-
-    for key, val in custom_configs.iteritems():
-        prop = ET.Element('property')
-        name = ET.SubElement(prop, "name")
-        name.text = key
-        value = ET.SubElement(prop, "value")
-        value.text = val
-        root.append(prop)
-
-    tree = ET.ElementTree(root)
-    with open(target_config_file, "w") as f:
-        tree.write(f)
-
 def deploy(component, version, project_path):
-    config_path = project_path + "/conf"
+    config_path = project_path + "/conf/" + component
     package_path = project_path +"/packages"
     config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml"]
 

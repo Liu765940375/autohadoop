@@ -1,11 +1,12 @@
 import os
 
 class Node:
-    def __init__(self, hostname, ip, username, password):
+    def __init__(self, hostname, ip, username, password, role):
         self.hostname = hostname
         self.ip = ip
         self.username = username
         self.password = password
+        self.role = role
 
 
 def get_master_node(slaves):
@@ -22,7 +23,7 @@ def get_slaves(filename):
             if line.startswith('#') or not line.split():
                 continue
             val = line.split()
-            if len(val) != 4:
+            if len(val) != 5:
                 print "Wrong format of slave config"
                 break
             else:

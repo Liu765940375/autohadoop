@@ -19,10 +19,11 @@ def get_config(filename, key):
                 break;
     return value
 
-
 def get_custom_configs (filename, custom_configs):
     with open(filename) as f:
         for line in f:
+            if line.startswith('#') or not line.split():
+                continue
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
