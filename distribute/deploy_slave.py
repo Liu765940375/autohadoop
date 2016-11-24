@@ -16,10 +16,11 @@ def setup_config_dist(slaves, config_files, component):
 def copy_package_dist(slaves, file, component):
     print "Distrubte package for " + component
     for node in slaves:
+        print "\tCopy packge to " + node.hostname + ":" + node.ip
         ssh_execute(node, "mkdir -p /opt")
         ssh_copy(node, file, "/opt/" + os.path.basename(file))
         cmd = "mkdir -p /opt/" + component + ";tar zxf /opt/" + os.path.basename(file) +\
-              " -C /opt/" + component + " --strip-components=1"
+              " -C /opt/" + component + " --strip-components=1 > /dev/null &"
         ssh_execute(node, cmd)
 
 # Execute command on slave nodes
@@ -69,7 +70,7 @@ def deploy(component, version, project_path):
     setup_env_dist(slaves, envs, component)
 
     # Copy component package to slave nodes
-    download_server = "10.239.47.53"
+    download_server = "10.239.47.156"
     package = component + "-" + version + ".tar.gz";
     if not os.path.isfile(os.path.join(package_path, package)):
         download_url = "http://" + download_server + "/" + component

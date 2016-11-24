@@ -32,5 +32,6 @@ def setup_nopass(slaves):
         os.system("ssh-keyscan -H " + node.hostname  + " >> ~/.ssh/known_hosts")
         os.system("ssh-keyscan -H " + node.ip + " >> ~/.ssh/known_hosts")
         ssh_copy(node, pubkey, "/tmp/id_rsa.pub")
+        ssh_execute(node, "mkdir -p ~/.ssh")
         ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")

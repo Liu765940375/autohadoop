@@ -49,13 +49,13 @@ baseurl = file:///srv/my/repo/
     Python package management software check, since python version on CentOS is 2.7.5, a bit too old.
     pip is package management of python, CentOS 7 can NOT install python-pip software directly. Use following
     instruction to install pip and ssh library "paramiko".
-```
 
-yum -y install gcc python-devel.x86_64 libffi-devel.x86_64 openssl_devel.x86_64
+```
+yum -y install gcc python-devel.x86_64 libffi-devel.x86_64 openssl-devel.x86_64
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 pip install paramiko
-
+```
 
 ###  Customize your cluster.
 1. Customize configuration in conf/*.custom via key=value pair.
@@ -64,9 +64,11 @@ pip install paramiko
 ```
 hostname ip username password role
 ```
+
 3. Customize the environment key=value for cluster nodes in conf/env.
 
 4. run following command to create the cluster
+
 ```
 python cluster.py --version=2.7.3 --component=hadoop
 ```
