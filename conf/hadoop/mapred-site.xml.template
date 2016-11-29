@@ -38,7 +38,6 @@
                 <name>mapred.job.tracker</name>
                 <value>bdpe611n1:9001</value>
         </property>
-
 	<property>
 	        <name>mapreduce.map.memory.mb</name>
        	        <value>1536</value>

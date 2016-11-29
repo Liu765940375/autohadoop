@@ -19,11 +19,11 @@
 <configuration>
 	<property>
                 <name>dfs.namenode.name.dir</name>
-                <value>file:/home/program/hadoop-2.6.4/name</value>
+                <value>file:/home/tmp/hadoop/name</value>
         </property>
         <property>
                 <name>dfs.datanode.data.dir</name>
-                <value>file:/home/program/hadoop-2.6.4/data</value>
+                <value>file:/home/tmp/hadoop/data</value>
         </property>
         <property>
                 <name>dfs.replication</name>

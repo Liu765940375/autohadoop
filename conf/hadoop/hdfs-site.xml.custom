@@ -1,2 +1,2 @@
-dfs.datanode.data.dir=file:/home/program/hadoop-2.7.3/data
-dfs.namenode.name.dir=file:/home/program/hadoop-2.7.3/name
+dfs.datanode.data.dir=/home/tmp/hadoop/data
+dfs.namenode.name.dir=/home/tmp/hadoop/name

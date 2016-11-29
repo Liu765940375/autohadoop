@@ -27,6 +27,24 @@ def get_custom_configs (filename, custom_configs):
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
+def generate_spark_conf(config_template_file, custom_config_file, target_config_file):
+    custom_configs = {}
+    get_custom_configs(custom_config_file, custom_configs)
+    with open(config_template_file) as f, open(target_config_file, "w") as target:
+        for line in f:
+            if line.startswith('#') or not line.split():
+                target.writelines(line)
+            else:
+                list = line.split()
+                if custom_configs.has_key(list[0]):
+                    line = list[0] + " " + custom_configs.get(list[0]) + "\n"
+                    target.writelines(line)
+                    del custom_configs[list[0]]
+                else:
+                    target.writelines(line)
+        for key, value in custom_configs.iteritems():
+           line = key + " " + value + "\n"
+           target.writelines(line)
 
 def generate_configuration(config_template_file, custom_config_file, target_config_file):
     default_configs = {}

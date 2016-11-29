@@ -1,0 +1,2 @@
+SPARK_HOME=/opt/spark
+SPARK_VERSION=1.6.2

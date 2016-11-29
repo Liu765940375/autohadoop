@@ -19,7 +19,7 @@
 <configuration>
 	<property>
         <name>fs.defaultFS</name>
-        <value>hdfs://bdpe611n1:9000</value>
+        <value>hdfs://tt20:9000</value>
     </property>
 
 <property>
