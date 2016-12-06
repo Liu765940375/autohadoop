@@ -1,4 +1,8 @@
 import glob
+import re
+import shutil
+import time
+import tempfile
 
 from config import *
 from node import *
@@ -33,6 +37,23 @@ spark_home = spark_env.get("SPARK_HOME")
 hive_home = hive_env.get("HIVE_HOME")
 
 jdk_version = hadoop_env["JDK_VERSION"]
+
+def set_hosts(slaves):
+    old_file = "/etc/hosts"
+    temp_file = tempfile.mktemp()
+    with open(old_file) as rf, open(temp_file, "w") as wf:
+        for node in slaves:
+            for line in rf:
+                str = re.findall(node.ip, line)
+                if len(str) > 0:
+                    wf.writelines(node.ip + " " + node.hostname)
+                else:
+                    wf.writelines(line)
+    cmd = "cp /etc/hosts " + "/etc/hosts." + time.strftime('%Y%m%d%H%M%S') + ";"
+    os.system(cmd)
+    os.remove(old_file)
+    shutil.copy(temp_file, old_file)
+    os.remove(temp_file)
 
 # Add binary path to PATH
 def set_path(component, slaves):

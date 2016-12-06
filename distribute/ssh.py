@@ -16,7 +16,6 @@ def ssh_execute(node, cmd):
             if len(rl) > 0:
                 print channel.recv(1024)
     ssh.close()
-    return str
 
 def ssh_copy(node, src, dst):
     ssh = paramiko.SSHClient()

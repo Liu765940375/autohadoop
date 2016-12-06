@@ -4,24 +4,36 @@ This is the project to deploy Hive Spark and Pig automatically onto Hadoop clust
 1. Redeploy cluster with new patch for supported services(Pig, Spark, Hive and Hadoop if needed). 
 2. Switch Spark version(update ENVs and needed services)
 
-### Customize your cluster.
+## Overview
 1. Customize configuration in conf/*.custom via key=value pair.
-2. Specify you slave in conf/slaves.custom.
+2. Specify you slave in conf/hadoop/slaves.custom.
 
 ```
 hostname ip username password role
 ```
 
-3. Customize the environment key=value for cluster nodes in conf/env.
+3. Customize the environment key=value for cluster nodes in conf/*/env.
 
-4. run following command to create the cluster
+4. run following command to create the cluster(for hadoop).
 
 ```
 python cluster.py --version=2.7.3 --component=hadoop
 ```
-## customized configurations
-#### The following settings need to configure by yourself, the configuration value appears below is just for reference.
-#### All the <option> below means that you should set a value by yourself, and the final value is without <> symbol.
+
+## Python environmental preparation
+The following instructions are using to setup a cluster environment
+    Python package management software check, since python version on CentOS is 2.7.5, a bit too old.
+    pip is package management of python, CentOS 7 can NOT install python-pip software directly. Use following
+    instruction to install pip and ssh library "paramiko".
+```
+yum -y install gcc python-devel.x86_64 libffi-devel.x86_64 openssl-devel.x86_64
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+python get-pip.py
+pip install paramiko
+```
+
+## Customized configurations
+The following settings need to configure by yourself, the configuration value appears below is just for reference.
 ### 1. hadoop
 #### 1) conf/hadoop/env
 ```
@@ -98,9 +110,8 @@ spark.eventLog.dir=hdfs://<master_hostname>:8020/spark-history-server
 #### 3) conf/hive/hive-log4j2.properties.custom
 ```
 property.hive.log.dir =/opt/hive/logs
-
 ```
-## how to deploy
+## Deploy
 ```
 cd <Beaver_HOME>
 ```
@@ -108,5 +119,8 @@ cd <Beaver_HOME>
 ```
 python cluster.py --version=<version> --component=<component>
 ```
-<version> is the version of Hadoop, Spark or Hive, like 2.7.3(Hadoop), 2.0.0(Spark)...
-<component> means the module you want to install(hadoop, spark or hive)
+
+## About mysql version
+We will install mysql-5.6 for you by default, if you want to install mysql5.7, please modify the /etc/yum.repos.d/mysql-community
+,then modify the "MYSQL 5.6"  enabled value=0 and "MYSQL 5.7" enabled value=1. (For 5.7, we can't set mysql password by this script, you
+need to reset it by yourself)

@@ -53,6 +53,7 @@ def deploy_general(component, version, project_path):
     copy_packages(component, version, slaves)
 
     if component == "hadoop":
+        set_hosts(slaves)
         copy_jdk()
         copy_spark_shuffle()
     spark_version = spark_env.get("SPARK_VERSION")
@@ -77,5 +78,6 @@ def deploy_general(component, version, project_path):
 
     if component == "hive":
         ssh_execute(slaves[0], hive_home + "/bin/schematool --initSchema -dbType mysql")
-        ssh_execute(slaves[0], "nohup " + hive_home + "/bin/hive --service metastore &")
+        # ssh_execute(slaves[0], hive_home + "/bin/hive --service metastore &")
+        os.system("nohup $HIVE_HOME/bin/hive --service metastore &")
 
