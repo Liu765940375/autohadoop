@@ -1,3 +1,3 @@
 spark.eventLog.enabled=true
-spark.eventLog.dir=hdfs://zly1.sh.intel.com:8020/spark-history-server
-spark.history.fs.logDirectory=hdfs://zly1.sh.intel.com:8020/spark-history-server
+spark.eventLog.dir=hdfs://tt20:9000/spark-history-server
+spark.history.fs.logDirectory=hdfs://tt20:9000/spark-history-server

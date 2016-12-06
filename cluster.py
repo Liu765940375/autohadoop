@@ -29,19 +29,19 @@ if __name__ == '__main__':
     os.system("export PYTHONPATH=$PYTHONPATH:"+project_path)
     #sys.path.append(os.path.join(project_path, "distribute"))
 
-    # dist.deploy(component, version, project_path)
     dist.deploy_general(component, version, project_path)
 
-    print "Running commands on master"
     slaves = dist.get_slaves(os.path.join(config_path, "hadoop/slaves.custom"))
-    master = dist.get_master_node(slaves)
     if component == "hadoop":
+        print "Running commands on master"
+        master = dist.get_master_node(slaves)
         for node in slaves:
             dist.ssh_execute(node, "systemctl stop firewalld")
         dist.ssh_execute(master, "yes | $HADOOP_HOME/bin/hdfs namenode -format")
         dist.ssh_execute(master, "$HADOOP_HOME/sbin/stop-all.sh")
         dist.ssh_execute(master, "$HADOOP_HOME/sbin/start-all.sh")
         dist.ssh_execute(master, "$HADOOP_HOME/sbin/yarn-daemon.sh start proxyserver")
+        dist.ssh_execute(master, "$HADOOP_HOME/sbin/mr-jobhistory-daemon.sh stop historyserver")
         dist.ssh_execute(master, "$HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver")
     if component == "spark":
         dist.start_spark_history(slaves, os.path.join((config_path), "spark/spark-defaults.conf"))

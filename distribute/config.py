@@ -27,7 +27,7 @@ def get_custom_configs (filename, custom_configs):
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
-def generate_spark_conf(config_template_file, custom_config_file, target_config_file):
+def generate_conf(config_template_file, custom_config_file, target_config_file):
     custom_configs = {}
     get_custom_configs(custom_config_file, custom_configs)
     with open(config_template_file) as f, open(target_config_file, "w") as target:

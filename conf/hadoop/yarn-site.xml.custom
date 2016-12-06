@@ -1,11 +1,11 @@
 yarn-nodemanager.resource.cpu-vcores=8
-yarn.resourcemanager.address=10.239.47.29:8032
+yarn.resourcemanager.address=tt20:8032
 yarn.resourcemanager.hostname=tt20
-yarn.resourcemanager.scheduler.address=10.239.47.29:8030
-yarn.resourcemanager.resource-tracker.address=10.239.47.29:8031
-yarn.resourcemanager.admin.address=10.239.47.29:8033
-yarn.resourcemanager.webapp.address=10.239.47.29:8088
-yarn.web-proxy.address=10.239.47.29:12345
+yarn.resourcemanager.scheduler.address=tt20:8030
+yarn.resourcemanager.resource-tracker.address=tt20:8031
+yarn.resourcemanager.admin.address=tt20:8033
+yarn.resourcemanager.webapp.address=tt20:8088
+yarn.web-proxy.address=tt20:12345
 yarn.nodemanager.aux-services=mapreduce_shuffle,spark_shuffle
 yarn.nodemanager.aux-services.spark_shuffle.class=org.apache.spark.network.yarn.YarnShuffleService
 spark.shuffle.service.port=7337

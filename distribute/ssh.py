@@ -1,15 +1,22 @@
 import paramiko
 import os
+import select
 
 def ssh_execute(node, cmd):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
     ssh.connect(node.ip, username=node.username,password=node.password)
-    ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
-    for line in ssh_stdout:
-        print '...' + line.strip('\n')
+    # ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
+    channel = ssh.get_transport().open_session()
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    while not stdout.channel.exit_status_ready():
+        if stdout.channel.recv_ready():
+            rl, wl, xl = select.select([channel], [], [], 0.0)
+            if len(rl) > 0:
+                print channel.recv(1024)
     ssh.close()
+    return str
 
 def ssh_copy(node, src, dst):
     ssh = paramiko.SSHClient()
