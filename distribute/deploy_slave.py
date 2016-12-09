@@ -66,13 +66,13 @@ def deploy_general(component, version, project_path):
         if spark_version[0:3] == "1.6":
             os.system("cp -f " + spark_home + "/lib/*" + " " + hive_home + "/lib")
         if spark_version[0:3] == "2.0":
-            ssh_execute(master, "zip spark-archive.zip $SPARK_HOME/jars/*")
-            ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -copyFromLocal spark-archive.zip /spark-archive.zip")
-            ssh_execute(master, "echo \"spark.yarn.archive=hdfs:///" + master_host + ":9000/spark-archive.zip\" >> $SPARK_HOME/conf/spark-defaults.conf")
+            #ssh_execute(master, "zip spark-archive.zip $SPARK_HOME/jars/*")
+            #ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -copyFromLocal spark-archive.zip /spark-archive.zip")
+            #ssh_execute(master, "echo \"spark.yarn.archive=hdfs:///" + master_host + ":9000/spark-archive.zip\" >> $SPARK_HOME/conf/spark-defaults.conf")
 
             ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -mkdir /spark-2.0.0-bin-hadoop")
             ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -copyFromLocal $SPARK_HOME/jars/* /spark-2.0.0-bin-hadoop")
-            ssh_execute(master, "echo \"spark.yarn.jars=hdfs:///" + master_host + ":9000/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
+            ssh_execute(master, "echo \"spark.yarn.jars=local:"+ spark_home+"/jars/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
 
     copy_configurations(slaves, config_file_names, config_path, component)
 
