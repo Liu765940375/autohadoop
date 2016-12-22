@@ -42,18 +42,34 @@ def set_hosts(slaves):
     old_file = "/etc/hosts"
     temp_file = tempfile.mktemp()
     with open(old_file) as rf, open(temp_file, "w") as wf:
+        flag = True
         for node in slaves:
             for line in rf:
                 str = re.findall(node.ip, line)
                 if len(str) > 0:
-                    wf.writelines(node.ip + " " + node.hostname)
-                else:
-                    wf.writelines(line)
+                    flag = False
+                wf.writelines(line)
+            if flag:
+                wf.writelines(node.ip + " " + node.hostname + "\n")
     cmd = "cp /etc/hosts " + "/etc/hosts." + time.strftime('%Y%m%d%H%M%S') + ";"
     os.system(cmd)
     os.remove(old_file)
     shutil.copy(temp_file, old_file)
     os.remove(temp_file)
+
+def detect_rcfile(node, component):
+    if not os.path.exists(package_path):
+        os.makedirs(package_path)
+    os.system("scp " + node.username + "@" + node.ip + ":/" + node.username + "/.bashrc "  + " " + package_path + "/")
+    bashfile = os.path.join(package_path, ".bashrc")
+    strLine = ". /opt/" + component + "rc"
+    with open(bashfile) as f:
+        flag = True
+        for line in f:
+            str = re.findall(strLine, line)
+            if len(str) > 0:
+                flag = False
+    return flag
 
 # Add binary path to PATH
 def set_path(component, slaves):
@@ -133,12 +149,12 @@ def install_mysql(node, user, password):
         os.system("wget -P " + package_path + " " + download_url + "/" + package)
     ssh_copy(node, download_package, "/opt/" + package)
 
-    package = "mysql-community.repo"
+    repo_package = "mysql-community.repo"
     download_url = "http://" + download_server + "/" + "mysql"
-    download_package = os.path.join(package_path, package)
+    download_package = os.path.join(package_path, repo_package)
     if not os.path.isfile(download_package):
-        os.system("wget -P " + package_path + " " + download_url + "/" + package)
-    ssh_copy(node, download_package, "/etc/yum.repos.d/" + package)
+        os.system("wget -P " + package_path + " " + download_url + "/" + repo_package)
+    ssh_copy(node, download_package, "/etc/yum.repos.d/" + repo_package)
 
     cmd = "rpm -qa | grep mysql-community-server;"
     installed = ""

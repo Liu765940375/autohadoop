@@ -1,3 +1,4 @@
+import sys
 from utils import *
 
 # Start Spark history server
@@ -33,7 +34,8 @@ def setup_env_dist(slaves, envs, component):
         cmd += "rm -f /opt/" + component + "rc;"
         for key, value in envs.iteritems():
             cmd += "echo \"export " + key + "=" + value + "\">> /opt/" + component + "rc;"
-        cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
+        if detect_rcfile(node, component):
+            cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
         ssh_execute(node, cmd)
 
 def deploy_general(component, version, project_path):
@@ -44,6 +46,16 @@ def deploy_general(component, version, project_path):
     master_host = master.hostname
     if component == "spark" or component == "hive":
         slaves = [master]
+
+    if component == "hadoop" or component == "hive":
+        for node in slaves:
+            cmd = "which " + component + ";"
+            componentStr = "" + component
+            cmd += "echo $" + componentStr.upper() + "_HOME"
+            bin = ssh_execute(node, cmd)
+            if bin is not None:
+                print "You have deployed hadoop on " + node.ip + ",please remove your previous hadoop first!"
+                sys.exit(1)
 
     # Setup ENV on slave nodes
     envs = get_env_list(os.path.join(config_path, "env"))
@@ -78,6 +90,6 @@ def deploy_general(component, version, project_path):
 
     if component == "hive":
         ssh_execute(slaves[0], hive_home + "/bin/schematool --initSchema -dbType mysql")
-        # ssh_execute(slaves[0], hive_home + "/bin/hive --service metastore &")
-        os.system("nohup $HIVE_HOME/bin/hive --service metastore &")
+        ssh_execute(slaves[0], "nohup " + hive_home + "/bin/hive --service metastore &")
+        #os.system("nohup $HIVE_HOME/bin/hive --service metastore &")
 
