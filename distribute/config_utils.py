@@ -1,7 +1,11 @@
 import os
 import xml.etree.cElementTree as ET
+from xml.dom.minidom import parseString
 
-def get_config(filename, key):
+pretty_print = lambda data: '\n'.join(
+    [line for line in parseString(data).toprettyxml(indent=' ' * 2).split('\n') if line.strip()])
+
+def get_config_from_xml(filename, key):
     doc = ET.parse(filename)
     root = doc.getroot()
     configs = root.getchildren()
@@ -19,7 +23,7 @@ def get_config(filename, key):
                 break;
     return value
 
-def get_custom_configs (filename, custom_configs):
+def get_configs_from_kv (filename, custom_configs):
     with open(filename) as f:
         for line in f:
             if line.startswith('#') or not line.split():
@@ -27,9 +31,9 @@ def get_custom_configs (filename, custom_configs):
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
-def generate_conf(config_template_file, custom_config_file, target_config_file):
+def generate_configuration_kv (config_template_file, custom_config_file, target_config_file):
     custom_configs = {}
-    get_custom_configs(custom_config_file, custom_configs)
+    get_configs_from_kv(custom_config_file, custom_configs)
     with open(config_template_file) as f, open(target_config_file, "w") as target:
         for line in f:
             if line.startswith('#') or not line.split():
@@ -46,7 +50,7 @@ def generate_conf(config_template_file, custom_config_file, target_config_file):
            line = key + " " + value + "\n"
            target.writelines(line)
 
-def generate_configuration(config_template_file, custom_config_file, target_config_file):
+def generate_configuration_xml(config_template_file, custom_config_file, target_config_file):
     default_configs = {}
     custom_configs = {}
 
@@ -60,7 +64,7 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
             tree.write(f)
         return
 
-    get_custom_configs(custom_config_file, custom_configs)
+    get_configs_from_kv(custom_config_file, custom_configs)
 
     properties = root.getchildren()
     for prop in properties:
@@ -90,6 +94,6 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
         value.text = val
         root.append(prop)
 
-    tree = ET.ElementTree(root)
+    xmlstr = pretty_print(ET.tostring(root))
     with open(target_config_file, "w") as f:
-        tree.write(f)
+        f.write(xmlstr)

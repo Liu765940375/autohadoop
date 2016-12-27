@@ -4,7 +4,7 @@ import shutil
 import time
 import tempfile
 
-from config import *
+from config_utils import *
 from node import *
 from ssh import *
 
@@ -14,6 +14,23 @@ project_path = os.path.dirname(os.path.abspath('__file__'))
 package_path = os.path.join(project_path, "package")
 
 slaves = get_slaves(os.path.join(project_path, "conf/hadoop/slaves.custom"))
+
+# Execute command on slave nodes
+def execute_command_dist(slaves, command):
+    print "Execute commands over slaves"
+    for node in slaves:
+        ssh_execute(node, command)
+
+def setup_env_dist(slaves, envs, component):
+    print "Setup Environment over slaves"
+    cmd = ""
+    for node in slaves:
+        cmd += "rm -f /opt/" + component + "rc;"
+        for key, value in envs.iteritems():
+            cmd += "echo \"export " + key + "=" + value + "\">> /opt/" + component + "rc;"
+        if detect_rcfile(node, component):
+            cmd += "echo \". /opt/" + component + "rc" + "\" >> ~/.bashrc;"
+        ssh_execute(node, cmd)
 
 def get_env_list(filename):
     envs = {}
@@ -29,33 +46,13 @@ def get_env_list(filename):
 
     return envs
 
-hadoop_env = get_env_list(os.path.join(project_path, "conf/hadoop/env"))
-spark_env = get_env_list(os.path.join(project_path, "conf/spark/env"))
-hive_env = get_env_list(os.path.join(project_path, "conf/hive/env"))
-
-spark_home = spark_env.get("SPARK_HOME")
-hive_home = hive_env.get("HIVE_HOME")
-
-jdk_version = hadoop_env["JDK_VERSION"]
-
 def set_hosts(slaves):
-    old_file = "/etc/hosts"
-    temp_file = tempfile.mktemp()
-    with open(old_file) as rf, open(temp_file, "w") as wf:
-        flag = True
-        for node in slaves:
-            for line in rf:
-                str = re.findall(node.ip, line)
-                if len(str) > 0:
-                    flag = False
-                wf.writelines(line)
-            if flag:
-                wf.writelines(node.ip + " " + node.hostname + "\n")
-    cmd = "cp /etc/hosts " + "/etc/hosts." + time.strftime('%Y%m%d%H%M%S') + ";"
-    os.system(cmd)
-    os.remove(old_file)
-    shutil.copy(temp_file, old_file)
-    os.remove(temp_file)
+    str_hosts = "127.0.0.1 localhost\n"
+    for node in slaves:
+        str_hosts += node.ip + "  " + node.hostname + "\n"
+
+    for node in slaves:
+        ssh_execute(node, "echo \"" + str_hosts + "\">/etc/hosts;")
 
 def detect_rcfile(node, component):
     if not os.path.exists(package_path):
@@ -112,17 +109,14 @@ def copy_package_dist(slaves, file, component):
 def copy_packages(component, version, slaves):
     download_url = "http://" + download_server + "/" + component
     package = component + "-" + version + ".tar.gz"
-    if component == "hive":
-        package = "apache-" + component + "-" + version + "-SNAPSHOT-bin.tar.gz"
     if not os.path.isfile(os.path.join(package_path, package)):
         os.system("wget -P " + package_path + " " + download_url + "/" + package)
     copy_package_dist(slaves, os.path.join(package_path, package), component)
 
-
 # Copy JDK
 # TODO: It should only setup one time.
-def copy_jdk():
-    package = "jdk-" + jdk_version + "-linux-x64.tar.gz"
+def copy_jdk(version):
+    package = "jdk-" + version + "-linux-x64.tar.gz"
     if not os.path.isfile(os.path.join(package_path, package)):
         download_url = "http://" + download_server + "/software"
         os.system("wget -P " + package_path + " " + download_url + "/" + package)
@@ -130,13 +124,11 @@ def copy_jdk():
 
 
 # Copy saprk-<version>-yarn-shuffle.jar
-def copy_spark_shuffle():
-    spark_version = spark_env.get("SPARK_VERSION")
+def copy_spark_shuffle(spark_version, hadoop_home):
     package = "spark-" + spark_version + "-yarn-shuffle.jar"
     if not os.path.isfile(os.path.join(package_path, package)):
         download_url = "http://" + download_server + "/software"
         os.system("wget -P " + package_path + " " + download_url + "/" + package)
-    hadoop_home = hadoop_env.get("HADOOP_HOME")
     des = os.path.join(hadoop_home, "share/hadoop/yarn/lib", package)
     for node in slaves:
         ssh_copy(node, os.path.join(package_path, package), des)
@@ -193,7 +185,7 @@ def copy_configurations(slaves, config_file_names, config_path, component):
         yarn_custom_file = os.path.join(config_path, "yarn-site.xml.custom")
         if not os.path.isfile(yarn_custom_file):
             with open(yarn_custom_file, "w") as f:
-                f.wirte("yarn.resourcemanager,hostname=" + master.ip + "\n")
+                f.wirte("yarn.resourcemanager.hostname=" + master.ip + "\n")
 
         core_custom_file = os.path.join(config_path, "core-site.xml.custom")
         if not os.path.isfile(core_custom_file):
@@ -205,7 +197,7 @@ def copy_configurations(slaves, config_file_names, config_path, component):
         custom_config = os.path.join(config_path, config_file) + ".custom"
         if config_file == "hdfs-site.xml":
             custom_configs = {}
-            get_custom_configs(custom_config, custom_configs)
+            get_configs_from_kv(custom_config, custom_configs)
             data_dir = custom_configs.get("dfs.datanode.data.dir")
             name_dir = custom_configs.get("dfs.namenode.name.dir")
             for node in slaves:
@@ -214,11 +206,11 @@ def copy_configurations(slaves, config_file_names, config_path, component):
 
         target_config = os.path.join(config_path, config_file)
         if component == "hadoop" or component == "hive" and config_file != "hive-log4j2.properties":
-            generate_configuration(template_config, custom_config, target_config)
+            generate_configuration_xml(template_config, custom_config, target_config)
         if component == "spark":
-            generate_conf(template_config, custom_config, target_config)
+            generate_configuration_kv(template_config, custom_config, target_config)
         if component == "hive" and config_file == "hive-log4j2.properties":
-            generate_conf(template_config, custom_config, target_config)
+            generate_configuration_kv(template_config, custom_config, target_config)
     path = config_path + "/*"
     final_config_files = glob.glob(path)
     setup_config_dist(slaves, final_config_files, component)

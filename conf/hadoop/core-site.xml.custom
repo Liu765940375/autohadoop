@@ -1,1 +1,1 @@
-fs.defaultFS=hdfs://tt20:9000
+fs.defaultFS=hdfs://bdpe822n2:9000

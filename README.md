@@ -1,4 +1,4 @@
-This is the project to deploy Hive Spark and Pig automatically onto Hadoop cluster.
+Beaver is the project to deploy Hive Spark and Pig automatically onto Hadoop cluster.
 
 ## Goal
 1. Redeploy cluster with new patch for supported services(Pig, Spark, Hive and Hadoop if needed). 
@@ -17,19 +17,12 @@ hostname ip username password role
 4. run following command to create the cluster(for hadoop).
 
 ```
-python cluster.py --version=2.7.3 --component=hadoop
+bin/cluster hadoop
 ```
 
-## Python environmental preparation
-The following instructions are using to setup a cluster environment
-    Python package management software check, since python version on CentOS is 2.7.5, a bit too old.
-    pip is package management of python, CentOS 7 can NOT install python-pip software directly. Use following
-    instruction to install pip and ssh library "paramiko".
+## Environmental preparation
 ```
-yum -y install gcc python-devel.x86_64 libffi-devel.x86_64 openssl-devel.x86_64
-curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-python get-pip.py
-pip install paramiko
+source bin/setup-env.sh
 ```
 
 ## Customized configurations
@@ -117,7 +110,7 @@ cd <Beaver_HOME>
 ```
 <Beaver_HOME> means the directory of Beaver project.
 ```
-python cluster.py --version=<version> --component=<component>
+bin/cluster.py <component>
 ```
 
 ## About mysql version

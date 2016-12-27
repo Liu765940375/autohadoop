@@ -1,4 +1,4 @@
-mapreduce.jobtracker.http.address=tt20:50030
-mapreduce.jobhistory.address=tt20:10020
-mapreduce.jobhistory.webapp.address=tt20:19888
-mapred.job.tracker=tt20:9001
+mapreduce.jobtracker.http.address=bdpe822n2:50030
+mapreduce.jobhistory.address=bdpe822n2:10020
+mapreduce.jobhistory.webapp.address=bdpe822n2:19888
+mapred.job.tracker=bdpe822n2:9001

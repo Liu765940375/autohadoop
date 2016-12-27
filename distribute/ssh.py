@@ -34,6 +34,7 @@ def setup_nopass(slaves):
     if not os.path.isfile(pubkey):
         os.system("ssh-keygen -t rsa -P '' -f " + privkey)
 
+    os.system("rm ~/.ssh/known_hosts")
     os.system("ssh-keyscan -H `hostname -f` > ~/.ssh/known_hosts")
     os.system("ssh-keyscan -H 0.0.0.0 >> ~/.ssh/known_hosts")
     os.system("ssh-keyscan -H 127.0.0.1 >> ~/.ssh/known_hosts")
