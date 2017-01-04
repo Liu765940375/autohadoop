@@ -30,8 +30,8 @@ The following settings need to configure by yourself, the configuration value ap
 ### 1. hadoop
 #### 1) conf/hadoop/env
 ```
-HADOOP_HOME=/opt/hadoop
-JAVA_HOME=/opt/jdk
+HADOOP_HOME=/opt/Beaver/hadoop
+JAVA_HOME=/opt/Beaver/jdk
 JDK_VERSION=8u112
 HADOOP_VERSION=2.7.3
 ```
@@ -77,7 +77,7 @@ yarn.scheduler.capacity.resource-calculator=org.apache.hadoop.yarn.util.resource
 ### 2. spark
 #### 1) conf/spark/env
 ```
-SPARK_HOME=/opt/spark
+SPARK_HOME=/opt/Beaver/spark
 SPARK_VERSION=2.0.0
 ```
 #### 2) conf/spark/spark-defaults.conf.custom
@@ -89,7 +89,7 @@ spark.history.fs.logDirectory=hdfs://<master_hostname>:9000/spark-history-server
 ### 3. hive
 #### 1) conf/hive/env
 ```
-HIVE_HOME=/opt/hive
+HIVE_HOME=/opt/Beaver/hive
 ```
 #### 2) conf/hive/hive-site.xml.custom
 ```
@@ -102,7 +102,7 @@ spark.eventLog.dir=hdfs://<master_hostname>:8020/spark-history-server
 ```
 #### 3) conf/hive/hive-log4j2.properties.custom
 ```
-property.hive.log.dir =/opt/hive/logs
+property.hive.log.dir =/opt/Beaver/hive/logs
 ```
 ## Deploy
 ```

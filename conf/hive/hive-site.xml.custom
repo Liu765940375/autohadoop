@@ -1,6 +1,0 @@
-javax.jdo.option.ConnectionURL=jdbc:mysql://localhost:3306/metastore?createDatabaseIfNotExist=true
-javax.jdo.option.ConnectionDriverName=com.mysql.jdbc.Driver
-javax.jdo.option.ConnectionUserName=root
-javax.jdo.option.ConnectionPassword=123456
-hive.metastore.uris=thrift://bdpe822n2:9083
-spark.eventLog.dir=hdfs://bdpe822n2:8020/spark-history-server

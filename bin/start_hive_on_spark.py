@@ -1,49 +1,46 @@
 #!/usr/bin/python
 from cluster import *
 
-def fail_on_msg():
-    pass
+def test_env(component, version):
+    cmd = "ls /opt/Beaver | grep -x " + component
+    if component == "spark":
+        switch_spark_version(version)
+        cmd = "ls /opt/Beaver | grep -x spark-" + version
+    installed = ""
+    for line in os.popen(cmd).readlines():
+        installed += line.strip('\r\n')
+    if installed != component and component != "spark":
+        manage_cluster(component, "deploy")
+    if installed != "spark-" + version and component == "spark":
+        manage_cluster(component, "deploy")
 
-def deploy_hive_on_spark():
-    pass
+def switch_spark_version(version):
+    spark_env_file = os.path.join(config_path, "spark/env")
+    with open(spark_env_file) as rf:
+        line = rf.read()
+    with open(spark_env_file, 'w') as wf:
+        if version == "1.6.2":
+            line = line.replace("SPARK_VERSION=2.0.0", "SPARK_VERSION=1.6.2")
+        if version == "2.0.0":
+            line = line.replace("SPARK_VERSION=1.6.2", "SPARK_VERSION=2.0.0")
+        wf.write(line)
 
 if __name__ == '__main__':
+    service = sys.argv[1]
+    version = sys.argv[2]
 
-    current_path = os.path.dirname(os.path.abspath(__file__))
-    project_path = os.path.dirname(current_path)
-    script_path = os.path.join(project_path, "scripts")
-    config_path = os.path.join(project_path, "conf")
-    package_path = os.path.join(project_path, "packages")
+    if service == "deploy":
+        switch_spark_version(version)
+        manage_cluster("hadoop", "deploy")
+        manage_cluster("hive", "deploy")
+        manage_cluster("spark", "deploy")
+        manage_cluster("BB", "deploy")
 
-    slaves = get_slaves(os.path.join(config_path, "hadoop/slaves.custom"))
-    deploy_hadoop(project_path)
-    print "Running commands on master"
-    master = get_master_node(slaves)
-    for node in slaves:
-        ssh_execute(node, "systemctl stop firewalld")
-    ssh_execute(master, "yes | $HADOOP_HOME/bin/hdfs namenode -format")
-    ssh_execute(master, "$HADOOP_HOME/sbin/stop-all.sh")
-    ssh_execute(master, "$HADOOP_HOME/sbin/start-all.sh")
-    ssh_execute(master, "$HADOOP_HOME/sbin/yarn-daemon.sh start proxyserver")
-    ssh_execute(master, "$HADOOP_HOME/sbin/mr-jobhistory-daemon.sh stop historyserver")
-    ssh_execute(master, "$HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver")
-
-    deploy_spark(project_path)
-    start_spark_history(slaves, os.path.join((config_path), "spark/spark-defaults.conf"))
-
-    deploy_hive(project_path)
-
-    # Step 1: check hadoop install
-    #check_hadoop(host)
-    #subprocess.Popen("cluster", shell=True)
-    #print ("Hadoop not ready, please use cluster.py to setup")
-    # Step 2: check spark install
-    #check_spark(host)
-    #print ("Spark not ready, please use cluster.py to setup")
-    # Step 3: check hive install
-    #check_hive(host)
-    #print ("Hive not ready, please use cluster.py to setup")
-    # Step 4: deploy service
-    #deploy_hive_on_spark()
-
-    #pass
+    if service == "run":
+        list = ["hadoop", "hive", "spark", "BB"]
+        for component in list:
+            test_env(component, version)
+        os.system("rm -rf /opt/Beaver/spark")
+        os.system("ln -s /opt/Beaver/spark-" + version + " " + "/opt/Beaver/spark")
+        cmd = "/opt/Beaver/BB/bin/bigBench runBenchmark"
+        os.system(cmd)

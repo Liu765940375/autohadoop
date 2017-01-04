@@ -24,19 +24,19 @@
         </property>
         <property>
                 <name>mapreduce.jobtracker.http.address</name>
-                <value>bdpe611n1:50030</value>
+                <value>master_hostname:50030</value>
         </property>
         <property>
                 <name>mapreduce.jobhistory.address</name>
-                <value>bdpe611n1:10020</value>
+                <value>master_hostname:10020</value>
         </property>
         <property>
                 <name>mapreduce.jobhistory.webapp.address</name>
-                <value>bdpe611n1:19888</value>
+                <value>master_hostname:19888</value>
         </property>
         <property>
                 <name>mapred.job.tracker</name>
-                <value>bdpe611n1:9001</value>
+                <value>master_hostname:9001</value>
         </property>
 	<property>
 	        <name>mapreduce.map.memory.mb</name>

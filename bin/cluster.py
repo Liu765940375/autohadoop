@@ -23,11 +23,33 @@ def start_spark_history(slaves, spark_conf):
     ssh_execute(master, "$SPARK_HOME/sbin/stop-history-server.sh")
     ssh_execute(master, "$SPARK_HOME/sbin/start-history-server.sh")
 
+def manage_cluster(component, service):
+    if component == "hadoop" and service == "deploy":
+        deploy_hadoop(project_path)
+        print "Hadoop is formatting the filesystem and starting services"
+        master = get_master_node(slaves)
+        for node in slaves:
+            ssh_execute(node, "systemctl stop firewalld")
+        ssh_execute(master, "yes | $HADOOP_HOME/bin/hdfs namenode -format")
+        stop_hadoop_service()
+        start_hadoop_service()
+    if component == "hadoop" and service == "restart":
+        config_file_names = get_config_files("hadoop", config_path)
+        copy_configurations(slaves, config_file_names, os.path.join(config_path, "hadoop"), "hadoop", "restart")
+        stop_hadoop_service()
+        start_hadoop_service()
 
+    if component == "spark" and service == "deploy":
+        deploy_spark(project_path)
+        start_spark_history(slaves, os.path.join((config_path), "spark/spark-defaults.conf"))
+    if component == "hive" and service == "deploy":
+        deploy_hive(project_path)
+    if component == "BB" and service == "deploy":
+        deploy_BB(project_path)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage: bin/cluster.py <component>")
+    if len(sys.argv) != 3:
+        print("Usage: bin/cluster.py <component> <service>")
         sys.exit(1)
 
     component = sys.argv[1]
@@ -36,29 +58,9 @@ if __name__ == '__main__':
         print("Beaver now only support deploy hadoop, spark, hive, BB")
         sys.exit(1)
 
-    current_path = os.path.dirname(os.path.abspath(__file__))
-    project_path = os.path.dirname(current_path)
-    script_path = os.path.join(project_path, "scripts")
-    config_path = os.path.join(project_path, "conf")
-    package_path = os.path.join(project_path, "packages")
+    service = sys.argv[2]
+    if service != "deploy" and service != "restart":
+        print("Beaver now only support deploy and restart service")
+        sys.exit(1)
 
-    slaves = get_slaves(os.path.join(config_path, "hadoop/slaves.custom"))
-    if component == "hadoop":
-        deploy_hadoop(project_path)
-        print "Running commands on master"
-        master = get_master_node(slaves)
-        for node in slaves:
-            ssh_execute(node, "systemctl stop firewalld")
-        ssh_execute(master, "yes | $HADOOP_HOME/bin/hdfs namenode -format")
-        ssh_execute(master, "$HADOOP_HOME/sbin/stop-all.sh")
-        ssh_execute(master, "$HADOOP_HOME/sbin/start-all.sh")
-        ssh_execute(master, "$HADOOP_HOME/sbin/yarn-daemon.sh start proxyserver")
-        ssh_execute(master, "$HADOOP_HOME/sbin/mr-jobhistory-daemon.sh stop historyserver")
-        ssh_execute(master, "$HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver")
-    if component == "spark":
-        deploy_spark(project_path)
-        start_spark_history(slaves, os.path.join((config_path), "spark/spark-defaults.conf"))
-    if component == "hive":
-        deploy_hive(project_path)
-    if component == "BB":
-        deploy_BB(project_path)
+    manage_cluster(component, service)

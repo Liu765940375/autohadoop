@@ -7,9 +7,8 @@
 # spark.eventLog.dir               hdfs://namenode:8021/directory
 # spark.serializer                 org.apache.spark.serializer.KryoSerializer
 # spark.driver.memory              5g
-# spark.executor.extraJavaOptions  -XX:+PrintGCDetails -Dkey=value -Dnumbers="one two three"
-spark.executor.memory   1g
-spark.history.fs.cleaner.enabled        true
-spark.eventLog.enabled  true
-spark.eventLog.dir      hdfs://bdpe74:9000/spark-history-server
-spark.history.fs.logDirectory   hdfs://bdpe74:9000/spark-history-server
+
+spark.history.fs.cleaner.enabled      true
+spark.eventLog.enabled      true
+spark.eventLog.dir      hdfs://<master_hostname>:9000/spark-history-server
+spark.history.fs.logDirectory      hdfs://<master_hostname>:9000/spark-history-server

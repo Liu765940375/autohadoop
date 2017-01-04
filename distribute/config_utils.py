@@ -31,7 +31,7 @@ def get_configs_from_kv (filename, custom_configs):
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
-def generate_configuration_kv (config_template_file, custom_config_file, target_config_file):
+def generate_configuration_kv (master, config_template_file, custom_config_file, target_config_file):
     custom_configs = {}
     get_configs_from_kv(custom_config_file, custom_configs)
     with open(config_template_file) as f, open(target_config_file, "w") as target:
@@ -39,18 +39,19 @@ def generate_configuration_kv (config_template_file, custom_config_file, target_
             if line.startswith('#') or not line.split():
                 target.writelines(line)
             else:
-                list = line.split()
+                list = line.split(" ")
                 if custom_configs.has_key(list[0]):
                     line = list[0] + " " + custom_configs.get(list[0]) + "\n"
                     target.writelines(line)
                     del custom_configs[list[0]]
                 else:
+                    line = line.replace("<master_hostname>", master.hostname)
                     target.writelines(line)
         for key, value in custom_configs.iteritems():
-           line = key + " " + value + "\n"
+           line = key + "      " + value + "\n"
            target.writelines(line)
 
-def generate_configuration_xml(config_template_file, custom_config_file, target_config_file):
+def generate_configuration_xml(master, config_template_file, custom_config_file, target_config_file):
     default_configs = {}
     custom_configs = {}
 
@@ -78,6 +79,11 @@ def generate_configuration_xml(config_template_file, custom_config_file, target_
                 if custom_configs.has_key(key):
                     custom = True;
 
+            if attribute.tag == "value" and custom == False:
+                value = attribute.text
+                if value.find("master_hostname") != -1:
+                    value = value.replace("master_hostname", master.hostname)
+                    attribute.text = value
             if attribute.tag == "value" and custom == True:
                 attribute.text = custom_configs[key]
                 value = attribute.text

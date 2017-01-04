@@ -16,6 +16,7 @@ def ssh_execute(node, cmd):
             if len(rl) > 0:
                 print channel.recv(1024)
     ssh.close()
+    return stdout
 
 def ssh_copy(node, src, dst):
     ssh = paramiko.SSHClient()
@@ -26,6 +27,12 @@ def ssh_copy(node, src, dst):
     sftp.put(src, dst)
     sftp.close()
     ssh.close()
+def ssh_download(node, remote_path, local_path):
+    transport = paramiko.Transport((node.ip,22))
+    transport.connect(username=node.username, password=node.password)
+    sftp = paramiko.SFTPClient.from_transport(transport)
+    sftp.get(remote_path, local_path)
+    transport.close()
 
 def setup_nopass(slaves):
     home = os.path.expanduser("~")

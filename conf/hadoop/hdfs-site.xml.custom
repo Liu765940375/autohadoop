@@ -1,2 +1,0 @@
-dfs.datanode.data.dir=/home/tmp/hadoop/data
-dfs.namenode.name.dir=/home/tmp/hadoop/name
