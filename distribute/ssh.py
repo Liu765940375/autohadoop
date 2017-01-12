@@ -1,8 +1,26 @@
 import paramiko
 import os
 import select
+import time
 
 def ssh_execute(node, cmd):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.load_system_host_keys()
+    ssh.connect(node.ip, username=node.username,password=node.password)
+    # ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
+    channel = ssh.get_transport().open_session()
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    for line in stdout:
+        print '........' + line.strip('\n')
+    while not stdout.channel.exit_status_ready():
+        if stdout.channel.recv_ready():
+            rl, wl, xl = select.select([channel], [], [], 0.0)
+            if len(rl) > 0:
+                print channel.recv(1024)
+    ssh.close()
+
+def ssh_execute_withReturn(node, cmd):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -17,6 +35,23 @@ def ssh_execute(node, cmd):
                 print channel.recv(1024)
     ssh.close()
     return stdout
+
+def ssh_execute_forMetastore(node, cmd):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.load_system_host_keys()
+    ssh.connect(node.ip, username=node.username,password=node.password)
+    # ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
+    channel = ssh.get_transport().open_session()
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    while not stdout.channel.exit_status_ready():
+        if stdout.channel.recv_ready():
+            rl, wl, xl = select.select([channel], [], [], 0.0)
+            if len(rl) > 0:
+                print channel.recv(1024)
+    print "Metastore is starting, it may take a while......"
+    time.sleep(10)
+    ssh.close()
 
 def ssh_copy(node, src, dst):
     ssh = paramiko.SSHClient()

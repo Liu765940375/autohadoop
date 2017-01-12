@@ -17,42 +17,56 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
-        <property>
-                <name>mapreduce.framework.name</name>
-                <value>yarn</value>
-                <final>true</final>
-        </property>
-        <property>
-                <name>mapreduce.jobtracker.http.address</name>
-                <value>master_hostname:50030</value>
-        </property>
-        <property>
-                <name>mapreduce.jobhistory.address</name>
-                <value>master_hostname:10020</value>
-        </property>
-        <property>
-                <name>mapreduce.jobhistory.webapp.address</name>
-                <value>master_hostname:19888</value>
-        </property>
-        <property>
-                <name>mapred.job.tracker</name>
-                <value>master_hostname:9001</value>
-        </property>
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+        <final>true</final>
+    </property>
+    <property>
+        <name>mapreduce.jobtracker.http.address</name>
+        <value>master_hostname:50030</value>
+    </property>
+    <property>
+        <name>mapred.job.tracker</name>
+        <value>master_hostname:9001</value>
+    </property>
 	<property>
-	        <name>mapreduce.map.memory.mb</name>
-       	        <value>1536</value>
-	 </property>
+        <name>mapreduce.map.memory.mb</name>
+        <value>4096</value>
+    </property>
     <property>
         <name>mapreduce.reduce.memory.mb</name>
-        <value>2900</value>
+        <value>4096</value>
     </property>
     <property>
         <name>mapreduce.map.java.opts</name>
-        <value>-Xmx1230m</value>
+        <value>-Xmx3276m</value>
     </property>
     <property>
         <name>mapreduce.reduce.java.opts</name>
-        <value>-Xmx2460m</value>
+        <value>-Xmx3276m</value>
+    </property>
+    <property>
+        <name>mapreduce.task.io.sort.mb</name>
+        <value>1638</value>
+    </property>
+    <!--
+    <property>
+        <name>mapreduce.task.io.sort.factor</name>
+        <value>64</value>
+    </property>
+    <property>
+        <name>mapreduce.reduce.shuffle.parallelcopies</name>
+        <value>50</value>
+    </property>
+    -->
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>master_hostname:10020</value>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>master_hostname:19888</value>
     </property>
     <property>
         <name>yarn.nodemanager.vmem-pmem-ratio</name>

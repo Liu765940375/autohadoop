@@ -48,7 +48,7 @@ def generate_configuration_kv (master, config_template_file, custom_config_file,
                     line = line.replace("<master_hostname>", master.hostname)
                     target.writelines(line)
         for key, value in custom_configs.iteritems():
-           line = key + "      " + value + "\n"
+           line = key + "=" + value + "\n"
            target.writelines(line)
 
 def generate_configuration_xml(master, config_template_file, custom_config_file, target_config_file):

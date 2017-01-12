@@ -14,10 +14,6 @@
 -->
 <configuration>
     <property>
-        <name>yarn.resourcemanager.master.hostname</name>
-        <value>master_hostname</value>
-    </property>
-    <property>
         <name>yarn.nodemanager.aux-services</name>
         <value>mapreduce_shuffle,spark_shuffle</value>
     </property>
@@ -28,10 +24,6 @@
     <property>
         <name>spark.shuffle.service.port</name>
         <value>7337</value>
-    </property>
-    <property>
-        <name>yarn.resourcemanager.address</name>
-        <value>master_hostname:8032</value>
     </property>
     <property>
         <name>yarn.resourcemanager.scheduler.address</name>
@@ -50,6 +42,10 @@
         <value>master_hostname:8088</value>
     </property>
     <property>
+        <name>yarn.web-proxy.address</name>
+        <value>master_hostname:12345</value>
+    </property>
+    <property>
         <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
         <value>org.apache.hadoop.mapred.ShuffleHandler</value>
     </property>
@@ -66,10 +62,6 @@
         <value>20000</value>
     </property>
     <property>
-        <name>yarn.web-proxy.address</name>
-        <value>master_hostname:12345</value>
-    </property>
-        <property>
         <name>yarn.nodemanager.vmem-pmem-ratio</name>
         <value>4</value>
     </property>
@@ -77,8 +69,18 @@
         <name>yarn.nodemanager.pmem-check-enabled</name>
         <value>false</value>
     </property>
+    <!--
     <property>
         <name>yarn.nodemanager.local-dirs</name>
         <value>/home/Beaver/hadoop/nm</value>
+    </property>
+    -->
+    <property>
+        <name>yarn.resourcemanager.master.hostname</name>
+        <value>master_hostname</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.address</name>
+        <value>master_hostname:8032</value>
     </property>
 </configuration>
