@@ -7,7 +7,7 @@ build-eclipse
 *.launch
 *~
 .idea
-.idea/
+.idea/*
 *.iml
 *.ipr
 *.iws
@@ -15,5 +15,5 @@ build-eclipse
 .arc
 .DS_Store
 conf/*.property
-*.pyc
+*.py[cod]
 utils/*.pyc
