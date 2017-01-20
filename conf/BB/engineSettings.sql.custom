@@ -1,0 +1,6 @@
+set spark.eventLog.enabled=true
+set spark.eventLog.dir=hdfs://bdpe16:9000/spark-history-server
+set spark.executor.cores=4
+set spark.executor.instances=8
+set spark.executor.memory=10g
+set spark.yarn.executor.memoryOverhead=2734

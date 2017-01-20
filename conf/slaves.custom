@@ -1,2 +1,2 @@
-tt20 10.239.47.29 root bdt123 master
-tt21 10.239.47.116 root 123456 slave
+bdpe16 10.239.47.61 root bdpe123 master
+bdpe17 10.239.47.54 root bdpe123 slave

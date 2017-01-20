@@ -15,3 +15,5 @@ build-eclipse
 .arc
 .DS_Store
 conf/*.property
+*.pyc
+utils/*.pyc

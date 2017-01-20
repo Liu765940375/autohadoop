@@ -5,5 +5,6 @@ echo "Please input 2 variable like 'serverid' 'clientid'"
 else
 ssh root@$2 'iperf3 -c '$1' -i 2' > netio_result.log
 cat netio_result.log
-echo "The result is placed in file netio_results.log in the current path"
+rm -rf netio_result.log
+#echo "The result is placed in file netio_results.log in the current path"
 fi

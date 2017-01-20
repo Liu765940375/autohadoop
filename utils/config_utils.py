@@ -93,6 +93,7 @@ def generate_configuration_xml(master, config_template_file, custom_config_file,
         default_configs[key] = value
 
     for key, val in custom_configs.iteritems():
+        modify_flag = True
         prop = ET.Element('property')
         name = ET.SubElement(prop, "name")
         name.text = key
