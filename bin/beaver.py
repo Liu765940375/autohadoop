@@ -9,6 +9,9 @@ sys.path.append(project_path)
 
 from hosBB import deploy_hosBB, undeploy_hosBB, run_hosBB
 
+# usage ./beaver.py deploy --conf=conf_dir
+
+
 if __name__ == '__main__':
     args = sys.argv
     action = args[1]

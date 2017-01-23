@@ -1,3 +1,0 @@
-yarn.nodemanager.resource.cpu-vcores=32
-yarn.nodemanager.resource.memory-mb=109398
-yarn.scheduler.maximum-allocation-mb=109398

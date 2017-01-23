@@ -2,11 +2,11 @@
 
 import os
 
-from utils.util import hadoop_version, config_path, check_env
-from hadoop import deploy_hadoop, undeploy_hadoop
-from hive import deploy_hive, undeploy_hive
-from spark import deploy_spark, undeploy_spark, stop_history_server, start_spark_history
 from bb import deploy_BB, undeploy_BB, run_BB
+from hive import deploy_hive, undeploy_hive
+from infra.hadoop import deploy_hadoop, undeploy_hadoop
+from infra.spark import deploy_spark, undeploy_spark
+from utils.util import hadoop_version, check_env
 
 # hive_env_file = os.path.join(config_path, "hive/env")
 # spark_env_file = os.path.join(config_path, "spark/env")

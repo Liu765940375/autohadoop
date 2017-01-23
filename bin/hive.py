@@ -75,7 +75,7 @@ def install_mysql(node):
     ssh_copy(node, download_package, "/etc/yum.repos.d/" + repo_package)
 
     mysql_configs = {}
-    get_configs_from_kv(os.path.join(config_path, "hive/hive-site.xml.custom"), mysql_configs)
+    get_configs_from_kvfile(os.path.join(config_path, "hive/hive-site.xml.custom"), mysql_configs)
     username ="root"
     password = "123456"
     if mysql_configs.has_key("javax.jdo.option.ConnectionUserName"):

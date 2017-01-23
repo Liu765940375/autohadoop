@@ -14,9 +14,7 @@ current_path = os.path.dirname(os.path.abspath(__file__))
 project_path = os.path.dirname(current_path)
 package_path = os.path.join(project_path, "package")
 config_path = os.path.join(project_path, "conf")
-
-slaves = get_slaves(os.path.join(project_path, "conf/slaves.custom"))
-master = get_master_node(slaves)
+runtime_path = os.path.join(project_path, "runtime")
 
 # Execute command on slave nodes
 def execute_command_dist(slaves, command):
@@ -91,38 +89,39 @@ def detect_rcfile(node, component):
     return flag
 
 # # Wirte IP address of all nodes to "/etc/hosts" file
-# def set_hosts():
-#     print colors.LIGHT_BLUE + "Update \"/etc/hosts\" file" + colors.ENDC
-#     str_hosts = "127.0.0.1 localhost\n"
-#     for node in slaves:
-#         str_hosts += node.ip + "  " + node.hostname + "\n"
-#
-#     for node in slaves:
-#         ssh_execute(node, "echo \"" + str_hosts + "\">/etc/hosts;")
+
+def update_etc_hosts(slaves):
+    print colors.LIGHT_BLUE + "Update \"/etc/hosts\" file" + colors.ENDC
+    str_hosts = "127.0.0.1 localhost\n"
+    for node in slaves:
+        str_hosts += node.ip + "  " + node.hostname + "\n"
+
+    for node in slaves:
+        ssh_execute(node, "echo \"" + str_hosts + "\">/etc/hosts;")
 
 # Wirte IP address of all nodes to "/etc/hosts" file
-def set_hosts():
-    old_file = "/etc/hosts"
-    temp_file = tempfile.mktemp()
-    with open(old_file) as rf, open(temp_file, "w") as wf:
-        flag = True
-        for node in slaves:
-            for line in rf:
-                str = re.findall(node.ip, line)
-                if len(str) > 0:
-                    wf.writelines(node.ip + " " + node.hostname)
-            else:
-                wf.writelines(line)
-                flag = False
-            wf.writelines(line)
-        if flag:
-            wf.writelines(node.ip + " " + node.hostname + "\n")
-
-    cmd = "cp /etc/hosts " + "/etc/hosts." + time.strftime('%Y%m%d%H%M%S') + ";"
-    os.system(cmd)
-    os.remove(old_file)
-    shutil.copy(temp_file, old_file)
-    os.remove(temp_file)
+# def set_etc_hosts(slaves):
+#     old_file = "/etc/hosts"
+#     temp_file = tempfile.mktemp()
+#     with open(old_file) as rf, open(temp_file, "w") as wf:
+#         flag = True
+#         for node in slaves:
+#             for line in rf:
+#                 str = re.findall(node.ip, line)
+#                 if len(str) > 0:
+#                     wf.writelines(node.ip + " " + node.hostname)
+#                 else:
+#                     wf.writelines(line)
+#                     flag = False
+#             wf.writelines(line)
+#             if flag:
+#                 wf.writelines(node.ip + " " + node.hostname + "\n")
+#
+#     cmd = "cp /etc/hosts " + "/etc/hosts." + time.strftime('%Y%m%d%H%M%S') + ";"
+#     os.system(cmd)
+#     os.remove(old_file)
+#     shutil.copy(temp_file, old_file)
+#     os.remove(temp_file)
 
 # Add binary files of different components into PATH
 def set_path(component, slaves):
@@ -140,7 +139,14 @@ def set_path(component, slaves):
 # Get the list of configuration files for different components
 def get_config_files(component):
     if component == "hadoop":
-        config_file_names = ["hdfs-site.xml", "core-site.xml", "mapred-site.xml", "yarn-site.xml", "capacity-scheduler.xml"]
+        config_file_names = [
+            "env",
+            "hdfs-site.xml",
+            "core-site.xml",
+            "mapred-site.xml",
+            "yarn-site.xml",
+            "capacity-scheduler.xml"]
+
     if component == "spark":
         config_file_names = ["spark-defaults.conf"]
     if component == "hive":
@@ -199,36 +205,27 @@ def copy_spark_shuffle(slaves, spark_version, hadoop_home):
         ssh_execute(node, cmd)
         ssh_copy(node, os.path.join(package_path, package), des)
 
+def format_hadoop(config_filename):
+    custom_configs = {}
+    get_configs_from_kvfile(config_filename, custom_configs)
+    data_dir = "/opt/Beaver/hadoop/name"
+    name_dir = "/opt/Beaver/hadoop/data"
+    if custom_configs.has_key("dfs.namenode.name.dir"):
+        data_dir = custom_configs.get("dfs.namenode.name.dir")
+    if custom_configs.has_key("dfs.namenode.data.dir"):
+        name_dir = custom_configs.get("dfs.namenode.data.dir")
+    print colors.LIGHT_BLUE + "\tDelete existed namenode name.dir and data.dir" + colors.ENDC
+    for node in slaves:
+        ssh_execute(node, "rm -rf " + data_dir)
+        ssh_execute(node, "rm -rf " + name_dir)
+
 # Generate final configuration file and copy this files to destination node
-def copy_configurations(slaves, config_file_names, config_path, component, action):
+def copy_configurations(slaves, config_path, component):
     print colors.LIGHT_BLUE + "Distribute configuration files for " + component + ":" + colors.ENDC
     print colors.LIGHT_BLUE + "\tGenerate final configuration files of " + component + colors.ENDC
-    for config_file in config_file_names:
-        template_config = os.path.join(config_path, config_file) + ".template"
-        custom_config = os.path.join(config_path, config_file) + ".custom"
-        if config_file == "hdfs-site.xml" and action == "deploy":
-            custom_configs = {}
-            get_configs_from_kv(custom_config, custom_configs)
-            data_dir = "/opt/Beaver/hadoop/name"
-            name_dir = "/opt/Beaver/hadoop/data"
-            if custom_configs.has_key("dfs.namenode.name.dir"):
-                data_dir = custom_configs.get("dfs.namenode.name.dir")
-            if custom_configs.has_key("dfs.namenode.data.dir"):
-                name_dir = custom_configs.get("dfs.namenode.data.dir")
-            print colors.LIGHT_BLUE + "\tDelete existed namenode name.dir and data.dir" + colors.ENDC
-            for node in slaves:
-                ssh_execute(node, "rm -rf " + data_dir)
-                ssh_execute(node, "rm -rf " + name_dir)
-
-        target_config = os.path.join(config_path, config_file)
-        if component == "hadoop" or component == "hive" and config_file != "hive-log4j2.properties":
-            generate_configuration_xml(master, template_config, custom_config, target_config)
-        if component == "spark" or component == "BB":
-            generate_configuration_kv(master, template_config, custom_config, target_config)
-        if component == "hive" and config_file == "hive-log4j2.properties":
-            generate_configuration_kv(master, template_config, custom_config, target_config)
     path = config_path + "/*"
     final_config_files = glob.glob(path)
+    print final_config_files
     copy_final_configs(slaves, final_config_files, component)
 
 #Copy final configuration files to destination

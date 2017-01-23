@@ -13,7 +13,6 @@ def get_master_node(slaves):
     for node in slaves:
         if node.role == "master":
             return node
-    return None
 
 def get_slaves(filename):
     slaves = []

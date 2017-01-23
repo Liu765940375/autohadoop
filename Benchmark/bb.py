@@ -15,14 +15,14 @@ bb_config_path = os.path.join(project_path, "conf/BB")
 def deploy_BB():
         setup_env_dist([master], bb_env, "BB")
         copy_packages([master], "BB", "1.0")
-        copy_configurations([master], config_file_names, bb_config_path, "BB", "deploy")
+        copy_configurations([master], config_file_names, bb_config_path, "BB")
         auto_spark_config()
 
 def undeploy_BB():
     os.system("rm -rf /opt/Beaver/BB-1.0;" + "rm -rf /opt/Beaver/BB;rm -rf /opt/Beaver/BBrc")
 
 def restart_BB():
-    copy_configurations([master], config_file_names, bb_config_path, "BB", "deploy")
+    copy_configurations([master], config_file_names, bb_config_path, "BB")
     auto_spark_config()
 
 def run_BB():

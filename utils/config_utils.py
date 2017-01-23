@@ -1,6 +1,7 @@
 import os
 import xml.etree.cElementTree as ET
 from xml.dom.minidom import parseString
+from shutil import copyfile
 
 pretty_print = lambda data: '\n'.join(
     [line for line in parseString(data).toprettyxml(indent=' ' * 2).split('\n') if line.strip()])
@@ -23,7 +24,24 @@ def get_config_from_xml(filename, key):
                 break;
     return value
 
-def get_configs_from_kv (filename, custom_configs):
+def get_configs_from_xml(filename, custom_configs):
+    doc = ET.parse(filename)
+    root = doc.getroot()
+    configs = root.getchildren()
+    value = ""
+    for config in configs:
+        attrs = config.getchildren()
+        if value != "":
+            break;
+        key = ""
+        for attr in attrs:
+            if attr.tag == "name":
+                key = attr.text.strip()
+            if attr.tag == "value":
+                custom_configs[key] = attr.text.strip()
+    pass
+
+def get_configs_from_kvfile (filename, custom_configs):
     with open(filename) as f:
         for line in f:
             if line.startswith('#') or not line.split():
@@ -31,76 +49,74 @@ def get_configs_from_kv (filename, custom_configs):
             key, value = line.partition("=")[::2]
             custom_configs[key.strip()] = value.strip()
 
-def generate_configuration_kv (master, config_template_file, custom_config_file, target_config_file):
-    custom_configs = {}
-    get_configs_from_kv(custom_config_file, custom_configs)
-    with open(config_template_file) as f, open(target_config_file, "w") as target:
-        for line in f:
-            if line.startswith('#') or not line.split():
-                target.writelines(line)
-            else:
-                list = line.split(" ")
-                if custom_configs.has_key(list[0]):
-                    line = list[0] + " " + custom_configs.get(list[0]) + "\n"
-                    target.writelines(line)
-                    del custom_configs[list[0]]
-                else:
-                    line = line.replace("<master_hostname>", master.hostname)
-                    target.writelines(line)
-        for key, value in custom_configs.iteritems():
-           line = key + "=" + value + "\n"
-           target.writelines(line)
+# TODO: need to be more smart and accurate
+def isxml(filename):
+    return "xml" in filename
+    try:
+        ET.parse(filename)
+    except os.error:
+        return False
 
-def generate_configuration_xml(master, config_template_file, custom_config_file, target_config_file):
-    default_configs = {}
-    custom_configs = {}
+    return True
 
-    configs = ET.parse(config_template_file)
-    root = configs.getroot()
-
-    # No custom file exsit
-    if not os.path.isfile(custom_config_file):
-        tree = ET.ElementTree(root)
-        with open(target_config_file, "w") as f:
-            tree.write(f)
+# Merge configuration
+def merge_configuration (config_files, default_dir, custom_dir, target_dir):
+    if not os.path.isdir(custom_dir):
+        os.system("cp -r "+default_dir + " " + target_dir)
         return
 
-    get_configs_from_kv(custom_config_file, custom_configs)
+    sub_dirs = os.listdir(default_dir)
 
-    properties = root.getchildren()
-    for prop in properties:
-        attributes = prop.getchildren()
-        key = ""
-        value = ""
-        custom = False
-        for attribute in attributes:
-            if attribute.tag == "name":
-                key = attribute.text
-                if custom_configs.has_key(key):
-                    custom = True;
+    for file in sub_dirs:
+        src = os.path.join(default_dir, file)
+        custom = os.path.join(custom_dir, file)
+        dest = os.path.join(target_dir, file)
+        if os.path.isfile(src) and os.path.basename(src) in config_files:
+            generate_configuration(src, custom, dest)
+        elif os.path.isdir(src):
+            merge_configuration ( src, custom, dest)
 
-            if attribute.tag == "value" and custom == False:
-                value = attribute.text
-                if value.find("master_hostname") != -1:
-                    value = value.replace("master_hostname", master.hostname)
-                    attribute.text = value
-            if attribute.tag == "value" and custom == True:
-                attribute.text = custom_configs[key]
-                value = attribute.text
-                custom_configs.pop(key, None)
-                custom = False
+def merge_configs(default_configs, custom_configs):
+    for key, value in custom_configs.iteritems():
+        default_configs[key] = custom_configs[key]
+    return default_configs
 
-        default_configs[key] = value
-
-    for key, val in custom_configs.iteritems():
-        modify_flag = True
+def generate_xml(configs, target_file):
+    xml_root = ET.Element("configuration")
+    for key, val in configs.iteritems():
         prop = ET.Element('property')
         name = ET.SubElement(prop, "name")
         name.text = key
         value = ET.SubElement(prop, "value")
         value.text = val
-        root.append(prop)
+        xml_root.append(prop)
 
-    xmlstr = pretty_print(ET.tostring(root))
-    with open(target_config_file, "w") as f:
+    xmlstr = pretty_print(ET.tostring(xml_root))
+    with open(target_file, "w") as f:
         f.write(xmlstr)
+
+def generate_kvfile(configs, target_file):
+    with open(target_file, "w") as f:
+        for key, value in configs.iteritems():
+            f.wirte(key + "=" + value + "\n")
+
+def get_configs(filename):
+    configs = {}
+    if isxml(filename):
+        get_configs_from_xml(filename, configs)
+    else:
+        get_configs_from_kvfile(filename, configs)
+
+    return configs
+
+def generate_configuration(config_template_file, custom_config_file, target_config_file):
+    if not os.path.isfile(custom_config_file):
+        copyfile(config_template_file, target_config_file)
+        return
+    default_config = get_configs(config_template_file)
+    custom_configs = get_configs(custom_config_file)
+    final_configs = merge_configs(default_config, custom_configs)
+    if isxml(target_config_file):
+        generate_xml(final_configs, target_config_file)
+    else:
+        generate_kvfile(final_configs, target_config_file)
