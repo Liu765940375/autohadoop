@@ -1,13 +1,16 @@
 import glob
 import re
-import shutil
+#import shutil
 import time
-import tempfile
+import os
+#import tempfile
 
-from config_utils import *
-from node import *
-from ssh import *
-from colors import *
+#from config_utils import *
+#from ssh import *
+#from colors import *
+from utils.config_utils import *
+from utils.colors import *
+from utils.ssh import *
 
 download_server = "10.239.47.156"
 current_path = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +21,7 @@ runtime_path = os.path.join(project_path, "runtime")
 
 # Execute command on slave nodes
 def execute_command_dist(slaves, command):
-    print "Execute commands over slaves"
+    print ("Execute commands over slaves")
     for node in slaves:
         ssh_execute(node, command)
 
@@ -36,7 +39,7 @@ def get_env_list(filename):
 
     return envs
 
-hadoop_env = get_env_list(os.path.join(config_path, "hadoop/env"))
+hadoop_env = get_env_list(os.path.join(config_path, "env"))
 hadoop_version = hadoop_env.get("HADOOP_VERSION")
 hadoop_home = hadoop_env.get("HADOOP_HOME")
 java_home = hadoop_env.get("JAVA_HOME")
@@ -52,7 +55,7 @@ bb_home = bb_env.get("BB_HOME")
 
 # Set environment variables
 def setup_env_dist(slaves, envs, component):
-        print colors.LIGHT_BLUE+ "Set environment variables over all nodes" + colors.ENDC
+        print (colors.LIGHT_BLUE+ "Set environment variables over all nodes" + colors.ENDC)
         # list = ["HADOOP_HOME", "JAVA_HOME", "HIVE_HOME", "BB_HOME"]
         rcfile = "/opt/Beaver/" + component + "rc"
         for node in slaves:
@@ -63,7 +66,9 @@ def setup_env_dist(slaves, envs, component):
             #         if key in list:
             #             line = key + "=" + value
             #             f.write(line + "\n")
-            for key, value in envs.iteritems():
+            # for python 2.7
+            #for key, value in envs.iteritems():
+            for key, value in envs.items():
                 cmd += "echo \"export " + key + "=" + value + "\">> /opt/Beaver/" + component + "rc;"
             if detect_rcfile(node, component):
                 cmd += "echo \"" + "if [ -f " + rcfile + " ]; then\n" \
@@ -91,7 +96,7 @@ def detect_rcfile(node, component):
 # # Wirte IP address of all nodes to "/etc/hosts" file
 
 def update_etc_hosts(slaves):
-    print colors.LIGHT_BLUE + "Update \"/etc/hosts\" file" + colors.ENDC
+    print (colors.LIGHT_BLUE + "Update \"/etc/hosts\" file" + colors.ENDC)
     str_hosts = "127.0.0.1 localhost\n"
     for node in slaves:
         str_hosts += node.ip + "  " + node.hostname + "\n"
@@ -125,7 +130,7 @@ def update_etc_hosts(slaves):
 
 # Add binary files of different components into PATH
 def set_path(component, slaves):
-    print colors.LIGHT_BLUE+ "Add binary files of " + component + " into PATH env" + colors.ENDC
+    print (colors.LIGHT_BLUE+ "Add binary files of " + component + " into PATH env" + colors.ENDC)
     for node in slaves:
         if component == "hadoop":
             cmd = "echo \"export PATH=" + java_home + "/bin:" + hadoop_home + "/bin:" + hadoop_home + "/sbin:$PATH\" >> /opt/Beaver/" + component + "rc"
@@ -158,10 +163,10 @@ def get_config_files(component):
 # Copy and unpack a package to slave nodes
 def copy_package_dist(slaves, file, component, version):
     for node in slaves:
-        print colors.LIGHT_BLUE + "\tCopy " + component + " to " + node.hostname + "..." + colors.ENDC
+        print (colors.LIGHT_BLUE + "\tCopy " + component + " to " + node.hostname + "..." + colors.ENDC)
         ssh_execute(node, "mkdir -p /opt/Beaver/")
         ssh_copy(node, file, "/opt/Beaver/" + os.path.basename(file))
-        print colors.LIGHT_BLUE + "\tUnzip " + component + " on " + node.hostname + "..." + colors.ENDC
+        print (colors.LIGHT_BLUE + "\tUnzip " + component + " on " + node.hostname + "..." + colors.ENDC)
         softlink = "/opt/Beaver/" + component
         package = "/opt/Beaver/" + os.path.basename(file)
         component_home = "/opt/Beaver/" + component + "-" + version
@@ -176,14 +181,14 @@ def copy_package_dist(slaves, file, component, version):
 
 # Copy component package to slave nodes
 def copy_packages(slaves, component, version):
-    print colors.LIGHT_BLUE + "Distrubte " + "tar.gz file" + " for " + component + colors.ENDC
+    print (colors.LIGHT_BLUE + "Distrubte " + "tar.gz file" + " for " + component + colors.ENDC)
     download_url = "http://" + download_server + "/" + component
     package = component + "-" + version + ".tar.gz"
     if not os.path.isfile(os.path.join(package_path, package)):
-        print colors.LIGHT_BLUE + "\tDownloading " + package + " from our repo..." + colors.ENDC
+        print (colors.LIGHT_BLUE + "\tDownloading " + package + " from our repo..." + colors.ENDC)
         os.system("wget --no-proxy -P " + package_path + " " + download_url + "/" + package)
     else:
-        print colors.LIGHT_GREEN + "\t" + package + " has already exists in Beaver package" + colors.ENDC
+        print (colors.LIGHT_GREEN + "\t" + package + " has already exists in Beaver package" + colors.ENDC)
     if component == "hive" or component =="spark" or component =="BB":
         slaves = [master]
     copy_package_dist(slaves, os.path.join(package_path, package), component, version)
@@ -193,15 +198,15 @@ def copy_spark_shuffle(slaves, spark_version, hadoop_home):
     package = "spark-" + spark_version + "-yarn-shuffle.jar"
     if not os.path.isfile(os.path.join(package_path, package)):
         download_url = "http://" + download_server + "/software"
-        print colors.LIGHT_BLUE + "Downloading " + package + " from our repo..." + colors.ENDC
+        print (colors.LIGHT_BLUE + "Downloading " + package + " from our repo..." + colors.ENDC)
         os.system("wget --no-proxy -P " + package_path + " " + download_url + "/" + package)
     else:
-        print colors.LIGHT_GREEN + "\t" + package + " has already exists in Beaver package" + colors.ENDC
+        print (colors.LIGHT_GREEN + "\t" + package + " has already exists in Beaver package" + colors.ENDC)
     des_path = os.path.join(hadoop_home, "share/hadoop/yarn/lib")
     cmd = "rm -rf " + des_path + "/spark-*-yarn-shuffle.jar"
     des = os.path.join(des_path, package)
     for node in slaves:
-        print colors.LIGHT_BLUE + "\tCopy spark-shuffle jar to " + node.hostname + "..." + colors.ENDC
+        print (colors.LIGHT_BLUE + "\tCopy spark-shuffle jar to " + node.hostname + "..." + colors.ENDC)
         ssh_execute(node, cmd)
         ssh_copy(node, os.path.join(package_path, package), des)
 
@@ -214,23 +219,23 @@ def format_hadoop(config_filename):
         data_dir = custom_configs.get("dfs.namenode.name.dir")
     if custom_configs.has_key("dfs.namenode.data.dir"):
         name_dir = custom_configs.get("dfs.namenode.data.dir")
-    print colors.LIGHT_BLUE + "\tDelete existed namenode name.dir and data.dir" + colors.ENDC
+    print (colors.LIGHT_BLUE + "\tDelete existed namenode name.dir and data.dir" + colors.ENDC)
     for node in slaves:
         ssh_execute(node, "rm -rf " + data_dir)
         ssh_execute(node, "rm -rf " + name_dir)
 
 # Generate final configuration file and copy this files to destination node
 def copy_configurations(slaves, config_path, component):
-    print colors.LIGHT_BLUE + "Distribute configuration files for " + component + ":" + colors.ENDC
-    print colors.LIGHT_BLUE + "\tGenerate final configuration files of " + component + colors.ENDC
+    print (colors.LIGHT_BLUE + "Distribute configuration files for " + component + ":" + colors.ENDC)
+    print (colors.LIGHT_BLUE + "\tGenerate final configuration files of " + component + colors.ENDC)
     path = config_path + "/*"
     final_config_files = glob.glob(path)
-    print final_config_files
+    print (final_config_files)
     copy_final_configs(slaves, final_config_files, component)
 
 #Copy final configuration files to destination
 def copy_final_configs(slaves, config_files, component):
-    print colors.LIGHT_BLUE + "\tCopy configuration files of " + component + " to all nodes" + colors.ENDC
+    print (colors.LIGHT_BLUE + "\tCopy configuration files of " + component + " to all nodes" + colors.ENDC)
     if component == "hadoop":
         conf_link = os.path.join(hadoop_home, "etc/hadoop")
         conf_path = os.path.join(hadoop_home, "etc/") + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
@@ -311,5 +316,5 @@ def check_env(component, version):
     if installed != component + "-" + version:
         return False
     else:
-        print colors.LIGHT_BLUE + component + " has exists, we do not have to deploy it." + colors.ENDC
+        print (colors.LIGHT_BLUE + component + " has exists, we do not have to deploy it." + colors.ENDC)
         return True

@@ -120,3 +120,46 @@ def generate_configuration(config_template_file, custom_config_file, target_conf
         generate_xml(final_configs, target_config_file)
     else:
         generate_kvfile(final_configs, target_config_file)
+
+def replace_conf_value(conf_file, old_value, new_value):
+    tree = ET.parse(conf_file)
+    root = tree.getroot()
+    for value_tag in root.findall("./property/value"):
+        value = str(value_tag.text)
+        value_tag.text = value.replace(old_value, new_value)
+
+    tree.write(conf_file, encoding="UTF-8", xml_declaration=True)
+
+def merge_conf_file(default_conf_file, custom_conf_file, output_conf_file):
+    tree_default = ET.parse(default_conf_file)
+    tree_custom = ET.parse(custom_conf_file)
+    root_default = tree_default.getroot()
+    root_custom = tree_custom.getroot()
+    root_output = ET.Element("configuration")
+    for property_tag in root_custom.findall("./property"):
+        property_name = property_tag.find("name").text
+        add_property_element(root_output, property_name, property_tag.find("value").text)
+        tags_in_default = root_default.findall("*[name='" + property_name + "']")
+        if len(tags_in_default) > 0:
+            root_default.remove(tags_in_default[0])
+
+    for property_tag in root_default.findall("./property"):
+        add_property_element(root_output, property_tag.find("name").text,
+            property_tag.find("value").text)
+
+    tree_output = ET.ElementTree(root_output)
+    tree_output.write(output_conf_file, encoding="UTF-8", xml_declaration=True)
+
+def add_property_element(root_elemnt, name, value):
+    property_element = ET.SubElement(root_elemnt, "property")
+    name_element = ET.SubElement(property_element, "name")
+    value_element = ET.SubElement(property_element, "value")
+    name_element.text = name
+    value_element.text = value
+
+def format_xml_file(xml_file):
+    xmlstr = ""
+    with open(xml_file, 'r') as f:
+        xmlstr = pretty_print(f.read())
+    with open(xml_file, "w") as f:
+        f.write(xmlstr)

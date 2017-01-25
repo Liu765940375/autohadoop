@@ -15,10 +15,9 @@
 <configuration>
 
 <!-- Site specific YARN configuration properties -->
-	<!--
 	<property>
                 <name>yarn.resourcemanager.hostname</name>
-                <value>bdpe611n2</value>
+                <value>master_hostname</value>
         </property>
         <property>
                 <name>yarn.nodemanager.aux-services</name>
@@ -26,25 +25,24 @@
         </property>
         <property>
                 <name>yarn.resourcemanager.address</name>
-                <value>bdpe611n2:8032</value>
+                <value>master_hostname:8032</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.scheduler.address</name>
-                <value>bdpe611n2:8030</value>
+                <value>master_hostname:8030</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.resource-tracker.address</name>
-                <value>bdpe611n2:8031</value>
+                <value>master_hostname:8031</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.admin.address</name>
-                <value>bdpe611n2:8033</value>
+                <value>master_hostname:8033</value>
         </property>
         <property>
                 <name>yarn.resourcemanager.webapp.address</name>
-                <value>bdpe611n2:8088</value>
+                <value>master_hostname:8088</value>
         </property>
-	-->
         <property>
                 <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
                 <value>org.apache.hadoop.mapred.ShuffleHandler</value>

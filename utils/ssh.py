@@ -12,12 +12,12 @@ def ssh_execute(node, cmd):
     channel = ssh.get_transport().open_session()
     stdin, stdout, stderr = ssh.exec_command(cmd)
     for line in stdout:
-        print '....' + line.strip('\n')
+        print ('....' + line.strip('\n'))
     while not stdout.channel.exit_status_ready():
         if stdout.channel.recv_ready():
             rl, wl, xl = select.select([channel], [], [], 0.0)
             if len(rl) > 0:
-                print channel.recv(1024)
+                print (channel.recv(1024))
     ssh.close()
 
 def ssh_execute_withReturn(node, cmd):
@@ -32,7 +32,7 @@ def ssh_execute_withReturn(node, cmd):
         if stdout.channel.recv_ready():
             rl, wl, xl = select.select([channel], [], [], 0.0)
             if len(rl) > 0:
-                print channel.recv(1024)
+                print (channel.recv(1024))
     ssh.close()
     return stdout
 
@@ -48,7 +48,7 @@ def ssh_execute_forMetastore(node, cmd):
         if stdout.channel.recv_ready():
             rl, wl, xl = select.select([channel], [], [], 0.0)
             if len(rl) > 0:
-                print channel.recv(1024)
+                print (channel.recv(1024))
     # print "Metastore is starting, it may take a while..."
     time.sleep(10)
     ssh.close()

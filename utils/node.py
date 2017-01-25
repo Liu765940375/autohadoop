@@ -25,7 +25,7 @@ def get_slaves(filename):
                 continue
             val = line.split()
             if len(val) != 5:
-                print "Wrong format of slave config"
+                print ("Wrong format of slave config")
                 break
             else:
                 node = Node(val[0], val[1], val[2], val[3], val[4])
