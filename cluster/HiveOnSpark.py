@@ -16,7 +16,7 @@ def deploy_hive_on_spark(custom_conf):
     deploy_hadoop(default_conf, custom_conf, master, slaves, beaver_env)
 
     # Deploy Spark
-    deploy_spark(default_conf, master, custom_conf, beaver_env)
+    deploy_spark(default_conf, custom_conf, master, beaver_env)
 
     # Deploy Hive
     deploy_hive(default_conf, custom_conf, master, beaver_env)
