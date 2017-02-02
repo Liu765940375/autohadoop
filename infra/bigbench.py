@@ -33,17 +33,25 @@ def update_copy_bb_conf(master, default_conf, custom_conf, beaver_env):
     ssh_copy(master, bb_tar_file, remote_tar_file)
     ssh_execute(master, "tar xf " + remote_tar_file + " -C " + bb_home)
 
+
 def clean_bb(master):
     ssh_execute(master, "rm -rf /opt/Beaver/BB*")
 
+
 def undeploy_bb(master):
     clean_bb(master)
+
 
 def run_BB(master, beaver_env):
     ssh_execute(master, beaver_env.get("BB_HOME") + "/bin/bigBench runBenchmark")
     copy_res(beaver_env)
 
+
 def copy_res(beaver_env):
-    #TODO
-    print()
+    res_dir = os.path.join(beaver_env.get("RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
+                                                                        time.localtime())))
+    print("Copying result to dir " + res_dir)
+    log_dir = os.path.join(beaver_env.get("BB_HOME"), "logs")
+    os.system("cp -r " + res_dir + " " + log_dir)
+
 
