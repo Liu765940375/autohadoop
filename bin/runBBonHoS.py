@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 import sys
-
 from cluster.HiveOnSpark import *
 from infra.bigbench import *
 
 
-def deploy_BigBench(custom_conf):
+def deploy_bigbench(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
@@ -32,7 +31,7 @@ def deploy_run(custom_conf):
     undeploy_hive_on_spark(custom_conf)
     deploy_hive_on_spark(custom_conf)
     start_hive_on_spark(custom_conf)
-    deploy_BigBench(custom_conf)
+    deploy_bigbench(custom_conf)
     run_BB(master, beaver_env)
 
 
@@ -45,7 +44,7 @@ def usage():
 
 if __name__ == '__main__':
     args = sys.argv
-    if  args.__sizeof__() != 2:
+    if args.__sizeof__() != 2:
         usage
     action = args[1]
     conf_p = args[2]
