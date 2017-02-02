@@ -20,7 +20,7 @@ def deploy_hos(custom_conf):
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     deploy_start_hadoop(default_conf, custom_conf, master, slaves, beaver_env)
-    deploy_start_hive(default_conf, custom_conf, master, beaver_env)
+    deploy_start_hive_internal(default_conf, custom_conf, master, beaver_env)
     deploy_start_spark(default_conf, master, custom_conf, beaver_env)
     copy_lib_for_spark(master, beaver_env, True)
     deploy_bb(default_conf, custom_conf, master)
@@ -41,7 +41,7 @@ def deploy_hive_sql(custom_conf):
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     deploy_start_hadoop(default_conf, custom_conf, master, slaves, beaver_env)
-    deploy_start_hive(default_conf, custom_conf, master, beaver_env)
+    deploy_start_hive_internal(default_conf, custom_conf, master, beaver_env)
     deploy_bb(default_conf, custom_conf, master)
 
 def update_conf_all(custom_conf):

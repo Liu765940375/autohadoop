@@ -7,7 +7,7 @@ from infra.other_components import *
 HADOOP_COMPONENT = "hadoop"
 
 # Deploy Hadoop component
-def deploy_hadoop(default_conf, custom_conf, master, slaves):
+def deploy_hadoop_internal(default_conf, custom_conf, master, slaves):
     setup_nopass(slaves)
     update_etc_hosts(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
@@ -101,10 +101,16 @@ def hdfs_format(master, hadoop_home):
     print (colors.LIGHT_BLUE + "format hdfs" + colors.ENDC)
     ssh_execute(master, "yes | " + hadoop_home + "/bin/hdfs namenode -format")
 
+def deploy_hadoop(default_conf, custom_conf, master, slaves, beaver_env):
+    deploy_jdk(slaves, beaver_env)
+    stop_hadoop_service(master, slaves)
+    deploy_hadoop_internal(default_conf, custom_conf, master, slaves)
+    hdfs_format(master, beaver_env.get("HADOOP_HOME"))
+
 def deploy_start_hadoop(default_conf, custom_conf, master, slaves, beaver_env):
     deploy_jdk(slaves, beaver_env)
     stop_hadoop_service(master, slaves)
-    deploy_hadoop(default_conf, custom_conf, master, slaves)
+    deploy_hadoop_internal(default_conf, custom_conf, master, slaves)
     hdfs_format(master, beaver_env.get("HADOOP_HOME"))
     start_hadoop_service(master, slaves, beaver_env)
 

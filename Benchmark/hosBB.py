@@ -4,8 +4,8 @@ import os
 
 from bb import deploy_BB, undeploy_BB, run_BB
 from hive import deploy_hive, undeploy_hive
-from infra.hadoop import deploy_hadoop, undeploy_hadoop
-from infra.spark import deploy_spark, undeploy_spark
+from infra.hadoop import deploy_hadoop_internal, undeploy_hadoop
+from infra.spark import deploy_spark_internal, undeploy_spark
 from utils.util import hadoop_version, check_env
 
 # hive_env_file = os.path.join(config_path, "hive/env")
@@ -21,13 +21,13 @@ def deploy_hosBB(version):
 
     installed = check_env("hadoop", hadoop_version)
     if not installed:
-        deploy_hadoop(hadoop_version)
+        deploy_hadoop_internal(hadoop_version)
     installed = check_env("hive", hive_version)
     if not installed:
         deploy_hive(hive_version)
     installed = check_env("spark", spark_version)
     if not installed:
-        deploy_spark(spark_version)
+        deploy_spark_internal(spark_version)
     installed = check_env("BB", "1.0")
     if not installed:
         deploy_BB()

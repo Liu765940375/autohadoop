@@ -1,16 +1,21 @@
 #!/usr/bin/python
 
-import os
 from utils.util import *
 from utils.ssh import *
 
 BB_COMPONENT = "BB"
+
 
 def deploy_bb(default_conf, custom_conf, master):
     clean_bb(master)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     copy_packages([master], BB_COMPONENT, beaver_env.get("BB_VERSION"))
     update_copy_bb_conf(master, default_conf, custom_conf, beaver_env)
+
+
+def populate_bb_conf(master, default_conf, custom_conf, beaver_env):
+    update_copy_bb_conf(master, default_conf, custom_conf, beaver_env)
+
 
 def update_copy_bb_conf(master, default_conf, custom_conf, beaver_env):
     bb_custom_conf = os.path.join(custom_conf, BB_COMPONENT)
@@ -36,3 +41,9 @@ def undeploy_bb(master):
 
 def run_BB(master, beaver_env):
     ssh_execute(master, beaver_env.get("BB_HOME") + "/bin/bigBench runBenchmark")
+    copy_res(beaver_env)
+
+def copy_res(beaver_env):
+    #TODO
+    print()
+

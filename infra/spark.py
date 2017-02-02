@@ -5,7 +5,7 @@ from utils.util import *
 
 SPARK_COMPONENT = "spark"
 
-def deploy_spark(default_conf, custom_conf, master, beaver_env):
+def deploy_spark_internal(default_conf, custom_conf, master, beaver_env):
     spark_verion = beaver_env.get("SPARK_VERSION")
     setup_env_dist([master], beaver_env, SPARK_COMPONENT)
     set_path(SPARK_COMPONENT, [master], beaver_env.get("SPARK_HOME"))
@@ -51,9 +51,14 @@ def restart_hadoop_yarn(master, hadoop_home):
     ssh_execute(master, hadoop_home + "/sbin/start-yarn.sh")
     ssh_execute(master, hadoop_home + "/sbin/yarn-daemon.sh start proxyserver")
 
+def deploy_spark(default_conf, custom_conf, master, beaver_env):
+    stop_spark_service(master, beaver_env)
+    deploy_spark_internal(default_conf, custom_conf, master, beaver_env)
+    restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
+
 def deploy_start_spark(default_conf, custom_conf, master, beaver_env):
     stop_spark_service(master, beaver_env)
-    deploy_spark(default_conf, custom_conf, master, beaver_env)
+    deploy_spark_internal(default_conf, custom_conf, master, beaver_env)
     restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
     start_spark_history_server(master, beaver_env.get("SPARK_HOME"))
 

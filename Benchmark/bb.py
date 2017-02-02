@@ -3,6 +3,7 @@
 import os
 import sys
 
+# deprecated
 current_path = os.path.dirname(os.path.abspath(__file__))
 project_path = os.path.dirname(current_path)
 sys.path.append(project_path)
