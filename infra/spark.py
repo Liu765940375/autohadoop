@@ -51,12 +51,12 @@ def restart_hadoop_yarn(master, hadoop_home):
     ssh_execute(master, hadoop_home + "/sbin/yarn-daemon.sh start proxyserver")
 
 def deploy_spark(default_conf, custom_conf, master, beaver_env):
-    stop_spark_service(master, beaver_env)
+    stop_spark_service(master)
     deploy_spark_internal(default_conf, custom_conf, master, beaver_env)
     restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
 
 def deploy_start_spark(default_conf, custom_conf, master, beaver_env):
-    stop_spark_service(master, beaver_env)
+    stop_spark_service(master)
     deploy_spark_internal(default_conf, custom_conf, master, beaver_env)
     restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
     start_spark_history_server(master, beaver_env.get("SPARK_HOME"))
@@ -69,8 +69,8 @@ def start_spark_service(master, beaver_env):
     restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
     start_spark_history_server(master, beaver_env.get("SPARK_HOME"))
 
-def stop_spark_service(master, beaver_env):
-    stop_spark_history_server(master, beaver_env.get("SPARK_HOME"))
+def stop_spark_service(master):
+    stop_spark_history_server(master)
 
 def update_copy_spark_conf(master, default_conf, custom_conf, beaver_env):
     spark_output_conf = update_conf(SPARK_COMPONENT, default_conf, custom_conf)
