@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import os
 from utils.node import *
 from infra.hadoop import *
 from infra.hive import *

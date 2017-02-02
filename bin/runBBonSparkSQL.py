@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/python
+
 import sys
 from cluster.SparkSQL import *
 from infra.bigbench import *

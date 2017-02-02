@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import os
 from utils.util import *
 
 SPARK_COMPONENT = "spark"

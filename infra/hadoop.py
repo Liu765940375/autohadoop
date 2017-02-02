@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-import os
-import fnmatch
 from infra.other_components import *
 
 HADOOP_COMPONENT = "hadoop"
