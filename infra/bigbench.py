@@ -52,6 +52,10 @@ def copy_res(beaver_env):
                                                                         time.localtime())))
     print("Copying result to dir " + res_dir)
     log_dir = os.path.join(beaver_env.get("BB_HOME"), "logs")
+<<<<<<< HEAD
     os.system("cp -r " + res_dir + " " + log_dir)
+=======
+    os.system("cp -r " + log_dir + " " + res_dir)
+>>>>>>> Support copy res function
 
 
