@@ -29,19 +29,27 @@ def deploy_run(custom_conf):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    undeploy_spark(master)
+    undeploy_spark_sql(master)
     deploy_spark_sql(custom_conf)
     start_spark_sql(custom_conf)
     deploy_bigbench(custom_conf)
     run_BB(master, beaver_env)
 
 
+def undeploy_run(custom_conf):
+    cluster_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
+    undeploy_spark_sql(master)
+
+
 def usage():
     print "Usage: sbin/runBBonHoS.sh [action] [path/to/conf]/n"
-    print "   Action option includes: deploy_run and replace_conf_run /n"
+    print "   Action option includes: deploy_run, replace_conf_run, undeploy /n"
     print "           replace_conf_run means just replacing configurations and trigger a run /n"
     print "           deploy_run means remove all and redeploy a new run /n"
-    sys.exit(1)
+    print "           undeploy means remove all components based on the specified configuration /n"
+    exit(1)
 
 if __name__ == '__main__':
     args = sys.argv
@@ -53,6 +61,8 @@ if __name__ == '__main__':
         replace_conf_run(conf_p)
     elif action == "deploy_run":
         deploy_run(conf_p)
+    elif action == "undeploy":
+        undeploy_run(conf_p)
     else:
         usage()
 
