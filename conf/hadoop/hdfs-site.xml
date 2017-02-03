@@ -19,11 +19,11 @@
 <configuration>
 	<property>
                 <name>dfs.namenode.name.dir</name>
-                <value>file:/home/tmp/hadoop/name</value>
+                <value>/opt/Beaver/hadoop/data/nn</value>
         </property>
         <property>
                 <name>dfs.datanode.data.dir</name>
-                <value>file:/home/tmp/hadoop/data</value>
+                <value>/opt/Beaver/hadoop/data/dn</value>
         </property>
         <property>
                 <name>dfs.replication</name>

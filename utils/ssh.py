@@ -62,6 +62,7 @@ def ssh_copy(node, src, dst):
     sftp.put(src, dst)
     sftp.close()
     ssh.close()
+
 def ssh_download(node, remote_path, local_path):
     transport = paramiko.Transport((node.ip,22))
     transport.connect(username=node.username, password=node.password)

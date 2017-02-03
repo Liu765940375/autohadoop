@@ -1,9 +1,5 @@
 import glob
 import re
-import shutil
-import time
-import tempfile
-
 from config_utils import *
 from node import *
 from ssh import *
@@ -161,7 +157,8 @@ def install_mysql(node, user, password):
     else:
         cmd = install_cmd
     # TODO: This may be replaced by ssh.execute(node, cmd) to install mysql on any node
-    os.system(cmd)
+    #os.system(cmd)
+    ssh_execute(node, cmd)
 
 def setup_config_dist(slaves, config_files, component):
     print "Distribute config xml for " + component

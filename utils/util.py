@@ -1,13 +1,7 @@
 import glob
 import re
-#import shutil
 import time
 import os
-#import tempfile
-
-#from config_utils import *
-#from ssh import *
-#from colors import *
 from utils.config_utils import *
 from utils.colors import *
 from utils.ssh import *
@@ -36,22 +30,7 @@ def get_env_list(filename):
                 continue
             key, value = line.partition("=")[::2]
             envs[key.strip()] = value.strip()
-
     return envs
-
-hadoop_env = get_env_list(os.path.join(config_path, "env"))
-hadoop_version = hadoop_env.get("HADOOP_VERSION")
-hadoop_home = hadoop_env.get("HADOOP_HOME")
-java_home = hadoop_env.get("JAVA_HOME")
-hive_env = get_env_list(os.path.join(config_path, "hive/env"))
-hive_version = hive_env.get("HIVE_VERSION")
-hive_home = hive_env.get("HIVE_HOME")
-spark_env = get_env_list(os.path.join(config_path, "spark/env"))
-spark_version = spark_env.get("SPARK_VERSION")
-spark_home = spark_env.get("SPARK_HOME")
-bb_env = get_env_list(os.path.join(config_path, "BB/env"))
-bb_version = bb_env.get("BB_VERSION")
-bb_home = bb_env.get("BB_HOME")
 
 # Set environment variables
 def setup_env_dist(slaves, envs, component):
@@ -104,61 +83,13 @@ def update_etc_hosts(slaves):
     for node in slaves:
         ssh_execute(node, "echo \"" + str_hosts + "\">/etc/hosts;")
 
-# Wirte IP address of all nodes to "/etc/hosts" file
-# def set_etc_hosts(slaves):
-#     old_file = "/etc/hosts"
-#     temp_file = tempfile.mktemp()
-#     with open(old_file) as rf, open(temp_file, "w") as wf:
-#         flag = True
-#         for node in slaves:
-#             for line in rf:
-#                 str = re.findall(node.ip, line)
-#                 if len(str) > 0:
-#                     wf.writelines(node.ip + " " + node.hostname)
-#                 else:
-#                     wf.writelines(line)
-#                     flag = False
-#             wf.writelines(line)
-#             if flag:
-#                 wf.writelines(node.ip + " " + node.hostname + "\n")
-#
-#     cmd = "cp /etc/hosts " + "/etc/hosts." + time.strftime('%Y%m%d%H%M%S') + ";"
-#     os.system(cmd)
-#     os.remove(old_file)
-#     shutil.copy(temp_file, old_file)
-#     os.remove(temp_file)
-
 # Add binary files of different components into PATH
-def set_path(component, slaves):
+def set_path(component, slaves, path):
     print (colors.LIGHT_BLUE+ "Add binary files of " + component + " into PATH env" + colors.ENDC)
     for node in slaves:
-        if component == "hadoop":
-            cmd = "echo \"export PATH=" + java_home + "/bin:" + hadoop_home + "/bin:" + hadoop_home + "/sbin:$PATH\" >> /opt/Beaver/" + component + "rc"
-        if component == "spark":
-            cmd = "echo \"export PATH=" + spark_home + "/bin:" + spark_home + "/sbin:$PATH\" >> /opt/Beaver/" + component + "rc"
-        if component == "hive":
-            cmd = "echo \"export PATH=" + hive_home + "/bin:$PATH\" >> /opt/Beaver/" + component + "rc"
+        cmd = "echo \"export PATH=" + path + "/bin:" + path + "/sbin:$PATH\" >> /opt/Beaver/" + component + "rc"
         ssh_execute(node, cmd)
         ssh_execute(node, "source ~/.bashrc")
-
-# Get the list of configuration files for different components
-def get_config_files(component):
-    if component == "hadoop":
-        config_file_names = [
-            "env",
-            "hdfs-site.xml",
-            "core-site.xml",
-            "mapred-site.xml",
-            "yarn-site.xml",
-            "capacity-scheduler.xml"]
-
-    if component == "spark":
-        config_file_names = ["spark-defaults.conf"]
-    if component == "hive":
-        config_file_names = ["hive-site.xml", "hive-log4j2.properties"]
-    if component == "BB":
-        config_file_names = ["engineSettings.sql", "bigBench.properties", "userSettings.conf"]
-    return config_file_names
 
 # Copy and unpack a package to slave nodes
 def copy_package_dist(slaves, file, component, version):
@@ -180,7 +111,7 @@ def copy_package_dist(slaves, file, component, version):
         ssh_execute(node, cmd)
 
 # Copy component package to slave nodes
-def copy_packages(slaves, component, version):
+def copy_packages(nodes, component, version):
     print (colors.LIGHT_BLUE + "Distrubte " + "tar.gz file" + " for " + component + colors.ENDC)
     download_url = "http://" + download_server + "/" + component
     package = component + "-" + version + ".tar.gz"
@@ -189,9 +120,7 @@ def copy_packages(slaves, component, version):
         os.system("wget --no-proxy -P " + package_path + " " + download_url + "/" + package)
     else:
         print (colors.LIGHT_GREEN + "\t" + package + " has already exists in Beaver package" + colors.ENDC)
-    if component == "hive" or component =="spark" or component =="BB":
-        slaves = [master]
-    copy_package_dist(slaves, os.path.join(package_path, package), component, version)
+    copy_package_dist(nodes, os.path.join(package_path, package), component, version)
 
 # Copy "spark-<version>-yarn-shuffle.jar" to all of Hadoop nodes
 def copy_spark_shuffle(slaves, spark_version, hadoop_home):
@@ -210,42 +139,28 @@ def copy_spark_shuffle(slaves, spark_version, hadoop_home):
         ssh_execute(node, cmd)
         ssh_copy(node, os.path.join(package_path, package), des)
 
-def format_hadoop(config_filename):
-    custom_configs = {}
-    get_configs_from_kvfile(config_filename, custom_configs)
-    data_dir = "/opt/Beaver/hadoop/name"
-    name_dir = "/opt/Beaver/hadoop/data"
-    if custom_configs.has_key("dfs.namenode.name.dir"):
-        data_dir = custom_configs.get("dfs.namenode.name.dir")
-    if custom_configs.has_key("dfs.namenode.data.dir"):
-        name_dir = custom_configs.get("dfs.namenode.data.dir")
-    print (colors.LIGHT_BLUE + "\tDelete existed namenode name.dir and data.dir" + colors.ENDC)
-    for node in slaves:
-        ssh_execute(node, "rm -rf " + data_dir)
-        ssh_execute(node, "rm -rf " + name_dir)
-
 # Generate final configuration file and copy this files to destination node
-def copy_configurations(slaves, config_path, component):
+def copy_configurations(nodes, config_path, component, home_path):
     print (colors.LIGHT_BLUE + "Distribute configuration files for " + component + ":" + colors.ENDC)
     print (colors.LIGHT_BLUE + "\tGenerate final configuration files of " + component + colors.ENDC)
     path = config_path + "/*"
     final_config_files = glob.glob(path)
     print (final_config_files)
-    copy_final_configs(slaves, final_config_files, component)
+    copy_final_configs(nodes, final_config_files, component, home_path)
 
 #Copy final configuration files to destination
-def copy_final_configs(slaves, config_files, component):
+def copy_final_configs(nodes, config_files, component, home_path):
     print (colors.LIGHT_BLUE + "\tCopy configuration files of " + component + " to all nodes" + colors.ENDC)
     if component == "hadoop":
-        conf_link = os.path.join(hadoop_home, "etc/hadoop")
-        conf_path = os.path.join(hadoop_home, "etc/") + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
+        conf_link = os.path.join(home_path, "etc/hadoop")
+        conf_path = os.path.join(home_path, "etc/") + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
     if component == "hive":
-        conf_link = os.path.join(hive_home, "conf")
-        conf_path = hive_home + "/config/" + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
+        conf_link = os.path.join(home_path, "conf")
+        conf_path = home_path + "/config/" + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
     if component == "spark":
-        conf_link = os.path.join(spark_home, "conf")
-        conf_path = spark_home + "/config/" + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
-    for node in slaves:
+        conf_link = os.path.join(home_path, "conf")
+        conf_path = home_path + "/config/" + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
+    for node in nodes:
         if component == "BB":
             break
         ssh_execute(node, "mkdir -p " + conf_path)
@@ -255,14 +170,14 @@ def copy_final_configs(slaves, config_files, component):
         ssh_execute(node, "rm -rf " + conf_link)
         ssh_execute(node, "ln -s " + conf_path + " " + conf_link)
     if component == "BB":
-        conf_link = os.path.join(bb_home, "conf")
-        conf_path = os.path.join(bb_home, "config/") + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
-        for node in slaves:
+        conf_link = os.path.join(home_path, "conf")
+        conf_path = os.path.join(home_path, "config/") + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
+        for node in nodes:
             ssh_execute(node, "mkdir -p " + conf_path)
             ssh_execute(node, "cp -r " + conf_link + "/*" + " " + conf_path)
             for file in config_files:
                 if os.path.basename(file) == "engineSettings.sql":
-                    conf_link_tmp = os.path.join(bb_home, "engines/hive/conf")
+                    conf_link_tmp = os.path.join(home_path, "engines/hive/conf")
                     # conf_path_tmp = os.path.join(bb_home, "engines/hive/config/") + str(
                     #     time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())) + "/"
                     # ssh_execute(node, "mkdir -p " + conf_path)
@@ -274,24 +189,6 @@ def copy_final_configs(slaves, config_files, component):
                 ssh_copy(node, file, conf_path + os.path.basename(file))
             ssh_execute(node, "rm -rf " + conf_link)
             ssh_execute(node, "ln -s " + conf_path + " " + conf_link)
-
-# Calculate statistics of hardware information for each node
-# def calculate_hardware():
-#     hardware_dict = {}
-#     for node in slaves:
-#         list = []
-#         cmd = "cat /proc/cpuinfo | grep \"processor\" | wc -l"
-#         stdout = ssh_execute_withReturn(node, cmd)
-#         for line in stdout:
-#             vcore_num = line
-#             list.append(vcore_num)
-#         cmd = "cat /proc/meminfo | grep \"MemTotal\""
-#         stdout = ssh_execute_withReturn(node, cmd)
-#         for line in stdout:
-#             memory = int(int(line.split()[1])/1024*0.85)
-#             list.append(memory)
-#         hardware_dict[node.hostname] = list
-#     return hardware_dict
 
 def calculate_hardware():
     list = []
@@ -318,3 +215,40 @@ def check_env(component, version):
     else:
         print (colors.LIGHT_BLUE + component + " has exists, we do not have to deploy it." + colors.ENDC)
         return True
+
+def stop_firewall(slaves):
+    print (colors.LIGHT_BLUE + "Stop firewall service" + colors.ENDC)
+    for node in slaves:
+        ssh_execute(node, "systemctl stop firewalld")
+
+def install_mysql(node, user, password):
+    package = "mysql-community-release-el7-9.noarch.rpm"
+    download_url = "http://" + download_server + "/" + "mysql"
+    download_package = os.path.join(package_path, package)
+    if not os.path.isfile(download_package):
+        os.system("wget -P " + package_path + " " + download_url + "/" + package)
+    ssh_copy(node, download_package, "/opt/" + package)
+
+    repo_package = "mysql-community.repo"
+    download_url = "http://" + download_server + "/" + "mysql"
+    download_package = os.path.join(package_path, repo_package)
+    if not os.path.isfile(download_package):
+        os.system("wget -P " + package_path + " " + download_url + "/" + repo_package)
+    ssh_copy(node, download_package, "/etc/yum.repos.d/" + repo_package)
+
+    cmd = "rpm -qa | grep mysql-community-server;"
+    installed = ""
+    for line in os.popen(cmd).readlines():
+        installed += line.strip('\r\n')
+    # For mysql5.7, command "mysqladmin -u username password pass" is not effective.
+    install_cmd = "cd /opt;rpm -ivh " + package + ";yum -y install mysql-community-server;" \
+                  + "systemctl start mysqld;mysqladmin -u " + user + " password " + password
+    if installed.find("mysql-community-server") != -1:
+        cmd = "systemctl stop mysqld;yum -y remove mysql-*;rm -rf /var/lib/mysql;"
+        cmd += install_cmd
+    else:
+        cmd = install_cmd
+    ssh_execute(node, cmd)
+    cmd_grant_privilege = "mysql -u root -p123456 -Bse \"GRANT ALL PRIVILEGES ON *.* TO '" + user \
+        + "'@'" + node.hostname + "' IDENTIFIED BY '" + password + "' with grant option;FLUSH PRIVILEGES;\""
+    ssh_execute(node, cmd_grant_privilege)

@@ -59,5 +59,8 @@
                 <name>yarn.scheduler.maximum-allocation-mb</name>
                 <value>20000</value>
         </property>
-
+        <property>
+                <name>yarn.nodemanager.local-dirs</name>
+                <value>/opt/Beaver/hadoop/data/nm</value>
+        </property>
 </configuration>

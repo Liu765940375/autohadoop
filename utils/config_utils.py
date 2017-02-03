@@ -1,4 +1,5 @@
 import os
+import fnmatch
 import xml.etree.cElementTree as ET
 from xml.dom.minidom import parseString
 from shutil import copyfile
@@ -163,3 +164,58 @@ def format_xml_file(xml_file):
         xmlstr = pretty_print(f.read())
     with open(xml_file, "w") as f:
         f.write(xmlstr)
+
+def get_config_value(conf_file, name):
+    tree = ET.parse(conf_file)
+    root = tree.getroot()
+    for property_tag in root.findall("property/[name='" + name + "']"):
+        return property_tag.find("value").text
+
+# merge configuration file
+def update_conf(component, default_conf, custom_conf):
+    custom_component_conf = os.path.join(custom_conf, component)
+    default_component_conf = os.path.join(default_conf, component)
+    output_component_conf = os.path.join(custom_conf, "output/" + component)
+    # create output dir for merged configuration file
+    os.system("rm -rf " + output_component_conf)
+    os.system("mkdir -p " + output_component_conf)
+    processed_file = {}
+    # loop in default_conf, merge with custom conf file and copy to output_conf
+    for conf_file in [file for file in os.listdir(default_component_conf) if fnmatch.fnmatch(file, '*.xml')]:
+        custom_conf_file = os.path.join(custom_component_conf, conf_file)
+        default_conf_file = os.path.join(default_component_conf, conf_file)
+        output_conf_file = os.path.join(output_component_conf, conf_file)
+        if os.path.isfile(custom_conf_file):
+            merge_conf_file(default_conf_file, custom_conf_file, output_conf_file)
+        else:
+            os.system("cp " + default_conf_file + " " + output_conf_file)
+        processed_file[conf_file] = ""
+    # copy unprocessed file in default_component_conf to output_component_conf
+    copy_unprocessed_file(processed_file, default_component_conf, output_component_conf)
+    # copy unprocessed file in custom_component_conf to output_component_conf
+    copy_unprocessed_file(processed_file, custom_component_conf, output_component_conf)
+    return output_component_conf
+
+def copy_unprocessed_file(processed_file, conf_dir, output_dir):
+    for conf_file in os.listdir(conf_dir):
+        if conf_file not in processed_file:
+            src_conf_file = os.path.join(conf_dir, conf_file)
+            output_conf_file = os.path.join(output_dir, conf_file)
+            os.system("cp " + src_conf_file + " " + output_conf_file)
+
+def merge_properties_file (filename, custom_configs):
+    with open(filename) as f:
+        for line in f:
+            if line.startswith('#') or not line.split():
+                continue
+            key, value = line.partition("=")[::2]
+            custom_configs[key.strip()] = value.strip()
+
+def get_configs_properties_file (filename):
+    result = {}
+    with open(filename) as f:
+        for line in f:
+            if line.startswith('#') or not line.split():
+                continue
+            key, value = line.partition("=")[::2]
+            result[key.strip()] = value.strip()

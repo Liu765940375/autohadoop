@@ -1,4 +1,0 @@
-HADOOP_HOME=/opt/Beaver/hadoop
-JAVA_HOME=/opt/Beaver/jdk
-JDK_VERSION=8u112
-HADOOP_VERSION=2.7.3
