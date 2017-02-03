@@ -92,7 +92,7 @@ def get_config_files(component, config_path):
 
 # Copy and unpack a package to slave nodes
 def copy_package_dist(slaves, file, component):
-    print "Distrubte package for " + component
+    print "Distribute package for " + component
     for node in slaves:
         print "\tCopy packge to " + node.hostname + ":" + node.ip
         ssh_execute(node, "mkdir -p /opt")

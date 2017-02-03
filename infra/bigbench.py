@@ -43,6 +43,7 @@ def undeploy_bb(master):
 
 
 def run_BB(master, beaver_env):
+    print (colors.LIGHT_BLUE + "Run BigBench" + colors.ENDC)
     ssh_execute(master, beaver_env.get("BB_HOME") + "/bin/bigBench runBenchmark")
     copy_res(beaver_env)
 
