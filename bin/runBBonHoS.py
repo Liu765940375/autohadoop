@@ -45,8 +45,8 @@ def usage():
 
 if __name__ == '__main__':
     args = sys.argv
-    if args.__sizeof__() != 2:
-        usage
+    if len(args) < 2:
+        usage()
     action = args[1]
     conf_p = args[2]
     if action == "replace_conf_run":
@@ -54,5 +54,5 @@ if __name__ == '__main__':
     elif action == "deploy_run":
         deploy_run(conf_p)
     else:
-        usage
+        usage()
 
