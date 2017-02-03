@@ -112,7 +112,7 @@ def copy_package_dist(slaves, file, component, version):
 
 # Copy component package to slave nodes
 def copy_packages(nodes, component, version):
-    print (colors.LIGHT_BLUE + "Distrubte " + "tar.gz file" + " for " + component + colors.ENDC)
+    print (colors.LIGHT_BLUE + "Distribute " + "tar.gz file" + " for " + component + colors.ENDC)
     download_url = "http://" + download_server + "/" + component
     package = component + "-" + version + ".tar.gz"
     if not os.path.isfile(os.path.join(package_path, package)):
