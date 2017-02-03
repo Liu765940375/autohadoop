@@ -68,11 +68,11 @@ def detect_rcfile(node, component):
 def set_path(component, slaves):
     for node in slaves:
         if component == "hadoop":
-            cmd = "echo \"export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin\" >> /opt/" + component + "rc"
+            cmd = "echo \"export PATH=\$PATH:\$JAVA_HOME/bin:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin\" >> /opt/" + component + "rc"
         if component == "spark":
-            cmd = "echo \"export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin\" >> /opt/" + component + "rc"
+            cmd = "echo \"export PATH=\$PATH:\$SPARK_HOME/bin:\$SPARK_HOME/sbin\" >> /opt/" + component + "rc"
         if component == "hive":
-            cmd = "echo \"export PATH=$PATH:$HIVE_HOME/bin\" >> /opt/" + component + "rc"
+            cmd = "echo \"export PATH=\$PATH:\$HIVE_HOME/bin\" >> /opt/" + component + "rc"
         ssh_execute(node, cmd)
 
 def get_config_files(component, config_path):

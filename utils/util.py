@@ -87,7 +87,7 @@ def update_etc_hosts(slaves):
 def set_path(component, slaves, path):
     print (colors.LIGHT_BLUE+ "Add binary files of " + component + " into PATH env" + colors.ENDC)
     for node in slaves:
-        cmd = "echo \"export PATH=" + path + "/bin:" + path + "/sbin:$PATH\" >> /opt/Beaver/" + component + "rc"
+        cmd = "echo \"export PATH=" + path + "/bin:" + path + "/sbin:\$PATH\" >> /opt/Beaver/" + component + "rc"
         ssh_execute(node, cmd)
         ssh_execute(node, "source ~/.bashrc")
 

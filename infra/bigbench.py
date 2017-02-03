@@ -53,4 +53,4 @@ def copy_res(master, beaver_env):
                                                                         time.localtime())))
     print("Copying result to dir " + res_dir)
     log_dir = os.path.join(beaver_env.get("BB_HOME"), "logs")
-    ssh_execute(master, "cp -r " + log_dir + " " + res_dir)
+    ssh_execute(master, "mkdir -p " + res_dir + " && cp -r " + log_dir + " " + res_dir)
