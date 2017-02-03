@@ -16,7 +16,7 @@ def deploy_hive_on_spark(custom_conf):
     deploy_hadoop(default_conf, custom_conf, master, slaves, beaver_env)
 
     # Deploy Spark
-    deploy_spark(default_conf, custom_conf, master, beaver_env)
+    deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
 
     # Deploy Hive
     deploy_hive_internal(default_conf, custom_conf, master, beaver_env)
@@ -30,7 +30,7 @@ def populate_hive_on_spark_conf(custom_conf):
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     update_copy_hadoop_conf(default_conf, custom_conf, master, slaves, beaver_env)
     update_copy_hive_conf(default_conf, custom_conf, master, beaver_env)
-    update_copy_spark_conf(master, default_conf, custom_conf, beaver_env)
+    update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env)
 
 
 def start_hive_on_spark(custom_conf):
@@ -39,7 +39,7 @@ def start_hive_on_spark(custom_conf):
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     start_hadoop_service(master, slaves, beaver_env)
-    start_spark_history_server(master, beaver_env.get("SPARK_HOME"))
+    start_spark_history_server(master, beaver_env)
     start_hive_service(master, beaver_env)
 
 

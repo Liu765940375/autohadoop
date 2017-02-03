@@ -39,7 +39,9 @@ def deploy_run(custom_conf):
 def undeploy_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
     undeploy_hive_on_spark(custom_conf)
+    undeploy_bb(master)
 
 
 def usage():

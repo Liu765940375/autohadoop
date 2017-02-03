@@ -72,7 +72,7 @@ def detect_rcfile(node, component):
     os.remove(bashfile)
     return flag
 
-# # Wirte IP address of all nodes to "/etc/hosts" file
+# # Write IP address of all nodes to "/etc/hosts" file
 
 def update_etc_hosts(slaves):
     print (colors.LIGHT_BLUE + "Update \"/etc/hosts\" file" + colors.ENDC)
