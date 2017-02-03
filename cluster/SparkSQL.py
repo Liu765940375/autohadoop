@@ -15,7 +15,7 @@ def deploy_spark_sql(custom_conf):
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     deploy_hadoop(default_conf, custom_conf, master, slaves, beaver_env)
     # Deploy Spark
-    deploy_spark(default_conf, master, custom_conf, beaver_env)
+    deploy_spark(default_conf, custom_conf, master, beaver_env)
 
 
 def populate_spark_sql_conf(custom_conf):
