@@ -9,8 +9,7 @@ def deploy_bigbench(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
-    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    deploy_bb(default_conf, beaver_env, master)
+    deploy_bb(default_conf, custom_conf, master)
 
 
 def replace_conf_run(custom_conf):

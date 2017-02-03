@@ -19,7 +19,7 @@ def deploy_hive_on_spark(custom_conf):
     deploy_spark(default_conf, custom_conf, master, beaver_env)
 
     # Deploy Hive
-    deploy_hive(default_conf, custom_conf, master, beaver_env)
+    deploy_hive_internal(default_conf, custom_conf, master, beaver_env)
     copy_lib_for_spark(master, beaver_env, True)
 
 
