@@ -62,7 +62,7 @@ def deploy_hive(project_path):
         ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -mkdir /spark-2.0.0-bin-hadoop")
         ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -copyFromLocal $SPARK_HOME/jars/* /spark-2.0.0-bin-hadoop")
         ssh_execute(master,
-                    "echo \"spark.yarn.jars=hdfs://" + master_host + ":9000/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
+                    "echo \"spark.yarn.jars hdfs://" + master_host + ":9000/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
 
     copy_configurations(slaves, config_file_names, config_path, "hive")
     ssh_execute(slaves[0], hive_home + "/bin/schematool --initSchema -dbType mysql")
