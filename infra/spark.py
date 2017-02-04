@@ -60,8 +60,6 @@ def restart_hadoop_yarn(master, hadoop_home):
 def deploy_spark(default_conf, custom_conf, master, beaver_env):
     stop_spark_service(master)
     deploy_spark_internal(default_conf, custom_conf, master, beaver_env)
-    restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
-
 
 def deploy_start_spark(default_conf, custom_conf, master, beaver_env):
     stop_spark_service(master)
