@@ -45,12 +45,12 @@ def undeploy_bb(master):
 def run_BB(master, beaver_env):
     print (colors.LIGHT_BLUE + "Run BigBench" + colors.ENDC)
     ssh_execute(master, beaver_env.get("BB_HOME") + "/bin/bigBench runBenchmark")
-    copy_res(beaver_env)
+    copy_res(master, beaver_env)
 
 
-def copy_res(beaver_env):
+def copy_res(master, beaver_env):
     res_dir = os.path.join(beaver_env.get("RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                         time.localtime())))
     print("Copying result to dir " + res_dir)
     log_dir = os.path.join(beaver_env.get("BB_HOME"), "logs")
-    os.system("cp -r " + log_dir + " " + res_dir)
+    ssh_execute(master, "cp -r " + log_dir + " " + res_dir)

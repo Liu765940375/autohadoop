@@ -131,7 +131,7 @@ def replace_conf_value(conf_file, old_value, new_value):
 
     tree.write(conf_file, encoding="UTF-8", xml_declaration=True)
 
-def merge_conf_file(default_conf_file, custom_conf_file, output_conf_file):
+def merge_conf_xml_file(default_conf_file, custom_conf_file, output_conf_file):
     tree_default = ET.parse(default_conf_file)
     tree_custom = ET.parse(custom_conf_file)
     root_default = tree_default.getroot()
@@ -150,6 +150,15 @@ def merge_conf_file(default_conf_file, custom_conf_file, output_conf_file):
 
     tree_output = ET.ElementTree(root_output)
     tree_output.write(output_conf_file, encoding="UTF-8", xml_declaration=True)
+
+def replace_properties_conf_value(conf_file, old_value, new_value):
+    tmp_filename = conf_file + '.tmp'
+    os.system("mv " + conf_file + " " + tmp_filename)
+    with open(tmp_filename, 'r') as file_read:
+            with open(conf_file, 'w') as file_write:
+                for line in file_read:
+                    file_write.write(line.replace(old_value, new_value))
+    os.system("rm -rf " + tmp_filename)
 
 def add_property_element(root_elemnt, name, value):
     property_element = ET.SubElement(root_elemnt, "property")
@@ -186,10 +195,22 @@ def update_conf(component, default_conf, custom_conf):
         default_conf_file = os.path.join(default_component_conf, conf_file)
         output_conf_file = os.path.join(output_component_conf, conf_file)
         if os.path.isfile(custom_conf_file):
-            merge_conf_file(default_conf_file, custom_conf_file, output_conf_file)
+            merge_conf_xml_file(default_conf_file, custom_conf_file, output_conf_file)
         else:
             os.system("cp " + default_conf_file + " " + output_conf_file)
         processed_file[conf_file] = ""
+
+    # loop in default_conf, merge with custom conf properties file and copy to output_conf
+    for conf_file in [file for file in os.listdir(default_component_conf) if fnmatch.fnmatch(file, '*.conf')]:
+        custom_conf_file = os.path.join(custom_component_conf, conf_file)
+        default_conf_file = os.path.join(default_component_conf, conf_file)
+        output_conf_file = os.path.join(output_component_conf, conf_file)
+        if os.path.isfile(custom_conf_file):
+            merge_conf_properties_file(default_conf_file, custom_conf_file, output_conf_file)
+        else:
+            os.system("cp " + default_conf_file + " " + output_conf_file)
+        processed_file[conf_file] = ""
+
     # copy unprocessed file in default_component_conf to output_component_conf
     copy_unprocessed_file(processed_file, default_component_conf, output_component_conf)
     # copy unprocessed file in custom_component_conf to output_component_conf
@@ -203,19 +224,21 @@ def copy_unprocessed_file(processed_file, conf_dir, output_dir):
             output_conf_file = os.path.join(output_dir, conf_file)
             os.system("cp " + src_conf_file + " " + output_conf_file)
 
-def merge_properties_file (filename, custom_configs):
-    with open(filename) as f:
-        for line in f:
-            if line.startswith('#') or not line.split():
-                continue
-            key, value = line.partition("=")[::2]
-            custom_configs[key.strip()] = value.strip()
+def merge_conf_properties_file (default_filename, custom_filename, output_filename):
+    props_result = get_configs_from_properties(default_filename)
+    props_custom = get_configs_from_properties(custom_filename)
+    for k, v in props_custom.items():
+        props_result[k] = v
+    with open(output_filename, 'w') as f:
+        for k, v in props_result.items():
+            f.write(k + " " + v + "\n")
 
-def get_configs_properties_file (filename):
+def get_configs_from_properties (filename):
     result = {}
-    with open(filename) as f:
+    with open(filename, 'r') as f:
         for line in f:
-            if line.startswith('#') or not line.split():
+            kv = line.split()
+            if line.startswith('#') or len(kv) != 2:
                 continue
-            key, value = line.partition("=")[::2]
-            result[key.strip()] = value.strip()
+            result[kv[0]] = kv[1]
+    return result

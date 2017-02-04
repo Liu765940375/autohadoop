@@ -4,6 +4,7 @@ from utils.util import *
 
 SPARK_COMPONENT = "spark"
 
+
 def deploy_spark_internal(default_conf, custom_conf, master, beaver_env):
     spark_verion = beaver_env.get("SPARK_VERSION")
     setup_env_dist([master], beaver_env, SPARK_COMPONENT)
@@ -13,8 +14,10 @@ def deploy_spark_internal(default_conf, custom_conf, master, beaver_env):
     update_copy_spark_conf(master, default_conf, custom_conf, beaver_env)
     copy_spark_shuffle([master], spark_verion, beaver_env.get("HADOOP_HOME"))
 
+
 def clean_spark(master):
     ssh_execute(master, "rm -rf /opt/Beaver/spark*")
+
 
 def create_related_hdfs_dir(spark_output_conf, master, hadoop_home):
     spark_default_path = os.path.join(spark_output_conf, "spark-defaults.conf")
@@ -34,15 +37,18 @@ def create_related_hdfs_dir(spark_output_conf, master, hadoop_home):
     if spark_history is not None:
         ssh_execute(master, hadoop_home + "/bin/hadoop fs -mkdir -p " + spark_history)
 
+
 # Start Spark history server
 def start_spark_history_server(master, spark_home):
     stop_spark_history_server(master)
     print (colors.LIGHT_BLUE + "Start spark history server" + colors.ENDC)
     ssh_execute(master, spark_home + "/sbin/start-history-server.sh")
 
+
 def stop_spark_history_server(master):
     print (colors.LIGHT_BLUE + "Stop Spark history-server service..." + colors.ENDC)
     ssh_execute(master, "ps aux | grep 'HistoryServer' | grep 'org.apache.spark.deploy.history.HistoryServer' | awk '{print $2}' | xargs -r kill -9")
+
 
 def restart_hadoop_yarn(master, hadoop_home):
     print (colors.LIGHT_BLUE + "Restart yarn service" + colors.ENDC)
@@ -50,10 +56,12 @@ def restart_hadoop_yarn(master, hadoop_home):
     ssh_execute(master, hadoop_home + "/sbin/start-yarn.sh")
     ssh_execute(master, hadoop_home + "/sbin/yarn-daemon.sh start proxyserver")
 
+
 def deploy_spark(default_conf, custom_conf, master, beaver_env):
     stop_spark_service(master)
     deploy_spark_internal(default_conf, custom_conf, master, beaver_env)
     restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
+
 
 def deploy_start_spark(default_conf, custom_conf, master, beaver_env):
     stop_spark_service(master)
@@ -61,19 +69,26 @@ def deploy_start_spark(default_conf, custom_conf, master, beaver_env):
     restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
     start_spark_history_server(master, beaver_env.get("SPARK_HOME"))
 
+
 def undeploy_spark(master):
     stop_spark_history_server(master)
     clean_spark(master)
+
 
 def start_spark_service(master, beaver_env):
     restart_hadoop_yarn(master, beaver_env.get("HADOOP_HOME"))
     start_spark_history_server(master, beaver_env.get("SPARK_HOME"))
 
+
 def stop_spark_service(master):
     stop_spark_history_server(master)
 
+
 def update_copy_spark_conf(master, default_conf, custom_conf, beaver_env):
     spark_output_conf = update_conf(SPARK_COMPONENT, default_conf, custom_conf)
+    for conf_file in [file for file in os.listdir(spark_output_conf) if fnmatch.fnmatch(file, '*.conf')]:
+        output_conf_file = os.path.join(spark_output_conf, conf_file)
+        replace_properties_conf_value(output_conf_file, "master_hostname", master.hostname)
     copy_configurations([master], spark_output_conf, SPARK_COMPONENT, beaver_env.get("SPARK_HOME"))
     create_related_hdfs_dir(spark_output_conf, master, beaver_env.get("HADOOP_HOME"))
 
