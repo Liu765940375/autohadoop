@@ -37,7 +37,7 @@
 -- EXECUTION ENGINE
 --###########################
 -- values: mr, tez, spark
-set hive.execution.engine=mr;
+set hive.execution.engine=spark;
 
 -- ###########################
 -- parallel order by. required by queries:
