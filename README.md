@@ -5,7 +5,8 @@ Beaver is the project to deploy Hive on Spark and Pig automatically onto Hadoop 
 2. Switch Spark version(update ENVs and needed services)
 
 ## Prerequisite
-packager is http://10.239.47.156/software/Python-2.7.13.tgz, the step you can refer http://tecadmin.net/install-python-2-7-on-centos-rhel/
+packager is http://10.239.47.156/software/Python-2.7.13.tgz, the step you can refer http://tecadmin.net/install-python-2-7-on-centos-rhel/, after installation, append following in ~/.bashrc
+alias python='python2.7'
 
 ## Overview
 1. Customize configuration in conf/*.custom via key=value pair.
