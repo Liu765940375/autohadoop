@@ -1,5 +1,26 @@
---"INTEL CONFIDENTIAL"
---Copyright 2016 Intel Corporation All Rights Reserved.
+--
+--Copyright (C) 2016 Transaction Processing Performance Council (TPC) and/or
+--its contributors.
+--
+--This file is part of a software package distributed by the TPC.
+--
+--The contents of this file have been developed by the TPC, and/or have been
+--licensed to the TPC under one or more contributor license agreements.
+--
+-- This file is subject to the terms and conditions outlined in the End-User
+-- License Agreement (EULA) which can be found in this distribution (EULA.txt)
+-- and is available at the following URL:
+-- http://www.tpc.org/TPC_Documents_Current_Versions/txt/EULA.txt
+--
+--Unless required by applicable law or agreed to in writing, this software
+--is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+--ANY KIND, either express or implied, and the user bears the entire risk as
+--to quality and performance as well as the entire cost of service or repair
+--in case of defect.  See the EULA for more details.
+--
+
+--
+--Copyright 2015 Intel Corporation All Rights Reserved.
 --
 --The source code contained or described herein and all documents related to the source code ("Material") are owned by Intel Corporation or its suppliers or licensors. Title to the Material remains with Intel Corporation or its suppliers and licensors. The Material contains trade secrets and proprietary and confidential information of Intel or its suppliers and licensors. The Material is protected by worldwide copyright and trade secret laws and treaty provisions. No part of the Material may be used, copied, reproduced, modified, published, uploaded, posted, transmitted, distributed, or disclosed in any way without Intel's prior express written permission.
 --
@@ -16,7 +37,7 @@
 -- EXECUTION ENGINE
 --###########################
 -- values: mr, tez, spark
-set hive.execution.engine=mr;
+-- set hive.execution.engine=mr;
 
 -- ###########################
 -- parallel order by. required by queries:
@@ -116,12 +137,6 @@ set hive.default.fileformat=${env:BIG_BENCH_hive_default_fileformat_tmp_table};
 -- set hive.stats.fetch.column.stats=true;
 -- set hive.stats.fetch.partition.stats=true;
 -- set hive.script.operator.truncate.env=true;
-set hive.vectorized.execution.enabled=true;
-set hive.vectorized.execution.reduce.enabled=true;
-set hive.vectorized.use.row.serde.deserialize=true;
-set hive.vectorized.use.vector.serde.deserialize=true;
-set hive.vectorized.execution.reduce.groupby.enabled = true;
-set hive.strict.checks.cartesian.product = false;
 
 
 -- ============================;
@@ -175,7 +190,8 @@ set bigbench.hive.optimize.sampling.orderby.number;
 set bigbench.hive.optimize.sampling.orderby.percent;
 set hive.groupby.skewindata;
 set hive.exec.submit.local.task.via.child;
-
+-- for Hive on Spark
+set spark.app.name=${hiveconf:QUERY_NAME};
 -- Database - DO NOT DELETE OR CHANGE
 CREATE DATABASE IF NOT EXISTS ${env:BIG_BENCH_DATABASE};
 use ${env:BIG_BENCH_DATABASE};
