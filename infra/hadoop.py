@@ -58,7 +58,7 @@ def update_hadoop_conf(default_conf, custom_conf, master, slaves):
     # for all conf files, replace the related value, eg, replace master_hostname with real hostname
     for conf_file in [file for file in os.listdir(output_hadoop_conf) if fnmatch.fnmatch(file, '*.xml')]:
         output_conf_file = os.path.join(output_hadoop_conf, conf_file)
-        replace_conf_value(output_conf_file, "master_hostname", master.hostname)
+        replace_xml_conf_value(output_conf_file, "master_hostname", master.hostname)
         format_xml_file(output_conf_file)
     return output_hadoop_conf
 
