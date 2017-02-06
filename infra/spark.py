@@ -69,7 +69,7 @@ def stop_spark_service(master):
 
 def update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env):
     spark_output_conf = update_conf(SPARK_COMPONENT, default_conf, custom_conf)
-    for conf_file in [file for file in os.listdir(spark_output_conf) if fnmatch.fnmatch(file, '*.conf')]:
+    for conf_file in [file for file in os.listdir(spark_output_conf) if file.endswith(('.conf', '.xml'))]:
         output_conf_file = os.path.join(spark_output_conf, conf_file)
         replace_properties_conf_value(output_conf_file, "master_hostname", master.hostname)
     copy_configurations([master], spark_output_conf, SPARK_COMPONENT, beaver_env.get("SPARK_HOME"))

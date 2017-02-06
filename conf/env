@@ -1,6 +1,7 @@
 JAVA_HOME=/opt/Beaver/jdk
 JDK_VERSION=8u112
 HADOOP_HOME=/opt/Beaver/hadoop
+HADOOP_CONF_DIR=/opt/Beaver/hadoop/etc/hadoop
 HADOOP_VERSION=2.7.3
 HIVE_HOME=/opt/Beaver/hive
 HIVE_VERSION=2.2.0
