@@ -67,6 +67,10 @@ def stop_spark_service(master):
     stop_spark_history_server(master)
 
 
+def start_spark_service(master, beaver_env):
+    start_spark_history_server(master, beaver_env)
+
+
 def update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env):
     spark_output_conf = update_conf(SPARK_COMPONENT, default_conf, custom_conf)
     for conf_file in [file for file in os.listdir(spark_output_conf) if file.endswith(('.conf', '.xml'))]:
