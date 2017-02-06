@@ -9,7 +9,6 @@ SPARK_COMPONENT = "spark"
 def deploy_spark_internal(default_conf, custom_conf, master, slaves, beaver_env):
     spark_verion = beaver_env.get("SPARK_VERSION")
     setup_env_dist([master], beaver_env, SPARK_COMPONENT)
-    set_path(SPARK_COMPONENT, [master], beaver_env.get("SPARK_HOME"))
     clean_spark(master)
     copy_packages([master], SPARK_COMPONENT, spark_verion)
     update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env)
