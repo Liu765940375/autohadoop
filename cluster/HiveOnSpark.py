@@ -1,10 +1,13 @@
 from utils.node import *
-from infra.hadoop import *
 from infra.hive import *
 from infra.spark import *
 from infra.other_components import *
 
 default_conf = os.path.join(project_path, "conf")
+
+
+def link_spark_defaults(custom_conf):
+    print("create a link file at the Hive path")
 
 
 def deploy_hive_on_spark(custom_conf):
@@ -21,7 +24,7 @@ def deploy_hive_on_spark(custom_conf):
     # Deploy Hive
     deploy_hive_internal(default_conf, custom_conf, master, beaver_env)
     copy_lib_for_spark(master, beaver_env, True)
-
+    link_spark_defaults(custom_conf)
 
 def populate_hive_on_spark_conf(custom_conf):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")

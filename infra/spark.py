@@ -23,6 +23,8 @@ def create_related_hdfs_dir(spark_output_conf, master, slaves, beaver_env):
     spark_default_path = os.path.join(spark_output_conf, "spark-defaults.conf")
     spark_eventLog = ""
     spark_history = ""
+    print("generate spark default configurations")
+    #TODO
     with open(spark_default_path) as f:
         for line in f:
             if not line.startswith('#') and line.split():
