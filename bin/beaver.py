@@ -1,6 +1,14 @@
 #!/usr/bin/python
 
+import os
 import sys
+import runBBonHoS
+import runBBonSparkSQL
+
+current_path = os.path.dirname(os.path.abspath(__file__))
+project_path = os.path.dirname(current_path)
+sys.path.append(project_path)
+
 from infra.hive import *
 from infra.spark import *
 from infra.bigbench import *
@@ -8,7 +16,6 @@ from utils.util import *
 from utils.node import *
 
 default_conf = os.path.join(project_path, "conf")
-
 
 def undeploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
@@ -77,6 +84,19 @@ def stop_services(custom_conf, hadoop_flg, hive_flg, spark_flg):
         stop_spark_service(master, beaver_env)
 
 
+def run_BB(custom_conf, hos_flg, sparkSQL_flg, run_flg):
+    if run_flg == "deploy_run":
+        if hos_flg:
+            runBBonHoS.deploy_run(custom_conf)
+        if sparkSQL_flg:
+            runBBonSparkSQL.deploy_run(custom_conf)
+    if run_flg == "replace_conf_run":
+        if hos_flg:
+            runBBonHoS.replace_conf_run(custom_conf)
+        if sparkSQL_flg:
+            runBBonSparkSQL.replace_conf_run(custom_conf)
+
+
 def usage():
     print("Usage: bin/beaver.py [component] [action] [path/to/conf]/n")
     print("   Component option includes: hadoop, hive, spark /n")
@@ -90,6 +110,36 @@ if __name__ == '__main__':
     if len(args) < 4:
         usage()
     component = args[1]
-    action = args[2]
+    actions = args[2]
     conf_p = args[3]
 
+    hadoop_flg = False
+    hive_flg = False
+    spark_flg = False
+    bb_flg = False
+    if component == "hadoop":
+        hadoop_flg = True
+    if component == "hive":
+        hive_flg = True
+    if component == "spark":
+        spark_flg = True
+    if component == "bb":
+        bb_flg = True
+
+    actions_list = actions.split(',')
+    for action in actions_list:
+        if action == "deploy":
+            deploy_components(conf_p, hadoop_flg, hive_flg, spark_flg)
+        elif action == "undeploy":
+            undeploy_components(conf_p, hadoop_flg, hive_flg, spark_flg)
+        elif action == "replace_conf":
+            update_component_conf(conf_p, hadoop_flg, hive_flg, spark_flg, bb_flg)
+        elif action == "start":
+            restart_services(conf_p, hadoop_flg, hive_flg, spark_flg)
+        elif action == "stop":
+            stop_services(conf_p, hadoop_flg, hive_flg, spark_flg)
+        # TODO: run service
+        # if action == "run":
+
+        else:
+            usage()
