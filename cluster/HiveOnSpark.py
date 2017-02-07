@@ -1,9 +1,21 @@
+
 from utils.node import *
 from infra.hive import *
 from infra.spark import *
 from infra.other_components import *
 
 default_conf = os.path.join(project_path, "conf")
+
+
+def copy_lib_for_spark(master, beaver_env, hos):
+    spark_version = beaver_env.get("SPARK_VERSION")
+    if spark_version[0:3] == "1.6" and hos:
+        ssh_execute(master, "cp -f " + beaver_env.get("SPARK_HOME") + "/lib/*" + " " + beaver_env.get("HIVE_HOME") + "/lib")
+    elif spark_version[0:3] == "2.0":
+        ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -mkdir /spark-2.0.0-bin-hadoop")
+        ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -copyFromLocal $SPARK_HOME/jars/* /spark-2.0.0-bin-hadoop")
+        ssh_execute(master,
+                    "echo \"spark.yarn.jars hdfs://" + master.hostname + ":9000/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
 
 
 def link_spark_defaults(custom_conf):

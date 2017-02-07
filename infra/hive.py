@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from infra.other_components import *
+from infra.mysql import *
 
 HIVE_COMPONENT = "hive"
 

@@ -1,17 +1,19 @@
 #!/usr/bin/python
 
-import os
 import sys
 import runBBonHoS
 import runBBonSparkSQL
+
+from infra.bigbench import *
+from cluster.HiveOnSpark import *
+from utils.util import *
+from utils.node import *
+
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 project_path = os.path.dirname(current_path)
 sys.path.append(project_path)
 
-from infra.hive import *
-from infra.spark import *
-from infra.bigbench import *
 
 default_conf = os.path.join(project_path, "conf")
 
