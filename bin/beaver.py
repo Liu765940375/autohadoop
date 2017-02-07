@@ -22,7 +22,7 @@ def undeploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg):
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
     if hadoop_flg:
-        undeploy_hadoop(master, slaves)
+        undeploy_hadoop(master, slaves, custom_conf)
     if hive_flg:
         undeploy_hive(master)
     if spark_flg:

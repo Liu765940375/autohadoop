@@ -9,7 +9,7 @@ def deploy_hadoop_internal(default_conf, custom_conf, master, slaves):
     setup_nopass(slaves)
     update_etc_hosts(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    clean_hadoop(slaves)
+    clean_hadoop(slaves, custom_conf)
     setup_env_dist(slaves, beaver_env, HADOOP_COMPONENT)
     set_path(HADOOP_COMPONENT, slaves, beaver_env.get("HADOOP_HOME"))
     copy_packages(slaves, HADOOP_COMPONENT, beaver_env.get("HADOOP_VERSION"))
@@ -17,9 +17,31 @@ def deploy_hadoop_internal(default_conf, custom_conf, master, slaves):
     create_related_dir(slaves)
     stop_firewall(slaves)
 
-def clean_hadoop(slaves):
+def clean_hadoop(slaves, custom_conf):
+    name_dir = "/opt/Beaver/hadoop/data/nn"
+    data_dir = "/opt/Beaver/hadoop/data/dn"
+    custom_conf_file = ""
+
+    custom_hadoop_conf = os.path.join(custom_conf, "hadoop")
+    for conf_file in [file for file in os.listdir(custom_hadoop_conf) if fnmatch.fnmatch(file, 'hdfs-site.xml')]:
+        custom_conf_file = os.path.join(custom_hadoop_conf, conf_file)
+        break
+    tree_custom = ET.parse(custom_conf_file)
+    root_custom = tree_custom.getroot()
+    if custom_conf_file == "hdfs-site.xml":
+        for property_tag in root_custom.findall("./property"):
+            property_name = property_tag.find("name").text
+            if property_name == "dfs.namenode.name.dir":
+                name_dir = property_tag.find("value").text
+                continue
+            if property_name == "dfs.datanode.data.dir":
+                data_dir = property_tag.find("value").text
+                continue
+
     for node in slaves:
         ssh_execute(node, "rm -rf /opt/Beaver/hadoop*")
+        ssh_execute(node, "rm -rf " + name_dir)
+        ssh_execute(node, "rm -rf " + data_dir)
         ssh_execute(node, "source ~/.bashrc")
 
 # create dir for dfs.namenode.name.dir, dfs.datanode.data.dir, yarn.nodemanager.local-dirs
@@ -112,9 +134,9 @@ def deploy_start_hadoop(default_conf, custom_conf, master, slaves, beaver_env):
     hdfs_format(master, beaver_env.get("HADOOP_HOME"))
     start_hadoop_service(master, slaves, beaver_env)
 
-def undeploy_hadoop(master, slaves):
+def undeploy_hadoop(master, slaves, custom_conf):
     stop_hadoop_service(master, slaves)
-    clean_hadoop(slaves)
+    clean_hadoop(slaves, custom_conf)
 
 '''
 if __name__ == '__main__':
