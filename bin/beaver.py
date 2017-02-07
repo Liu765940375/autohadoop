@@ -12,12 +12,11 @@ sys.path.append(project_path)
 from infra.hive import *
 from infra.spark import *
 from infra.bigbench import *
-from utils.util import *
-from utils.node import *
 
 default_conf = os.path.join(project_path, "conf")
 
-def undeploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg):
+
+def undeploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
@@ -27,9 +26,11 @@ def undeploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg):
         undeploy_hive(master)
     if spark_flg:
         undeploy_spark(master)
+    if bb_flg:
+        undeploy_bb(master)
 
 
-def deploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg):
+def deploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
@@ -41,6 +42,8 @@ def deploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg):
     if spark_flg:
         deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
         copy_lib_for_spark(master, beaver_env, True)
+    if bb_flg:
+        deploy_bb(default_conf, custom_conf, master)
 
 
 def update_component_conf(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
@@ -75,13 +78,19 @@ def stop_services(custom_conf, hadoop_flg, hive_flg, spark_flg):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
-    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     if hadoop_flg:
-        stop_hadoop_service(master, slaves, beaver_env)
+        stop_hadoop_service(master, slaves)
     if hive_flg:
-        stop_hive_service(master, beaver_env)
+        stop_hive_service(master)
     if spark_flg:
-        stop_spark_service(master, beaver_env)
+        stop_spark_service(master)
+
+def run_bigbench(custom_conf):
+    cluster_config_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_config_file)
+    master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    run_BB(master, beaver_env)
 
 
 def run_BB(custom_conf, hos_flg, sparkSQL_flg, run_flg):
@@ -117,6 +126,9 @@ if __name__ == '__main__':
     hive_flg = False
     spark_flg = False
     bb_flg = False
+    hos_flg=False
+    sparkSQL_flg=False
+
     if component == "hadoop":
         hadoop_flg = True
     if component == "hive":
@@ -125,21 +137,26 @@ if __name__ == '__main__':
         spark_flg = True
     if component == "bb":
         bb_flg = True
+    if component == "hos":
+        hos_flg = True
+    if component == "sparksql":
+        sparkSQL_flg = True
 
     actions_list = actions.split(',')
     for action in actions_list:
         if action == "deploy":
-            deploy_components(conf_p, hadoop_flg, hive_flg, spark_flg)
+            deploy_components(conf_p, hadoop_flg, hive_flg, spark_flg,bb_flg)
         elif action == "undeploy":
-            undeploy_components(conf_p, hadoop_flg, hive_flg, spark_flg)
+            undeploy_components(conf_p, hadoop_flg, hive_flg, spark_flg,bb_flg)
         elif action == "replace_conf":
             update_component_conf(conf_p, hadoop_flg, hive_flg, spark_flg, bb_flg)
         elif action == "start":
             restart_services(conf_p, hadoop_flg, hive_flg, spark_flg)
         elif action == "stop":
             stop_services(conf_p, hadoop_flg, hive_flg, spark_flg)
-        # TODO: run service
-        # if action == "run":
-
+        elif action == "deploy_run":
+            run_BB(conf_p, hos_flg, sparkSQL_flg, action)
+        elif action == "replace_conf_run":
+            run_BB(conf_p, hos_flg, sparkSQL_flg, action)
         else:
             usage()
