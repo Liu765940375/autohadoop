@@ -121,3 +121,23 @@ bin/cluster.py <component>
 We will install mysql-5.6 for you by default, if you want to install mysql5.7, please modify the /etc/yum.repos.d/mysql-community
 ,then modify the "MYSQL 5.6"  enabled value=0 and "MYSQL 5.7" enabled value=1. (For 5.7, we can't set mysql password by this script, you
 need to reset it by yourself)
+
+##Running the TPC-DS on hive on spark
+0. download DS project in https://github.com/kellyzly/hive-testbench 
+1. build TPC-DS
+     #./tpcds-build.sh
+2. generate  100 GB of TPC-DS data:
+     #./tpcds-setup.sh 100
+
+3. run queries and all infomation in log.ds
+     #setsid  ./runSuite.pl tpcds 100   (setsid will put the command in background)
+     #tail  -f log.ds
+          start time:2017/01/03 23:36:57
+filename,status,time,rows
+query12.sql,success,63,100
+query13.sql,success,146,1
+query15.sql,success,83,100
+
+There are 2 problems in origin benchmark and i have fixed the problems in my git project
+1. all the application started by hive on spark is "Hive on Spark", this is inconvenient for us to locate problem - Fixed
+2. print all info in console not file- Fixed
