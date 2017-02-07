@@ -3,7 +3,6 @@ import fnmatch
 import xml.etree.cElementTree as ET
 from xml.dom.minidom import parseString
 
-from utils.node import *
 
 pretty_print = lambda data: '\n'.join(
     [line for line in parseString(data).toprettyxml(indent=' ' * 2).split('\n') if line.strip()])
@@ -38,69 +37,6 @@ def merge_conf_xml_file(default_conf_file, custom_conf_file, output_conf_file):
 
     tree_output = ET.ElementTree(root_output)
     tree_output.write(output_conf_file, encoding="UTF-8", xml_declaration=True)
-
-
-def generate_configuration_xml(master, default_conf_file, custom_conf_file, output_conf_file):
-    default_configs = {}
-    custom_configs = {}
-
-    configs = ET.parse(default_conf_file)
-    root = configs.getroot()
-
-    # No custom file exsit
-    if not os.path.isfile(custom_conf_file):
-        tree = ET.ElementTree(root)
-        with open(output_conf_file, "w") as f:
-            tree.write(f)
-        return
-
-    get_configs_from_kv(custom_conf_file, custom_configs)
-
-    properties = root.getchildren()
-    for prop in properties:
-        attributes = prop.getchildren()
-        key = ""
-        value = ""
-        custom = False
-        for attribute in attributes:
-            if attribute.tag == "name":
-                key = attribute.text
-                if custom_configs.has_key(key):
-                    custom = True;
-
-            if attribute.tag == "value" and custom == False:
-                value = attribute.text
-                if value.find("master_hostname") != -1:
-                    value = value.replace("master_hostname", master.hostname)
-                    attribute.text = value
-            if attribute.tag == "value" and custom == True:
-                attribute.text = custom_configs[key]
-                value = attribute.text
-                custom_configs.pop(key, None)
-                custom = False
-
-        default_configs[key] = value
-
-    for key, val in custom_configs.iteritems():
-        prop = ET.Element('property')
-        name = ET.SubElement(prop, "name")
-        name.text = key
-        value = ET.SubElement(prop, "value")
-        value.text = val
-        root.append(prop)
-
-    xmlstr = pretty_print(ET.tostring(root))
-    with open(output_conf_file, "w") as f:
-        f.write(xmlstr)
-
-
-def get_configs_from_kv (filename, custom_configs):
-    with open(filename) as f:
-        for line in f:
-            if line.startswith('#') or not line.split():
-                continue
-            key, value = line.partition("=")[::2]
-            custom_configs[key.strip()] = value.strip()
 
 
 def replace_properties_conf_value(conf_file, old_value, new_value):
@@ -138,9 +74,6 @@ def get_config_value(conf_file, name):
 
 # merge configuration file
 def update_conf(component, default_conf, custom_conf):
-    cluster_config_file = os.path.join(custom_conf, "slaves.custom")
-    slaves = get_slaves(cluster_config_file)
-    master = get_master_node(slaves)
     custom_component_conf = os.path.join(custom_conf, component)
     default_component_conf = os.path.join(default_conf, component)
     output_component_conf = os.path.join(custom_conf, "output/" + component)
@@ -150,12 +83,11 @@ def update_conf(component, default_conf, custom_conf):
     processed_file = {}
     # loop in default_conf, merge with custom conf file and copy to output_conf
     for conf_file in [file for file in os.listdir(default_component_conf) if fnmatch.fnmatch(file, '*.xml')]:
-        custom_conf_file = os.path.join(custom_component_conf, conf_file + ".custom")
+        custom_conf_file = os.path.join(custom_component_conf, conf_file)
         default_conf_file = os.path.join(default_component_conf, conf_file)
         output_conf_file = os.path.join(output_component_conf, conf_file)
         if os.path.isfile(custom_conf_file):
             merge_conf_xml_file(default_conf_file, custom_conf_file, output_conf_file)
-            # generate_configuration_xml(master, default_conf_file, custom_conf_file, output_conf_file)
         else:
             os.system("cp " + default_conf_file + " " + output_conf_file)
         processed_file[conf_file] = ""

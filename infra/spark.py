@@ -12,7 +12,7 @@ def deploy_spark_internal(default_conf, custom_conf, master, slaves, beaver_env)
     clean_spark(master)
     copy_packages([master], SPARK_COMPONENT, spark_verion)
     update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env)
-    copy_spark_shuffle([master], spark_verion, beaver_env.get("HADOOP_HOME"))
+    copy_spark_shuffle(slaves, spark_verion, beaver_env.get("HADOOP_HOME"))
 
 
 def clean_spark(master):

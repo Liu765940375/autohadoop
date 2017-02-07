@@ -14,7 +14,6 @@ def deploy_hadoop_internal(default_conf, custom_conf, master, slaves):
     set_path(HADOOP_COMPONENT, slaves, beaver_env.get("HADOOP_HOME"))
     copy_packages(slaves, HADOOP_COMPONENT, beaver_env.get("HADOOP_VERSION"))
     update_copy_hadoop_conf(default_conf, custom_conf, master, slaves, beaver_env)
-    create_related_dir(slaves)
     stop_firewall(slaves)
 
 def clean_hadoop(slaves, custom_conf):
@@ -44,12 +43,6 @@ def clean_hadoop(slaves, custom_conf):
         ssh_execute(node, "rm -rf " + data_dir)
         ssh_execute(node, "source ~/.bashrc")
 
-# create dir for dfs.namenode.name.dir, dfs.datanode.data.dir, yarn.nodemanager.local-dirs
-def create_related_dir(slaves):
-    for node in slaves:
-        ssh_execute(node, "mkdir -p /opt/Beaver/hadoop/data/dn")
-        ssh_execute(node, "mkdir -p /opt/Beaver/hadoop/data/nn")
-        ssh_execute(node, "mkdir -p /opt/Beaver/hadoop/data/nm")
 
 def auto_hardware_config():
     print ("Get configs from hardware detect")
