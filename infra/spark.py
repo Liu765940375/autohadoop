@@ -7,9 +7,9 @@ SPARK_COMPONENT = "spark"
 
 
 def deploy_spark_internal(default_conf, custom_conf, master, slaves, beaver_env):
+    clean_spark(master)
     spark_verion = beaver_env.get("SPARK_VERSION")
     setup_env_dist([master], beaver_env, SPARK_COMPONENT)
-    clean_spark(master)
     copy_packages([master], SPARK_COMPONENT, spark_verion)
     update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env)
     copy_spark_shuffle(slaves, spark_verion, beaver_env.get("HADOOP_HOME"))
