@@ -1,6 +1,7 @@
 #!/usr/bin/python
-
-from infra.other_components import *
+from utils.util import *
+from utils.ssh import *
+from infra.jdk import *
 
 HADOOP_COMPONENT = "hadoop"
 

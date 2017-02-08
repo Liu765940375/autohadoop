@@ -2,7 +2,6 @@
 from utils.node import *
 from infra.hive import *
 from infra.spark import *
-from infra.other_components import *
 
 default_conf = os.path.join(project_path, "conf")
 
