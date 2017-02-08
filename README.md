@@ -141,3 +141,66 @@ query15.sql,success,83,100
 There are 2 problems in origin benchmark and i have fixed the problems in my git project
 1. all the application started by hive on spark is "Hive on Spark", this is inconvenient for us to locate problem - Fixed
 2. print all info in console not file- Fixed
+
+## NTP configuration
+There two steps to configure the NTP. If you already have an NTP Server,You can skip the step 1.If not,you should build the NTP Server in a machine by the step 1.
+Suppose you have two machines. Node1 is the NTP Server, Node2 is the NTP Client.Node2 is the machine that you want to update it time by NTP.
+
+1. Install NTP Server
+   Install NTP Server by this command:
+```
+yum install -y ntp
+```
+    After NTP has been installed. Edit the file of /etc/ntp.conf Red font is the part that required to modify.
+```
+# Hosts on local network are less restricted.
+restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap # Finally, we allow all the LAN client to connect to the server synchronization time, but refused to allow them to modify the time on the server
+# Use public servers from the pool.ntp.org project.
+# Please consider joining the pool (http://www.pool.ntp.org/join.html).
+#server 0.centos.pool.ntp.org iburst  #comment the original time server
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server 127.127.1.0        #Set this machine to a time server
+fudge 127.127.1.0 stratum 10  # This is the time server hierarchy. Set to 0 for the top, if you want to update the time to another NTP server, do not set it to 0
+```
+    Then,you can start NTP Server by command:
+```
+/etc/init.d/ntpd start
+```
+Now the NTP Server has been started successfully.
+You can see the information about NTP by :
+```
+ntpq -p
+```
+2. NTP Client configuration
+First you should install some server related to NTP by command:
+```
+yum install -y ntpdate*
+```
+Then edit the file /etc/ntp.conf
+```
+# Hosts on local network are less restricted.
+ restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+# Use public servers from the pool.ntp.org project.
+# Please consider joining the pool (http://www.pool.ntp.org/join.html).
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server Node1  #Set Node1 to be a time server
+```
+You should alse start NTP Server by command:
+```
+Centos6:
+/etc/init.d/ntpd start
+Centos7:
+systemctl  enable ntpd  // Ntp service should be set to boot
+systemctl start ntpd
+```
+Finally,you can update system time by command:
+```
+ntpdate -d Node1
+```
+-d means use the debug mode.
+(If –d don’t work.You can try : ntpdate -u Node1)
