@@ -27,14 +27,16 @@ def clean_hadoop(slaves, custom_conf):
         break
     tree_custom = ET.parse(custom_conf_file)
     root_custom = tree_custom.getroot()
-    if custom_conf_file == "hdfs-site.xml":
+    if os.path.basename(custom_conf_file) == "hdfs-site.xml":
         for property_tag in root_custom.findall("./property"):
             property_name = property_tag.find("name").text
             if property_name == "dfs.namenode.name.dir":
                 name_dir = property_tag.find("value").text
+                name_dir = name_dir.replace(",", " ")
                 continue
             if property_name == "dfs.datanode.data.dir":
                 data_dir = property_tag.find("value").text
+                data_dir = data_dir.replace(",", " ")
                 continue
 
     for node in slaves:
