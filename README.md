@@ -1,4 +1,5 @@
-Beaver is the project to deploy Hive on Spark and Pig automatically onto Hadoop cluster.
+Beaver [![Build Status](https://travis-ci.org/intel-hadoop/beaver.svg?branch=master)]
+(http://travis-ci.org/intel-hadoop/beaver) is the project to deploy SQL on Hadoop automatically onto Hadoop cluster.
 
 ## Goal
 1. Redeploy cluster with new patch for supported services(Pig, Spark, Hive and Hadoop if needed). 
