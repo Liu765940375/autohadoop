@@ -44,7 +44,8 @@ def undeploy_bb(master):
 
 def run_BB(master, beaver_env):
     print (colors.LIGHT_BLUE + "Run BigBench" + colors.ENDC)
-    ssh_execute(master, beaver_env.get("BB_HOME") + "/bin/bigBench runBenchmark")
+    #in order to pass q05, we can not export SPARK_HOME so here to unset this variable
+    ssh_execute(master, "unset SPARK_HOME;"+beaver_env.get("BB_HOME") + "/bin/bigBench runBenchmark")
     copy_res(master, beaver_env)
 
 
