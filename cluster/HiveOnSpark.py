@@ -2,23 +2,35 @@
 from utils.node import *
 from infra.hive import *
 from infra.spark import *
+from utils.config_utils import *
 
 default_conf = os.path.join(project_path, "conf")
 
 
-def copy_lib_for_spark(master, beaver_env, hos):
+def copy_lib_for_spark(master, beaver_env, custom_conf,  hos):
     spark_version = beaver_env.get("SPARK_VERSION")
+    output_conf = os.path.join(custom_conf, "output")
+    core_site_file = os.path.join(output_conf, "hadoop/core-site.xml")
+    defaultFS_value = get_config_value(core_site_file, "fs.defaultFS")
     if spark_version[0:3] == "1.6" and hos:
         ssh_execute(master, "cp -f " + beaver_env.get("SPARK_HOME") + "/lib/*" + " " + beaver_env.get("HIVE_HOME") + "/lib")
     elif spark_version[0:3] == "2.0":
         ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -mkdir /spark-2.0.0-bin-hadoop")
         ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -copyFromLocal $SPARK_HOME/jars/* /spark-2.0.0-bin-hadoop")
         ssh_execute(master,
-                    "echo \"spark.yarn.jars hdfs://" + master.hostname + ":9000/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
+                    "echo \"spark.yarn.jars " + defaultFS_value + "/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
 
 
 def link_spark_defaults(custom_conf):
     print("create a link file at the Hive path")
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_defaults_link = os.path.join(beaver_env.get("HIVE_HOME"), "conf/spark-defaults.conf")
+    spark_defaults_conf = os.path.join(beaver_env.get("SPARK_HOME"), "conf/spark-defaults.conf")
+    cluster_config_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_config_file)
+    master = get_master_node(slaves)
+    cmd = "rm -rf " + spark_defaults_link + ";ln -s " + spark_defaults_conf + " " + spark_defaults_link + ";"
+    ssh_execute(master, cmd)
 
 
 def deploy_hive_on_spark(custom_conf):
@@ -34,7 +46,7 @@ def deploy_hive_on_spark(custom_conf):
 
     # Deploy Hive
     deploy_hive(default_conf, custom_conf, master, beaver_env)
-    copy_lib_for_spark(master, beaver_env, True)
+    copy_lib_for_spark(master, beaver_env, custom_conf, True)
     link_spark_defaults(custom_conf)
 
 def populate_hive_on_spark_conf(custom_conf):

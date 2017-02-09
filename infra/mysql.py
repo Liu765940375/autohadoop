@@ -1,9 +1,10 @@
 from utils.util import *
 from utils.ssh import *
 
+package = "mysql-community-release-el7-9.noarch.rpm"
+
 
 def install_mysql(node, user, password):
-    package = "mysql-community-release-el7-9.noarch.rpm"
     download_url = "http://" + download_server + "/" + "mysql"
     download_package = os.path.join(package_path, package)
     if not os.path.isfile(download_package):
@@ -18,9 +19,7 @@ def install_mysql(node, user, password):
     ssh_copy(node, download_package, "/etc/yum.repos.d/" + repo_package)
 
     cmd = "rpm -qa | grep mysql-community-server;"
-    installed = ""
-    for line in os.popen(cmd).readlines():
-        installed += line.strip('\r\n')
+    installed = ssh_execute_withReturn(node, cmd)
     # For mysql5.7, command "mysqladmin -u username password pass" is not effective.
     install_cmd = "cd /opt;rpm -ivh " + package + ";yum -y install mysql-community-server;" \
                   + "systemctl start mysqld;mysqladmin -u " + user + " password " + password

@@ -43,7 +43,7 @@ def deploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
         deploy_hive(default_conf, custom_conf, master, beaver_env)
     if spark_flg:
         deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
-        copy_lib_for_spark(master, beaver_env, True)
+        copy_lib_for_spark(master, beaver_env, custom_conf, True)
     if bb_flg:
         deploy_bb(default_conf, custom_conf, master)
 
@@ -110,7 +110,7 @@ def run_BB(custom_conf, hos_flg, sparkSQL_flg, run_flg):
 
 def usage():
     print("Usage: bin/beaver.py [component] [action] [path/to/conf]/n")
-    print("   Component option includes: hadoop, hive, spark /n")
+    print("   Component option includes: Hadoop, HiveOnSpark, HiveOnTez, SparkSQL /n")
     print("   Action option includes: deploy, undeploy, replace_conf, start, stop, run /n")
     print("           deploy means just replacing configurations and trigger a run /n")
     print("           undeploy means remove all and redeploy a new run /n")

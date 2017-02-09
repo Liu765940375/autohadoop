@@ -190,20 +190,6 @@ def copy_final_configs(nodes, config_files, component, home_path):
             ssh_execute(node, "rm -rf " + conf_link)
             ssh_execute(node, "ln -s " + conf_path + " " + conf_link)
 
-def calculate_hardware():
-    list = []
-    cmd = "cat /proc/cpuinfo | grep \"processor\" | wc -l"
-    stdout = ssh_execute_withReturn(master, cmd)
-    for line in stdout:
-        vcore_num = int(line)
-        list.append(vcore_num)
-    cmd = "cat /proc/meminfo | grep \"MemTotal\""
-    stdout = ssh_execute_withReturn(master, cmd)
-    for line in stdout:
-        memory = int(int(line.split()[1]) / 1024 * 0.85)
-        list.append(memory)
-
-    return list
 
 def check_env(component, version):
     cmd = "ls /opt/Beaver | grep -x " + component + "-" + version

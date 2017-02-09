@@ -26,19 +26,9 @@ def clean_hadoop(slaves, custom_conf):
     for conf_file in [file for file in os.listdir(custom_hadoop_conf) if fnmatch.fnmatch(file, 'hdfs-site.xml')]:
         custom_conf_file = os.path.join(custom_hadoop_conf, conf_file)
         break
-    tree_custom = ET.parse(custom_conf_file)
-    root_custom = tree_custom.getroot()
     if os.path.basename(custom_conf_file) == "hdfs-site.xml":
-        for property_tag in root_custom.findall("./property"):
-            property_name = property_tag.find("name").text
-            if property_name == "dfs.namenode.name.dir":
-                name_dir = property_tag.find("value").text
-                name_dir = name_dir.replace(",", " ")
-                continue
-            if property_name == "dfs.datanode.data.dir":
-                data_dir = property_tag.find("value").text
-                data_dir = data_dir.replace(",", " ")
-                continue
+        name_dir = get_config_value(custom_conf_file, "dfs.namenode.name.dir").replace(",", " ")
+        data_dir = get_config_value(custom_conf_file, "dfs.datanode.data.dir").replace(",", " ")
 
     for node in slaves:
         ssh_execute(node, "rm -rf /opt/Beaver/hadoop*")
@@ -76,7 +66,8 @@ def update_hadoop_conf(default_conf, custom_conf, master, slaves):
     # for all conf files, replace the related value, eg, replace master_hostname with real hostname
     for conf_file in [file for file in os.listdir(output_hadoop_conf) if fnmatch.fnmatch(file, '*.xml')]:
         output_conf_file = os.path.join(output_hadoop_conf, conf_file)
-        replace_xml_conf_value(output_conf_file, "master_hostname", master.hostname)
+        dict = {'master_hostname':master.hostname}
+        replace_conf_value(output_conf_file, dict)
         format_xml_file(output_conf_file)
     return output_hadoop_conf
 

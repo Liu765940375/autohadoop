@@ -19,12 +19,26 @@ def clean_spark(master):
     ssh_execute(master, "rm -rf /opt/Beaver/spark*")
 
 
+# Calculate statistics of hardware information
+def calculate_hardware(master):
+    list = []
+    cmd = "cat /proc/cpuinfo | grep \"processor\" | wc -l"
+    stdout = ssh_execute_withReturn(master, cmd)
+    for line in stdout:
+        vcore_num = int(line)
+        list.append(vcore_num)
+    cmd = "cat /proc/meminfo | grep \"MemTotal\""
+    stdout = ssh_execute_withReturn(master, cmd)
+    for line in stdout:
+        memory = int(int(line.split()[1]) / 1024 * 0.85)
+        list.append(memory)
+    return list
+
+
 def create_related_hdfs_dir(spark_output_conf, master, slaves, beaver_env):
     spark_default_path = os.path.join(spark_output_conf, "spark-defaults.conf")
     spark_eventLog = ""
     spark_history = ""
-    print("generate spark default configurations")
-    #TODO
     with open(spark_default_path) as f:
         for line in f:
             if not line.startswith('#') and line.split():
@@ -77,9 +91,26 @@ def update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env
     spark_output_conf = update_conf(SPARK_COMPONENT, default_conf, custom_conf)
     for conf_file in [file for file in os.listdir(spark_output_conf) if file.endswith(('.conf', '.xml'))]:
         output_conf_file = os.path.join(spark_output_conf, conf_file)
-        replace_properties_conf_value(output_conf_file, "master_hostname", master.hostname)
+        dict = get_spark_replace_dict(master)
+        replace_conf_value(output_conf_file, dict)
     copy_configurations([master], spark_output_conf, SPARK_COMPONENT, beaver_env.get("SPARK_HOME"))
     create_related_hdfs_dir(spark_output_conf, master, slaves, beaver_env)
+
+
+def get_spark_replace_dict(master):
+    print("Calculate vcore and memory configurations into spark-defaults.conf")
+    list = calculate_hardware(master)
+    vcore_num = int(list[0])
+    memory = list[1]
+    executor_cores = 4
+    instances = int(vcore_num / executor_cores)
+    executor_memory = str(int(memory / instances / 1024 * 0.8))
+    executor_memoryOverhead = str(int(memory / instances * 0.2))
+    dict = {'master_hostname':master.hostname,
+            '{%spark.executor.cores%}':str(executor_cores), '{%spark.executor.instances%}':str(instances),
+            '{%spark.executor.memory%}':executor_memory, '{%spark.yarn.executor.memoryOverhead%}':executor_memoryOverhead}
+    return dict
+
 
 '''
 if __name__ == '__main__':

@@ -8,16 +8,6 @@ pretty_print = lambda data: '\n'.join(
     [line for line in parseString(data).toprettyxml(indent=' ' * 2).split('\n') if line.strip()])
 
 
-def replace_xml_conf_value(conf_file, old_value, new_value):
-    tree = ET.parse(conf_file)
-    root = tree.getroot()
-    for value_tag in root.findall("./property/value"):
-        value = str(value_tag.text)
-        value_tag.text = value.replace(old_value, new_value)
-
-    tree.write(conf_file, encoding="UTF-8", xml_declaration=True)
-
-
 def merge_conf_xml_file(default_conf_file, custom_conf_file, output_conf_file):
     tree_default = ET.parse(default_conf_file)
     tree_custom = ET.parse(custom_conf_file)
@@ -39,14 +29,13 @@ def merge_conf_xml_file(default_conf_file, custom_conf_file, output_conf_file):
     tree_output.write(output_conf_file, encoding="UTF-8", xml_declaration=True)
 
 
-def replace_properties_conf_value(conf_file, old_value, new_value):
-    tmp_filename = conf_file + '.tmp'
-    os.system("mv " + conf_file + " " + tmp_filename)
-    with open(tmp_filename, 'r') as file_read:
-            with open(conf_file, 'w') as file_write:
-                for line in file_read:
-                    file_write.write(line.replace(old_value, new_value))
-    os.system("rm -rf " + tmp_filename)
+def replace_conf_value(conf_file, dict):
+    with open(conf_file) as f:
+        read = f.read()
+    with open(conf_file, 'w') as f:
+        for key,val in dict.items():
+            read = read.replace(key, val)
+        f.write(read)
 
 
 def add_property_element(root_elemnt, name, value):
