@@ -28,12 +28,9 @@ def ssh_execute_withReturn(node, cmd):
     # ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(cmd)
     channel = ssh.get_transport().open_session()
     stdin, stdout, stderr = ssh.exec_command(cmd)
-    res = ""
-    while not stdout.channel.exit_status_ready():
-        if stdout.channel.recv_ready():
-            rl, wl, xl = select.select([channel], [], [], 0.0)
-            if len(rl) > 0:
-                res += str(channel.recv(1024))
+    res = []
+    for l in stdout.readlines():
+        res.append(str(l).strip())
     ssh.close()
     return res
 
