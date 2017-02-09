@@ -17,7 +17,7 @@ def deploy_spark_sql(custom_conf):
     # Deploy Spark
     deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
     # Deploy Hive
-    deploy_hive_internal(default_conf, custom_conf, master, beaver_env)
+    deploy_hive(default_conf, custom_conf, master, beaver_env)
 
 
 def populate_spark_sql_conf(custom_conf):

@@ -43,6 +43,7 @@ def deploy_hive(default_conf, custom_conf, master, beaver_env):
     deploy_hive_internal(default_conf, custom_conf, master, beaver_env)
     hive_init_schema(master, hive_home)
 
+'''
 def deploy_start_hive_internal(default_conf, custom_conf, master, beaver_env):
     hive_home = beaver_env.get("HIVE_HOME")
     deploy_mysql(master, default_conf)
@@ -50,6 +51,7 @@ def deploy_start_hive_internal(default_conf, custom_conf, master, beaver_env):
     deploy_hive_internal(default_conf, custom_conf, master, beaver_env)
     hive_init_schema(master, hive_home)
     start_hive_service(master, beaver_env)
+'''
 
 def undeploy_hive(master):
     hive_stop_metastore(master)
