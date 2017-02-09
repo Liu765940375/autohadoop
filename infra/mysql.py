@@ -23,7 +23,7 @@ def install_mysql(node, user, password):
     # For mysql5.7, command "mysqladmin -u username password pass" is not effective.
     install_cmd = "cd /opt;rpm -ivh " + package + ";yum -y install mysql-community-server;" \
                   + "systemctl start mysqld;mysqladmin -u " + user + " password " + password
-    if installed.find("mysql-community-server") != -1:
+    if "mysql-community-server" in installed:
         cmd = "systemctl stop mysqld;yum -y remove mysql-*;rm -rf /var/lib/mysql;"
         cmd += install_cmd
     else:
