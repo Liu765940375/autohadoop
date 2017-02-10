@@ -5,9 +5,9 @@ from infra.mysql import *
 HIVE_COMPONENT = "hive"
 
 def deploy_hive_internal(default_conf, custom_conf, master, beaver_env):
+    clean_hive(master)
     setup_env_dist([master], beaver_env, HIVE_COMPONENT)
     set_path(HIVE_COMPONENT, [master], beaver_env.get("HIVE_HOME"))
-    clean_hive(master)
     copy_packages([master], HIVE_COMPONENT, beaver_env.get("HIVE_VERSION"))
     update_copy_hive_conf(default_conf, custom_conf, master, beaver_env)
 
