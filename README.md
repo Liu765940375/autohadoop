@@ -204,3 +204,41 @@ ntpdate -d Node1
 ```
 -d means use the debug mode.
 (If –d don’t work.You can try : ntpdate -u Node1)
+
+##How to use Beaver
+There are three kinds of conditions running tests now.
+Please ensure that python has been installed in your system first, you can use bin/Python_install.sh to install Python in your system.
+
+1. switch workload
+```
+eg.first run BBonHoS, then run BBonSparkSQL
+bin/setup-env.sh
+bin/runBBonHoS.py deploy_run [confdir](like "/workspace/conf1/conf")
+bin/runBBonHoS.py undeploy [confdir]
+bin/runBBonSparkSQL.py deploy_run [confdir]
+bin/runBBonSparkSQL.py undeploy [confdir]
+```
+
+2. nochange in workload, just replace conf
+```
+eg.first run BBonHoS conf1, then run BBonHoS conf2
+bin/setup-env.sh
+bin/runBBonHoS.py deploy_run [confdir](like "/workspace/conf1/conf")
+bin/runBBonHoS.py replace_conf_run [confdir]
+bin/runBBonHoS.py undeploy [confdir]
+```
+
+3. use different packages on same workload
+```
+eg.run BBonHoS, first use hive-a.tar.gz, then use hive-b.tar.gz
+bin/setup-env.sh
+#now please change HIVE_VERSION in [confdir]/env(HIVE_VERSION=a when use hive-a.tar.gz)
+#then put hive-a.tar.gz in Beaver/package
+bin/runBBonHoS.py deploy_run [confdir](like "/workspace/conf1/conf")
+bin/runBBonHoS.py undeploy [confdir]
+#then change HIVE_VERSION in [confdir]/env(HIVE_VERSION=b when use hive-b.tar.gz)
+#then put hive-b.tar.gz in Beaver/package
+bin/runBBonHoS.py deploy_run [confdir]
+bin/runBBonHoS.py undeploy [confdir]
+```
+
