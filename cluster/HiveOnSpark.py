@@ -12,13 +12,16 @@ def copy_lib_for_spark(master, beaver_env, custom_conf,  hos):
     output_conf = os.path.join(custom_conf, "output")
     core_site_file = os.path.join(output_conf, "hadoop/core-site.xml")
     defaultFS_value = get_config_value(core_site_file, "fs.defaultFS")
+    spark_lib_dir = ""
     if spark_version[0:3] == "1.6" and hos:
-        ssh_execute(master, "cp -f " + beaver_env.get("SPARK_HOME") + "/lib/*" + " " + beaver_env.get("HIVE_HOME") + "/lib")
+        spark_lib_dir = "/lib"
     elif spark_version[0:3] == "2.0":
+        spark_lib_dir = "/jars"
         ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -mkdir /spark-2.0.0-bin-hadoop")
         ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -copyFromLocal $SPARK_HOME/jars/* /spark-2.0.0-bin-hadoop")
         ssh_execute(master,
                     "echo \"spark.yarn.jars " + defaultFS_value + "/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
+    ssh_execute(master, "cp -f " + beaver_env.get("SPARK_HOME") + spark_lib_dir + "/*" + " " + beaver_env.get("HIVE_HOME") + "/lib")
 
 
 def link_spark_defaults(custom_conf):
