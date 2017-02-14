@@ -11,3 +11,4 @@
 set bigbench.hive.optimize.sampling.orderby=${hiveconf:bigbench.hive.optimize.sampling.orderby};
 set bigbench.hive.optimize.sampling.orderby.number=${hiveconf:bigbench.hive.optimize.sampling.orderby.number};
 set bigbench.hive.optimize.sampling.orderby.percent=${hiveconf:bigbench.hive.optimize.sampling.orderby.percent};
+set hive.mapred.mode=nonstrict;
