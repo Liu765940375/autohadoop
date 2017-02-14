@@ -10,8 +10,8 @@ def deploy_jdk(slaves, beaver_env):
     jdk_version = beaver_env.get("JDK_VERSION")
     clean_jdk(slaves)
     copy_jdk(jdk_version, slaves)
-    set_path(JAVA_COMPONENT, slaves, jdk_version)
     setup_env_dist(slaves, beaver_env, JAVA_COMPONENT)
+    set_path(JAVA_COMPONENT, slaves, jdk_version)
 
 
 def clean_jdk(slaves):
