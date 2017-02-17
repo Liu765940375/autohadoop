@@ -13,3 +13,5 @@ echo "run BB on SparkSQL(switchworkload)">>log.txt
 ../bin/runBBonSparkSQL.py deploy_run /home/custom1/
 service_check
 ../bin/runBBonSparkSQL.py undeploy /home/custom1/
+../bin/runTPCDSonHoS.py deploy_run /home/custom2
+../bin/runTPCDSonHoS.py undeploy /home/custom2

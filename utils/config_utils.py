@@ -38,6 +38,15 @@ def replace_conf_value(conf_file, dict):
         f.write(read)
 
 
+def replace_conf_value(conf_file, dict):
+    with open(conf_file) as f:
+        read = f.read()
+    with open(conf_file, 'w') as f:
+        for key,val in dict.items():
+            read = read.replace(key, val)
+        f.write(read)
+
+
 def add_property_element(root_elemnt, name, value):
     property_element = ET.SubElement(root_elemnt, "property")
     name_element = ET.SubElement(property_element, "name")
