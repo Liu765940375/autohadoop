@@ -119,7 +119,7 @@ def switch(custom_conf):
     deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
     # Deploy Hive
     deploy_hive(default_conf, custom_conf, master, beaver_env)
-    copy_lib_for_spark(master, beaver_env, custom_conf, True)
+    copy_lib_for_spark(master, slaves, beaver_env, custom_conf, True)
     link_spark_defaults(custom_conf)
     # start Hive on Spark service
     start_hive_on_spark(custom_conf)
