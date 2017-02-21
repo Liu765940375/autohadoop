@@ -1,29 +1,21 @@
 #!/usr/bin/python
 
-from utils.node import *
-from utils.util import *
-from cluster.HiveOnSpark import default_conf
-
+from infra.maven import *
 
 TPC_DS_COMPONENT = "TPC-DS"
 
 
-def deploy_hive_tpc_ds(custom_conf):
+def deploy_hive_tpc_ds(default_conf, custom_conf, master):
     print("Deploy Hive TPC_DS")
-    cluster_file = os.path.join(custom_conf, "slaves.custom")
-    slaves = get_slaves(cluster_file)
-    master = get_master_node(slaves)
     clean_hive_tpc_ds(master)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    deploy_maven(master, beaver_env)
     copy_packages([master], TPC_DS_COMPONENT, beaver_env.get("TPC_DS_VERSION"))
     update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env)
 
 
-def undeploy_hive_tpc_ds(custom_conf):
+def undeploy_hive_tpc_ds(master):
     print("Undeploy Hive TPC_DS")
-    cluster_file = os.path.join(custom_conf, "slaves.custom")
-    slaves = get_slaves(cluster_file)
-    master = get_master_node(slaves)
     clean_hive_tpc_ds(master)
 
 
@@ -31,12 +23,8 @@ def clean_hive_tpc_ds(master):
     ssh_execute(master, "rm -rf /opt/Beaver/TPC-DS*")
 
 
-def populate_hive_tpc_ds_conf(custom_conf):
+def populate_hive_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
     print("replace Hive TPC_DS configurations")
-    cluster_file = os.path.join(custom_conf, "slaves.custom")
-    slaves = get_slaves(cluster_file)
-    master = get_master_node(slaves)
-    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env)
 
 
@@ -57,61 +45,49 @@ def update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
     ssh_execute(master, "tar xf " + remote_tar_file + " -C " + tpc_ds_home)
 
 
-def build_tpc_ds(master, tpc_ds_home, build_flg):
-    if build_flg == "yes":
-        print("+++++++++++++++++++++++++++++")
-        print("Install gcc and patch. Downloads, compiles and packages the TPC-DS data generator.")
-        print("+++++++++++++++++++++++++++++")
-        cmd = "yum -y install gcc* ;yum -y install patch;"
-        cmd += "cd " + tpc_ds_home + ";./tpcds-build.sh;"
-        ssh_execute(master, cmd)
+def build_tpc_ds(master, tpc_ds_home):
+    print("+++++++++++++++++++++++++++++")
+    print("Install gcc. Downloads, compiles and packages the TPC-DS data generator.")
+    print("+++++++++++++++++++++++++++++")
+    cmd = "yum -y install gcc make flex bison byacc;"
+    cmd += "cd " + tpc_ds_home + ";./tpcds-build.sh;"
+    ssh_execute(master, cmd)
 
 
-def generate_tpc_ds_data(master, tpc_ds_home, scale, generate_flg, format):
-    if generate_flg == "yes":
-        print("+++++++++++++++++++++++++++++")
-        print("Generate tpc-ds data and load data")
-        print("+++++++++++++++++++++++++++++")
-        if format == "textfile":
-            cmd = "cd " + tpc_ds_home + ";FORMAT=textfile ./tpcds-setup.sh " + scale + ";"
-        else:
-            cmd = "cd " + tpc_ds_home + ";./tpcds-setup.sh " + scale + ";"
-        ssh_execute(master, cmd)
+def generate_tpc_ds_data(master, tpc_ds_home, scale, data_format):
+    print("+++++++++++++++++++++++++++++")
+    print("Generate tpc-ds data and load data")
+    print("+++++++++++++++++++++++++++++")
+    cmd = "cd " + tpc_ds_home + ";FORMAT=" + data_format + " ./tpcds-setup.sh " + scale + ";"
+    ssh_execute(master, cmd)
 
 
-def run_hive_tpc_ds(custom_conf):
+def run_hive_tpc_ds(master, custom_conf, beaver_env):
     print (colors.LIGHT_BLUE + "Run TPC-DS..." + colors.ENDC)
-    cluster_file = os.path.join(custom_conf, "slaves.custom")
-    slaves = get_slaves(cluster_file)
-    master = get_master_node(slaves)
-    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     tpc_ds_home = beaver_env.get("TPC_DS_HOME")
-
     tpc_ds_config_file = os.path.join(custom_conf, "TPC-DS/config")
     config_dict = get_configs_from_properties(tpc_ds_config_file)
     scale = config_dict.get("scale")
     build_flg = config_dict.get("build")
     generate_flg = config_dict.get("generate")
-    format = config_dict.get("format")
-
-    build_tpc_ds(master, tpc_ds_home, build_flg)
-    generate_tpc_ds_data(master, tpc_ds_home, scale, generate_flg, format)
+    data_format = config_dict.get("format")
+    if build_flg == "yes":
+        build_tpc_ds(master, tpc_ds_home)
+    if generate_flg == "yes":
+        if data_format == "":
+            print(colors.LIGHT_RED + "Please set the format in <custom_conf>/TPC-DS/config file" + colors.ENDC)
+            return
+        generate_tpc_ds_data(master, tpc_ds_home, scale, data_format)
     tpc_ds_result = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                      time.localtime())))
     cmd = "cd " + tpc_ds_home + ";perl runSuite.pl tpcds " + scale + " >> " + tpc_ds_result + ";"
     ssh_execute(master, cmd)
-    copy_res_hive_tpc_ds(custom_conf)
+    copy_res_hive_tpc_ds(master, beaver_env)
 
 
-def copy_res_hive_tpc_ds(custom_conf):
+def copy_res_hive_tpc_ds(master, beaver_env):
     print("Collect Hive TPC_DS benchmark result")
-    cluster_file = os.path.join(custom_conf, "slaves.custom")
-    slaves = get_slaves(cluster_file)
-    master = get_master_node(slaves)
-    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     tpc_ds_home = beaver_env.get("TPC_DS_HOME")
-
-
     res_dir = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                         time.localtime())))
     log_dir = os.path.join(tpc_ds_home, "sample-queries-tpcds")
