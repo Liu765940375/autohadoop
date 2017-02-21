@@ -1,40 +1,47 @@
 #!/usr/bin/python
 
-import os
 import sys
-
-current_path = os.path.dirname(os.path.abspath(__file__))
-project_path = os.path.dirname(current_path)
-sys.path.append(project_path)
-
 from cluster.HiveOnSpark import *
 from infra.hive_tpc_ds import *
 
 
 def deploy_tpc_ds(custom_conf):
-    deploy_hive_tpc_ds(custom_conf)
+    cluster_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
+    deploy_hive_tpc_ds(default_conf, custom_conf, master)
 
 
 def replace_conf_run(custom_conf):
+    cluster_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     populate_hive_on_spark_conf(custom_conf)
     restart_hive_on_spark(custom_conf)
-    populate_hive_tpc_ds_conf(custom_conf)
-    run_hive_tpc_ds(custom_conf)
+    populate_hive_tpc_ds_conf(master, default_conf, custom_conf, beaver_env)
+    run_hive_tpc_ds(master, custom_conf, beaver_env)
 
 
 def deploy_run(custom_conf):
     print (colors.LIGHT_BLUE + "Deploy TPC-DS" + colors.ENDC)
-    get_env_list(os.path.join(custom_conf, "env"))
+    cluster_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     undeploy_hive_on_spark(custom_conf)
     deploy_hive_on_spark(custom_conf)
     start_hive_on_spark(custom_conf)
-    deploy_hive_tpc_ds(custom_conf)
-    run_hive_tpc_ds(custom_conf)
+    deploy_hive_tpc_ds(default_conf, custom_conf, master)
+    run_hive_tpc_ds(master, custom_conf, beaver_env)
 
 
 def undeploy_run(custom_conf):
+    cluster_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
     undeploy_hive_on_spark(custom_conf)
-    undeploy_hive_tpc_ds(custom_conf)
+    undeploy_hive_tpc_ds(master)
 
 
 def usage():

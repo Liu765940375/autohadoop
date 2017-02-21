@@ -13,3 +13,5 @@ RES_DIR=/opt/Beaver/result
 TPC_DS_HOME=/opt/Beaver/TPC-DS
 TPC_DS_VERSION=1.0
 TPC_DS_RES_DIR=/opt/Beaver/TPC-DS/result
+MAVEN_HOME=/opt/Beaver/maven
+MAVEN_VERSION=3.3.9
