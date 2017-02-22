@@ -1,7 +1,6 @@
 #!/bin/bash
 function service_check(){
-var1=`python -c 'import utils;print utils.check_service()'`
-echo "$var1"
+var1=`python -c 'import test_utils;print test_utils.check_service()'`
 if [ $var1 -eq 0 ]
 then
 	if [ -f /opt/Beaver/BB/logs/times.csv ]

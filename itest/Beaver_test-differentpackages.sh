@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-source ./utils.sh
+source ./test_utils.sh
 
 echo "run BB on HOS with HIVE_VERSION=2.2.0(differentpatch1)">>log.txt
 sed -i 's/^HIVE_VERSION=.*/HIVE_VERSION=2.2.0/' /home/custom/env

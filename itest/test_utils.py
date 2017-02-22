@@ -1,13 +1,9 @@
 #!/usr/bin/python
 
 import os
-import sys
 
 def check_service():
     check_service_jps="/opt/Beaver/jdk/bin/jps"
-    service_line=""
-    service_split=[]
-    flg_num=0
     NameNode_flg = False
     DataNode_flg = False
     NodeManager_flg = False
@@ -16,7 +12,6 @@ def check_service():
     HistoryServer_flg = False
     JobHistoryServer_flg = False
     SecondaryNameNode_flg = False
-    service_flg = False
     for line in os.popen(check_service_jps).readlines():
         service_line = line.strip('\r\n')
         service_split=service_line.split(" ")
@@ -39,7 +34,6 @@ def check_service():
             SecondaryNameNode_flg = True
 
     if NameNode_flg & DataNode_flg & NodeManager_flg & ResourceManager_flg & RunJar_flg & HistoryServer_flg & JobHistoryServer_flg & SecondaryNameNode_flg:
-        service_flg = True
         return 0
     else:
         f=file("log.txt","a+")

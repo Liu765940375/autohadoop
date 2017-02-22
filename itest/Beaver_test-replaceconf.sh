@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-source ./utils.sh
+source ./test_utils.sh
 
 echo "run BB on HOS with conf1(replaceconf)">>log.txt
 ../bin/runBBonHoS.py deploy_run /home/custom/
