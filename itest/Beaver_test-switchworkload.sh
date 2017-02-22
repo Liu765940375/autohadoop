@@ -1,7 +1,8 @@
 #!/bin/bash
 
 set -e
-source utils.sh
+source ./utils.sh
+
 echo "run BB on HoS(switchworkload)">>log.txt
 ../bin/runBBonHoS.py deploy_run /home/custom/
 service_check
