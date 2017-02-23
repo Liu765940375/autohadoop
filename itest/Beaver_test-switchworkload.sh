@@ -3,6 +3,8 @@
 set -e
 source ./test_utils.sh
 
+python ./auto_deploy.py
+
 echo "run BB on HoS(switchworkload)">>log.txt
 ../bin/runBBonHoS.py deploy_run /home/custom/
 service_check
