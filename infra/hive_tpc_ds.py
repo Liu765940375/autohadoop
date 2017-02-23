@@ -77,6 +77,9 @@ def run_hive_tpc_ds(master, custom_conf, beaver_env):
         if data_format == "":
             print(colors.LIGHT_RED + "Please set the format in <custom_conf>/TPC-DS/config file" + colors.ENDC)
             return
+        if int(scale) < 2:
+            print(colors.LIGHT_RED + "The scale in <custom_conf>/TPC-DS/config file must greater than 1" + colors.ENDC)
+            return
         generate_tpc_ds_data(master, tpc_ds_home, scale, data_format)
     tpc_ds_result = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                      time.localtime())))
@@ -91,4 +94,4 @@ def copy_res_hive_tpc_ds(master, beaver_env):
     res_dir = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                         time.localtime())))
     log_dir = os.path.join(tpc_ds_home, "sample-queries-tpcds")
-    ssh_execute(master, "mkdir -p " + res_dir + " && cp -r " + log_dir + "*log" + " " + res_dir)
+    ssh_execute(master, "mkdir -p " + res_dir + ";cp -r " + log_dir + "/*log" + " " + res_dir)
