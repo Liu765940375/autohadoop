@@ -43,7 +43,7 @@ def deploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
         deploy_hive(default_conf, custom_conf, master, beaver_env)
     if spark_flg:
         deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
-        copy_lib_for_spark(master, beaver_env, custom_conf, True)
+        copy_lib_for_spark(master, slaves, beaver_env, custom_conf, True)
     if bb_flg:
         deploy_bb(default_conf, custom_conf, master)
 
