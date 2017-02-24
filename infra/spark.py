@@ -91,22 +91,21 @@ def update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env
     spark_output_conf = update_conf(SPARK_COMPONENT, default_conf, custom_conf)
     for conf_file in [file for file in os.listdir(spark_output_conf) if file.endswith(('.conf', '.xml'))]:
         output_conf_file = os.path.join(spark_output_conf, conf_file)
-        dict = get_spark_replace_dict(master, slaves)
+        dict = get_spark_replace_dict(master)
         replace_conf_value(output_conf_file, dict)
     copy_configurations([master], spark_output_conf, SPARK_COMPONENT, beaver_env.get("SPARK_HOME"))
     create_related_hdfs_dir(spark_output_conf, master, slaves, beaver_env)
 
 
-def get_spark_replace_dict(master, slaves):
+def get_spark_replace_dict(master):
     print("Calculate vcore and memory configurations into spark-defaults.conf")
-    hardware_config_list = calculate_hardware(master)
-    node_num = len(slaves)
-    total_cores = int(hardware_config_list[0]) * node_num
-    total_memory = hardware_config_list[1] * node_num
+    list = calculate_hardware(master)
+    vcore_num = int(list[0])
+    memory = list[1]
     executor_cores = 4
-    instances = int(total_cores / executor_cores)
-    executor_memory = str(int(total_memory / instances / 1024 * 0.8))
-    executor_memoryOverhead = str(int(total_memory / instances * 0.2))
+    instances = int(vcore_num / executor_cores)
+    executor_memory = str(int(memory / instances / 1024 * 0.8))
+    executor_memoryOverhead = str(int(memory / instances * 0.2))
     dict = {'master_hostname':master.hostname,
             '{%spark.executor.cores%}':str(executor_cores), '{%spark.executor.instances%}':str(instances),
             '{%spark.executor.memory%}':executor_memory, '{%spark.yarn.executor.memoryOverhead%}':executor_memoryOverhead}
