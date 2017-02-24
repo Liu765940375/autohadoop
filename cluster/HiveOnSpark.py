@@ -1,3 +1,4 @@
+import sys
 from utils.node import *
 from infra.hive import *
 from infra.spark import *
@@ -94,3 +95,41 @@ def undeploy_hive_on_spark(custom_conf):
     undeploy_hadoop(master, slaves, custom_conf)
     undeploy_hive(master)
     undeploy_spark(master)
+
+
+def unlink(master, component):
+    softlink = "/opt/Beaver/" + component
+    cmd = "unlink "+softlink
+    ssh_execute(master,cmd)
+
+
+def unlink_spark_shuffle_shuffle(master):
+    unlink(master, "hadoop/share/hadoop/yarn/lib/spark-yarn-shuffle.jar")
+
+
+def switch(custom_conf):
+    cluster_config_file = os.path.join(custom_conf, "slaves.custom")
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    slaves = get_slaves(cluster_config_file)
+    master = get_master_node(slaves)
+    unlink(master,"hive")
+    unlink(master,"spark")
+    unlink_spark_shuffle_shuffle(master)
+    # Deploy Spark
+    deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
+    # Deploy Hive
+    deploy_hive(default_conf, custom_conf, master, beaver_env)
+    copy_lib_for_spark(master, slaves, beaver_env, custom_conf, True)
+    link_spark_defaults(custom_conf)
+    # start Hive on Spark service
+    start_hive_on_spark(custom_conf)
+
+
+if __name__ == '__main__':
+    args = sys.argv
+    if len(args) < 2:
+        exit(1)
+    action = args[1]
+    conf_p = args[2]
+    if action == "switch":
+        switch(conf_p)
