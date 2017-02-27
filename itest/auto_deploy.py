@@ -20,7 +20,7 @@ def get_local_hostname():
 def auto_deploy_slave(file_path):
     deploy_slave_master = get_local_hostname()+" "+get_local_IP() +" root bdpe123 master"
     slave_custom_fld=file_path+"/slaves.custom"
-    slave_custom_cover="echo "+deploy_slave_master+" > "+slave_custom_fld
+    os.system("echo "+deploy_slave_master+" > "+slave_custom_fld)
 
 #change engine
 def auto_deploy_engine(engine_name,file_path):
