@@ -33,7 +33,7 @@ echo "slave1 IP:$slave1_ip"
 sleep 10s
 
 /usr/bin/expect<<-EOF
-set timeout 3600
+set timeout 7200
 set pass bdpe123
 spawn sed -i "/$master_ip/d" /root/.ssh/known_hosts
 spawn ssh $master_ip
@@ -43,13 +43,13 @@ expect {
         "~]#" {send "source /home/$project_name/bin/Python_install.sh;source /home/$project_name/bin/setup-env.sh\r"}
 }
 expect {
-        "~]#" {send "cp -r /home/$project_name/conf/ /opt/conf1;echo \"$master_hostname $master_ip root bdpe123 master\" > /opt/conf1/slaves.custom;echo \"$slave1_hostname $slave1_ip root bdpe123 slave\" >> /opt/conf1/slaves.custom;sed -i 's/power_test_0=1-30/power_test_0=1/g' /opt/conf1/BB/conf/bigBench.properties\r"}
+        "~]#" {send "cp -r /home/$project_name/conf/ /opt/conf1;echo \"$master_hostname $master_ip root bdpe123 master\" > /opt/conf1/slaves.custom;echo \"$slave1_hostname $slave1_ip root bdpe123 slave\" >> /opt/conf1/slaves.custom;sed -i 's/power_test_0=1-30/power_test_0=1-30/g' /opt/conf1/BB/conf/bigBench.properties\r"}
 }
 expect {
-        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*\r"}
+        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runBBonHoS.py deploy_run /opt/conf1/\r"}
 }
 expect {
-        "~]#" {send "cd /home/$project_name/;bin/runBBonHoS.py deploy_run /opt/conf1/;exit\r"}
+        "]#" {send "cd /home/$project_name/itest/;source test_utils.sh;service_check;cp log.txt /opt/Beaver/result/;cat log.txt;exit\r"}
 }
 expect eof
 EOF
@@ -58,4 +58,3 @@ EOF
 nowdate=$(date +%Y-%-m-%-d-%-H-%-M-%-S)
 mkdir -p /opt/Beaver/result/docker/
 docker cp $masterId:/opt/Beaver/result/ /opt/Beaver/result/docker/$nowdate
-

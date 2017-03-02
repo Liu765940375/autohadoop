@@ -89,3 +89,8 @@ def setup_nopass(slaves):
         ssh_execute(node, "mkdir -p ~/.ssh")
         ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
+        ssh_execute(node, "yes|ssh-keygen -t rsa -P '' -f " + privkey)
+        os.system("rm -rf /tmp/id_rsa.pub")
+        ssh_download(node, "/root/.ssh/id_rsa.pub", "/tmp/id_rsa.pub")
+        os.system("cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
+
