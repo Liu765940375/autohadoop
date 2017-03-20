@@ -38,13 +38,11 @@ def replace_conf_value(conf_file, dict):
         f.write(read)
 
 
-def replace_conf_value(conf_file, dict):
-    with open(conf_file) as f:
-        read = f.read()
-    with open(conf_file, 'w') as f:
-        for key,val in dict.items():
-            read = read.replace(key, val)
-        f.write(read)
+def replace_name_value(conf_file, name, value):
+    tree = ET.parse(conf_file)
+    root = tree.getroot()
+    for property_tag in root.findall("property/[name='" + name + "']"):
+        property_tag.find("value").text = value
 
 
 def add_property_element(root_elemnt, name, value):
