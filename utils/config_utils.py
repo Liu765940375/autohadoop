@@ -43,6 +43,7 @@ def replace_name_value(conf_file, name, value):
     root = tree.getroot()
     for property_tag in root.findall("property/[name='" + name + "']"):
         property_tag.find("value").text = value
+    tree.write(conf_file)
 
 
 def add_property_element(root_elemnt, name, value):

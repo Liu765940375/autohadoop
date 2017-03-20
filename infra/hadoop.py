@@ -69,7 +69,7 @@ def update_hadoop_conf(default_conf, custom_conf, master, slaves):
         dict = {'master_hostname':master.hostname}
         replace_conf_value(output_conf_file, dict)
         format_xml_file(output_conf_file)
-    yarn_site_conf = os.path.join(output_conf_file, "yarn-site.xml")
+    yarn_site_conf = os.path.join(output_hadoop_conf, "yarn-site.xml")
     vcores = calculate_vcores(master)
     memory = calculate_memory(master)
     replace_name_value(yarn_site_conf, "yarn.nodemanager.resource.memory-mb", str(memory))
@@ -81,8 +81,8 @@ def calculate_vcores(node):
     print(colors.LIGHT_BLUE + "\tCalculate vcore configurations into yarn-site.xml"+ colors.ENDC)
     cmd = "cat /proc/cpuinfo | grep \"processor\" | wc -l"
     stdout = ssh_execute_withReturn(node, cmd)
-    vcores = int(stdout)
-    print(colors.LIGHT_BLUE + "\tThe vcores number are " + vcores + "." + colors.ENDC)
+    vcores = int(stdout[0])
+    print(colors.LIGHT_BLUE + "\tThe vcores number are " + str(vcores) + "." + colors.ENDC)
     return vcores
 
 def calculate_memory(node):
@@ -91,7 +91,7 @@ def calculate_memory(node):
     stdout = ssh_execute_withReturn(node, cmd)
     for line in stdout:
         memory = int(int(line.split()[1]) / 1024 * 0.85)
-    print(colors.LIGHT_BLUE + "\tThe memory is " + memory + "mb." + colors.ENDC)
+    print(colors.LIGHT_BLUE + "\tThe memory is " + str(memory) + "mb." + colors.ENDC)
     return memory
 
 def copy_hadoop_conf(default_hadoop_conf, beaver_custom_conf):
