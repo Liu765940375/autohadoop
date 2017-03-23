@@ -70,11 +70,15 @@ def update_hadoop_conf(default_conf, custom_conf, master, slaves):
         replace_conf_value(output_conf_file, dict)
         format_xml_file(output_conf_file)
     yarn_site_conf = os.path.join(output_hadoop_conf, "yarn-site.xml")
-    vcores = calculate_vcores(master)
-    memory = calculate_memory(master)
-    replace_name_value(yarn_site_conf, "yarn.nodemanager.resource.memory-mb", str(memory))
-    replace_name_value(yarn_site_conf, "yarn.nodemanager.resource.cpu-vcores", str(vcores))
-    replace_name_value(yarn_site_conf, "yarn.scheduler.maximum-allocation-mb", str(memory))
+    if ET.parse(yarn_site_conf).getroot().find("property/[name='yarn.nodemanager.resource.memory-mb']").find("value").text == "{%yarn.nodemanager.resource.memory-mb%}":
+        memory = calculate_memory(master)
+        replace_name_value(yarn_site_conf, "yarn.nodemanager.resource.memory-mb", str(memory))
+    if ET.parse(yarn_site_conf).getroot().find("property/[name='yarn.nodemanager.resource.cpu-vcores']").find("value").text == "{%yarn.nodemanager.resource.cpu-vcores%}":
+        vcores = calculate_vcores(master)
+        replace_name_value(yarn_site_conf, "yarn.nodemanager.resource.cpu-vcores", str(vcores))
+    if ET.parse(yarn_site_conf).getroot().find("property/[name='yarn.scheduler.maximum-allocation-mb']").find("value").text == "{%yarn.scheduler.maximum-allocation-mb%}":
+        memory = calculate_memory(master)
+        replace_name_value(yarn_site_conf, "yarn.scheduler.maximum-allocation-mb", str(memory))
     return output_hadoop_conf
 
 def calculate_vcores(node):
