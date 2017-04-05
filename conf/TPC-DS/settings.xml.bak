@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+    <proxies>
+        <proxy>
+            <id>http-proxy</id>
+            <active>true</active>
+            <protocol>http</protocol>
+            <host>child-prc.intel.com</host>
+            <port>913</port>
+            <username></username>
+            <password></password>
+        </proxy>
+    </proxies>
+    <mirrors>
+        <mirror>
+            <id>nexus-aliyun</id>
+            <mirrorOf>central</mirrorOf>
+            <name>Nexus aliyun</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+        </mirror>
+        <!--OSChina -->
+        <mirror>
+            <id>CN</id>
+            <name>OSChina Central</name>
+            <url>http://maven.oschina.net/content/groups/public/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+        <mirror>
+            <id>repo2</id>
+            <mirrorOf>central</mirrorOf>
+            <name>Human Readable Name for this Mirror.</name>
+            <url>http://repo2.maven.org/maven2/</url>
+        </mirror>
+        <!--net-cn -->
+        <mirror>
+            <id>net-cn</id>
+            <mirrorOf>central</mirrorOf>
+            <name>Human Readable Name for this Mirror.</name>
+            <url>http://maven.net.cn/content/groups/public/</url>
+        </mirror>
+        <!--UK -->
+        <mirror>
+            <id>CN</id>
+            <name>UK Central</name>
+            <url>http://uk.maven.org/maven2/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+        <!--ibiblio -->
+        <mirror>
+            <id>ibiblio</id>
+            <mirrorOf>central</mirrorOf>
+            <name>Human Readable Name for this Mirror.</name>
+            <url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
+        </mirror>
+        <!--jboss -->
+        <mirror>
+            <id>jboss-public-repository-group</id>
+            <mirrorOf>central</mirrorOf>
+            <name>JBoss Public Repository Group</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public</url>
+        </mirror> 
+    </mirrors>
+</settings>

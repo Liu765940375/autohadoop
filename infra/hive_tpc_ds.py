@@ -31,6 +31,24 @@ def populate_hive_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
 def update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
     tpc_ds_custom_conf = os.path.join(custom_conf, TPC_DS_COMPONENT)
     tpc_ds_default_conf = os.path.join(default_conf, TPC_DS_COMPONENT)
+    output_tpc_ds_conf = update_conf(TPC_DS_COMPONENT, default_conf, custom_conf)
+    conf_path = os.path.join(beaver_env.get("TPC_DS_HOME"), str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())))
+    ssh_execute(master, "mkdir -p " + conf_path)
+    tpc_ds_output_conf = glob.glob(output_tpc_ds_conf + "/*")
+    for file in tpc_ds_output_conf:
+        ssh_copy(master, file, conf_path + "/" + os.path.basename(file))
+    ssh_execute(master, "rm -f " + os.path.join(beaver_env.get("TPC_DS_HOME"),"sample-queries-tpcds/testbench.settings"))
+    ssh_execute(master, "ln -s " + conf_path + "/testbench.settings " + os.path.join(beaver_env.get("TPC_DS_HOME"),"sample-queries-tpcds/testbench.settings"))
+    ssh_execute(master, "rm -f " + os.path.join(beaver_env.get("TPC_DS_HOME"),"runSuite.pl"))
+    ssh_execute(master, "ln -s " + conf_path + "/runSuite.pl " + os.path.join(beaver_env.get("TPC_DS_HOME"),"runSuite.pl"))
+    ssh_execute(master, "\cp -f " + conf_path + "/settings.xml.bak ~/.m2/settings.xml" )
+#    ssh_execute(master, "\cp -f " + conf_path + "/config " + beaver_env.get("TPC_DS_HOME"))
+
+
+'''
+def update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
+    tpc_ds_custom_conf = os.path.join(custom_conf, TPC_DS_COMPONENT)
+    tpc_ds_default_conf = os.path.join(default_conf, TPC_DS_COMPONENT)
     output_conf = os.path.join(custom_conf, "output/")
     tpc_ds_output_conf = os.path.join(output_conf, TPC_DS_COMPONENT)
     os.system("rm -rf " + tpc_ds_output_conf)
@@ -43,6 +61,7 @@ def update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
     remote_tar_file = os.path.join(tpc_ds_home, tpc_ds_tar_file_name)
     ssh_copy(master, tpc_ds_tar_file, remote_tar_file)
     ssh_execute(master, "tar xf " + remote_tar_file + " -C " + tpc_ds_home)
+'''
 
 
 def build_tpc_ds(master, tpc_ds_home):
@@ -50,6 +69,7 @@ def build_tpc_ds(master, tpc_ds_home):
     print("Install gcc. Downloads, compiles and packages the TPC-DS data generator.")
     print("+++++++++++++++++++++++++++++")
     cmd = "yum -y install gcc make flex bison byacc;"
+    cmd += "yum -y install patch;"
     cmd += "cd " + tpc_ds_home + ";./tpcds-build.sh;"
     ssh_execute(master, cmd)
 
@@ -83,15 +103,13 @@ def run_hive_tpc_ds(master, custom_conf, beaver_env):
         generate_tpc_ds_data(master, tpc_ds_home, scale, data_format)
     tpc_ds_result = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                      time.localtime())))
-    cmd = "cd " + tpc_ds_home + ";perl runSuite.pl tpcds " + scale + " >> " + tpc_ds_result + ";"
+    cmd = "mkdir -p " + tpc_ds_result + ";cd " + tpc_ds_home + ";perl runSuite.pl tpcds " + scale + " >> " + tpc_ds_result + "/result.log;"
     ssh_execute(master, cmd)
-    copy_res_hive_tpc_ds(master, beaver_env)
+    copy_res_hive_tpc_ds(master, beaver_env, tpc_ds_result)
 
 
-def copy_res_hive_tpc_ds(master, beaver_env):
+def copy_res_hive_tpc_ds(master, beaver_env, res_dir):
     print("Collect Hive TPC_DS benchmark result")
     tpc_ds_home = beaver_env.get("TPC_DS_HOME")
-    res_dir = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
-                                                                        time.localtime())))
     log_dir = os.path.join(tpc_ds_home, "sample-queries-tpcds")
-    ssh_execute(master, "mkdir -p " + res_dir + ";cp -r " + log_dir + "/*log" + " " + res_dir)
+    ssh_execute(master, "cp -r " + log_dir + "/*.log" + " " + res_dir)

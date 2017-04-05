@@ -112,7 +112,7 @@ def copy_unprocessed_file(processed_file, conf_dir, output_dir):
         if conf_file not in processed_file:
             src_conf_file = os.path.join(conf_dir, conf_file)
             output_conf_file = os.path.join(output_dir, conf_file)
-            os.system("cp " + src_conf_file + " " + output_conf_file)
+            os.system("\cp -f " + src_conf_file + " " + output_conf_file)
 
 
 def merge_conf_properties_file (default_filename, custom_filename, output_filename):
