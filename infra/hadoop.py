@@ -7,7 +7,7 @@ HADOOP_COMPONENT = "hadoop"
 
 # Deploy Hadoop component
 def deploy_hadoop_internal(default_conf, custom_conf, master, slaves):
-    setup_nopass(master, slaves)
+    setup_nopass(slaves)
     update_etc_hosts(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     clean_hadoop(slaves, custom_conf)

@@ -70,26 +70,27 @@ def ssh_download(node, remote_path, local_path):
     transport.close()
 
 
-def setup_nopass(master,slaves):
-    pubkey = "/tmp/id_rsa.pub"
-    if os.path.isfile(pubkey) :
-        os.system("rm -rf "+pubkey)
+def setup_nopass(slaves):
+    home = os.path.expanduser("~")
+    privkey = home + "/.ssh/id_rsa"
+    pubkey = privkey + ".pub"
+    if not os.path.isfile(pubkey):
+        os.system("ssh-keygen -t rsa -P '' -f " + privkey)
 
-    ssh_execute(master, "yes n| ssh-keygen -f ~/.ssh/id_rsa -t rsa -P ''")
-    ssh_execute(master, "rm ~/.ssh/known_hosts")
-    ssh_execute(master, "ssh-keyscan -H `hostname -f` > ~/.ssh/known_hosts")
-    ssh_execute(master, "ssh-keyscan -H 0.0.0.0 >> ~/.ssh/known_hosts")
-    ssh_execute(master, "ssh-keyscan -H 127.0.0.1 >> ~/.ssh/known_hosts")
-    ssh_execute(master, "ssh-keyscan -H localhost >> ~/.ssh/known_hosts")
-    ssh_download(master, "/root/.ssh/id_rsa.pub", "/tmp/id_rsa.pub")
-
+    os.system("rm ~/.ssh/known_hosts")
+    os.system("ssh-keyscan -H `hostname -f` > ~/.ssh/known_hosts")
+    os.system("ssh-keyscan -H 0.0.0.0 >> ~/.ssh/known_hosts")
+    os.system("ssh-keyscan -H 127.0.0.1 >> ~/.ssh/known_hosts")
+    os.system("ssh-keyscan -H localhost >> ~/.ssh/known_hosts")
     for node in slaves:
-        ssh_execute(master, "ssh-keyscan -H " + node.hostname + " >> ~/.ssh/known_hosts")
-        ssh_execute(master, "ssh-keyscan -H " + node.ip + " >> ~/.ssh/known_hosts")
-
+        os.system("ssh-keyscan -H " + node.hostname + " >> ~/.ssh/known_hosts")
+        os.system("ssh-keyscan -H " + node.ip + " >> ~/.ssh/known_hosts")
         ssh_copy(node, pubkey, "/tmp/id_rsa.pub")
         ssh_execute(node, "mkdir -p ~/.ssh")
         ssh_execute(node, "cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
         ssh_execute(node, "chmod 0600 ~/.ssh/authorized_keys")
-        ssh_execute(node, "yes n|ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa ")
+        ssh_execute(node, "yes|ssh-keygen -t rsa -P '' -f " + privkey)
+        os.system("rm -rf /tmp/id_rsa.pub")
+        ssh_download(node, "/root/.ssh/id_rsa.pub", "/tmp/id_rsa.pub")
+        os.system("cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys")
 
