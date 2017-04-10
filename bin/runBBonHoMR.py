@@ -3,6 +3,7 @@
 import sys
 import os
 from cluster.HiveOnMR import *
+from cluster.SparkSQL import *
 from infra.bigbench import *
 
 def deploy_bigbench(custom_conf):
@@ -53,6 +54,7 @@ def undeploy_run(custom_conf):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     undeploy_hive_on_mr(custom_conf)
+    undeploy_spark_sql(custom_conf)
     undeploy_bb(master)
 
 def usage():

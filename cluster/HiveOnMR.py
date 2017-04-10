@@ -12,6 +12,7 @@ def undeploy_hive_on_mr(custom_conf):
     master = get_master_node(slaves)
     undeploy_hadoop(master, slaves, custom_conf)
     undeploy_hive(master)
+    undeploy_spark(master)
 
 def restart_hive_on_mr(custom_conf):
     stop_hive_on_mr(custom_conf)
@@ -24,6 +25,7 @@ def start_hive_on_mr(custom_conf):
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     start_hadoop_service(master, slaves, beaver_env)
     start_hive_service(master, beaver_env)
+    start_spark_history_server(master, beaver_env)
 
 def stop_hive_on_mr(custom_conf):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
@@ -48,6 +50,9 @@ def deploy_hive_on_mr(custom_conf):
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     deploy_hadoop(default_conf, custom_conf, master, slaves, beaver_env)
+
+    # Deploy Spark
+    deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
     # Deploy Hive
     deploy_hive(default_conf, custom_conf, master, beaver_env)
 

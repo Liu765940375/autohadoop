@@ -30,7 +30,7 @@ slave1_ip=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' $slave1Id|a
 echo "slave1 IP:$slave1_ip"
 
 ##The master need several seconds to start sshserver
-sleep 10s
+sleep 30s
 
 /usr/bin/expect<<-EOF
 set timeout 7200
