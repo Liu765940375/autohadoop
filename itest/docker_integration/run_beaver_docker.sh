@@ -4,6 +4,7 @@ project_path=$3
 
 repo_url=http://10.239.47.156
 os_repo_path=$repo_url/repodata/os.repo
+pip_conf=$repo_url/repodata/pip.conf
 
 ##delete container if exit slave or master
 docker ps -a|grep -E 'slave|master' |awk '{print $1}'|xargs docker stop;
@@ -17,9 +18,14 @@ echo "hostname:$master_hostname"
 master_ip=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' $masterId|awk '{print $1}')
 echo "master IP:$master_ip"
 
-wget -P /opt/ $os_repo_path
+wget -O /opt/os.repo $os_repo_path
 docker cp  $project_path/$project_name $masterId:/home/
 docker cp /opt/os.repo $masterId:/etc/yum.repos.d/
+
+##add pip mirror
+wget -O /opt/pip.conf $pip_conf
+docker exec $masterId mkdir ~/.pip
+docker cp /opt/pip.conf $masterId:~/.pip/
 
 ##run image for slave1
 slave1Id=$(docker run --privileged --name=slave1 -dti -v /sys/fs/cgroup:/sys/fs/cgroup:ro -p 50003:22 $image_name)
