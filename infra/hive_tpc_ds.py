@@ -68,9 +68,9 @@ def build_tpc_ds(master, tpc_ds_home):
     print("+++++++++++++++++++++++++++++")
     print("Install gcc. Downloads, compiles and packages the TPC-DS data generator.")
     print("+++++++++++++++++++++++++++++")
-    cmd = "yum -y install gcc make flex bison byacc;"
+    cmd = "yum -y install gcc make flex bison byacc unzip;"
     cmd += "yum -y install patch;"
-    cmd += "cd " + tpc_ds_home + ";./tpcds-build.sh;"
+    cmd += "cd " + tpc_ds_home + ";bash -x ./tpcds-build.sh;"
     ssh_execute(master, cmd)
 
 
