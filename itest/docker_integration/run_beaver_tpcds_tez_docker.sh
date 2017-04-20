@@ -49,13 +49,16 @@ expect {
         "~]#" {send "source /home/$project_name/bin/Python_install.sh;source /home/$project_name/bin/setup-env.sh\r"}
 }
 expect {
-        "~]#" {send "echo \"http_proxy=http://child-prc.intel.com:913\" >> ~/.bashrc;echo \"ftp_proxy=http://child-prc.intel.com:913\" >> ~/.bashrc;echo \"https_proxy=https://child-prc.intel.com:913\" >> ~/.bashrc;echo \"export http_proxy\" >> ~/.bashrc;echo \"export ftp_proxy\" >> ~/.bashrc;echo \"export https_proxy\" >> ~/.bashrc;cp -r /home/$project_name/conf/ /opt/sparkconf;echo \"$master_hostname $master_ip root bdpe123 master\" > /opt/sparkconf/slaves.custom;echo \"$slave1_hostname $slave1_ip root bdpe123 slave\" >> /opt/sparkconf/slaves.custom\r"}
+        "~]#" {send "echo \"http_proxy=http://child-prc.intel.com:913\" >> ~/.bashrc;echo \"ftp_proxy=http://child-prc.intel.com:913\" >> ~/.bashrc;echo \"https_proxy=https://child-prc.intel.com:913\" >> ~/.bashrc;echo \"export http_proxy\" >> ~/.bashrc;echo \"export ftp_proxy\" >> ~/.bashrc;echo \"export https_proxy\" >> ~/.bashrc;cp -r /home/$project_name/conf/  /opt/tezconf;echo \"$master_hostname $master_ip root bdpe123 master\" > /opt/tezconf/slaves.custom;echo \"$slave1_hostname $slave1_ip root bdpe123 slave\" >> /opt/tezconf/slaves.custom;sed -i 's/SPARK_VERSION=2.0.0/SPARK_VERSION=2.0.0-hive/g' /opt/tezconf/env\r"}
 }
 expect {
-        "~]#" {send "sed -i 's/{\%yarn.nodemanager.resource.memory-mb\%}/30480/g' /opt/sparkconf/hadoop/yarn-site.xml;sed -i 's/{\%yarn.nodemanager.resource.cpu-vcores\%}/30/g' /opt/sparkconf/hadoop/yarn-site.xml;sed -i 's/{\%yarn.scheduler.maximum-allocation-mb\%}/30000/g' /opt/sparkconf/hadoop/yarn-site.xml;sed -i 's/opt/tmp/g' /opt/mrconf/hadoop/yarn-site.xml\r"}
+        "~]#" {send "sed -i 's/{\%yarn.nodemanager.resource.memory-mb\%}/30480/g' /opt/tezconf/hadoop/yarn-site.xml;sed -i 's/{\%yarn.nodemanager.resource.cpu-vcores\%}/30/g' /opt/tezconf/hadoop/yarn-site.xml;sed -i 's/{\%yarn.scheduler.maximum-allocation-mb\%}/30000/g' /opt/tezconf/hadoop/yarn-site.xml;sed -i 's/opt/tmp/g' /opt/tezconf/hadoop/hdfs-site.xml;sed -i 's/opt/tmp/g' /opt/tezconf/hadoop/yarn-site.xml\r"}
+}
+expect { 
+	"~]#" {send "echo \"\rspark.master yarn\">>/opt/tezconf/spark/spark-defaults.conf;echo \"spark.deploy.mode client\">>/opt/tezconf/spark/spark-defaults.conf;echo \"spark.sql.hive.metastore.version 1.2.1\">>/opt/tezconf/spark/spark-defaults.conf;echo \"spark.sql.warehouse.dir hdfs:\/\/master_hostname:9000\/spark-warehouse\">>/opt/tezconf/spark/spark-defaults.conf;sed -i 's%<value>3<\/value>%<value>1<\/value>%g' /opt/tezconf/hadoop/hdfs-site.xml;cp -r /opt/tezconf/hive/hive-site.xml /opt/tezconf/spark/\r"}
 }
 expect {
-        "~]#" {send "chmod +x /home/$project_name/bin/*;rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runTPCDSonHoS.py deploy_run /opt/sparkconf/\r"}
+        "~]#" {send "chmod +x /home/$project_name/bin/*;rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runTPCDSonHoTez.py deploy_run /opt/tezconf/\r"}
 }
 expect {
         "]#" {send "cd /home/$project_name/itest/;source test_utils.sh;service_check;cp log.txt /opt/Beaver/result/;cat log.txt;exit\r"}

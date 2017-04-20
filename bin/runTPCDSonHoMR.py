@@ -15,11 +15,28 @@ def deploy_run(custom_conf):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    update_mr_tpcds(custom_conf)
     undeploy_hive_on_mr(custom_conf)
     deploy_hive_on_mr(custom_conf)
     start_hive_on_mr(custom_conf)
     deploy_hive_tpc_ds(default_conf, custom_conf, master)
     run_hive_tpc_ds(master, custom_conf, beaver_env)
+
+
+def update_mr_tpcds(custom_conf):
+    tpcds_custom_hive_enginesettings_sql = os.path.join(custom_conf, "TPC-DS/testbench.settings")
+    update_mr_tpcds_settings_sql(tpcds_custom_hive_enginesettings_sql)
+
+
+def update_mr_tpcds_settings_sql(conf_file):
+    with open(conf_file, 'r') as file_read:
+        total_line = file_read.read()
+    origin_pattern = r'.*set hive.execution.engine=.*;'
+    replace_pattern = 'set hive.execution.engine=mr;'
+    new_total_line = re.sub(origin_pattern, replace_pattern, total_line)
+    with open(conf_file, 'w') as file_write:
+        file_write.write(new_total_line)
+
 
 def replace_conf_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
