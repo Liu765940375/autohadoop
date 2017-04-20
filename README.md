@@ -10,7 +10,7 @@ Beaver is the project to deploy SQL on Hadoop automatically onto Hadoop cluster.
 1 . run following command to set up the enviroment of python.
 
 ```
-bin/Python_install.sh
+source bin/Python_install.sh
 ```
 You can also install python by yourself.
 packager is http://10.239.47.156/software/Python-2.7.13.tgz, the step you can refer http://tecadmin.net/install-python-2-7-on-centos-rhel/, after installation, append following in ~/.bashrc
