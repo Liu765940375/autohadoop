@@ -3,7 +3,7 @@ image_name=$2
 project_path=$3
 
 repo_url=http://10.239.47.156
-os_repo_path=$repo_url/repodata/os.repo
+os_repo_path=$repo_url/repodata/docker.repo
 pip_conf=$repo_url/repodata/pip.conf
 
 ##delete container if exit slave or master
@@ -21,6 +21,7 @@ echo "master IP:$master_ip"
 wget -O /opt/os.repo $os_repo_path
 docker cp  $project_path/$project_name $masterId:/home/
 docker cp /opt/os.repo $masterId:/etc/yum.repos.d/
+docker exec $masterId rm -rf /etc/yum.repos.d/CentOS-*;
 
 ##add pip mirror
 wget -O /opt/pip.conf $pip_conf
