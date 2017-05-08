@@ -9,6 +9,8 @@ export PYTHONPATH=$BEAVER_HOME
 yum -y install gcc python-devel.x86_64 libffi-devel.x86_64 openssl-devel.x86_64
 python $BEAVER_HOME/utils/get-pip.py
 pip install --upgrade paramiko
+pip install xlwt xlrd
+
 export no_proxy="127.0.0.1, localhost, *.intel.com, 10.239.47.*, *.sh.intel.com"
 
 if [ ! -f "/usr/bin/pssh" ]; then
