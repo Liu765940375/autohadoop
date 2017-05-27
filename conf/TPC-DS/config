@@ -2,3 +2,4 @@ scale 2
 format orc
 build yes
 generate yes
+table_dir tpcds

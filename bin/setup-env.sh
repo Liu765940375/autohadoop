@@ -5,6 +5,17 @@ else
     export BEAVER_HOME=$(dirname "$(cd $(dirname "${BASH_SOURCE[0]}") >/dev/null && pwd)")
 fi
 
+pexpect_file="../package/pexpect-2.3.tar.gz"
+
+if [ ! -f "$pexpect_file" ];
+then
+    wget -P ../package http://10.239.47.156/python/pexpect-2.3.tar.gz
+fi
+cd ../package
+tar zxvf pexpect-2.3.tar.gz
+cd ../package/pexpect-2.3
+python ./setup.py install
+cd ~
 export PYTHONPATH=$BEAVER_HOME
 yum -y install gcc python-devel.x86_64 libffi-devel.x86_64 openssl-devel.x86_64
 python $BEAVER_HOME/utils/get-pip.py
