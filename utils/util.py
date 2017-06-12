@@ -32,6 +32,59 @@ def get_env_list(filename):
             envs[key.strip()] = value.strip()
     return envs
 
+
+def read_bigBench_workloads(bigBench_properties, bb_home):
+    bigBench_command = []
+    workload_value = ""
+    power_test_value = ""
+    for key in bigBench_properties:
+        if key == "workload":
+            workload_value = bigBench_properties[key]
+        elif key == "power_test_0":
+            power_test_value = bigBench_properties[key]
+    workload_value_arr = workload_value.split(",")
+    for workload_key in workload_value_arr:
+        if workload_key == "CLEAN_ALL":
+            bigBench_command.append(workload_key)
+            bigBench_command.append(bb_home + "/bin/bigBench cleanAll -U")
+        elif workload_key == "CLEAN_DATA":
+            bigBench_command.append(workload_key)
+            bigBench_command.append(bb_home + "/bin/bigBench cleanData -U")
+        elif workload_key == "DATA_GENERATION":
+            bigBench_command.append(workload_key)
+            bigBench_command.append(bb_home + "/bin/bigBench dataGen -U")
+        elif workload_key == "LOAD_TEST":
+            bigBench_command.append(workload_key)
+            bigBench_command.append(bb_home + "/bin/bigBench populateMetastore -U \&\& " + bb_home + "/bin/bigBench refreshMetastore -U")
+        elif workload_key == "POWER_TEST":
+            queryNumber = read_bigBench_power_test_query_list(power_test_value)
+            for query in queryNumber:
+                bigBench_command.append(workload_key + "_" + str(query))
+                bigBench_command.append(bb_home + "/bin/bigBench runQuery -q "+ str(query)+" -U")
+        elif workload_key == "VALIDATE_POWER_TEST":
+            bigBench_command.append(workload_key)
+            bigBench_command.append(" ")
+        else:
+            print "UNKNOWN WORKLOAD:" + workload_key
+    return bigBench_command
+
+
+def read_bigBench_power_test_query_list(power_test_value):
+    tempQuerys = []
+    power_test_value_arr = power_test_value.split(",")
+    for tempQuery in power_test_value_arr:
+        if "-" in tempQuery:
+            subquery = tempQuery.split("-")
+            if len(subquery) == 2:
+                for i in range(int(subquery[0]), int(subquery[1]) + 1):
+                    tempQuerys.append(i)
+            else:
+                print "Format error"
+        else:
+            tempQuerys.append(tempQuery)
+    return tempQuerys
+
+
 # Set environment variables
 def setup_env_dist(slaves, envs, component):
         print (colors.LIGHT_BLUE+ "Set environment variables over all nodes" + colors.ENDC)

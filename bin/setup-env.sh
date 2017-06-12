@@ -22,6 +22,12 @@ python $BEAVER_HOME/utils/get-pip.py
 pip install --upgrade paramiko
 pip install xlwt xlrd
 
+yum -y install gawk
+yum -y install sysstat
+yum -y install perf
+yum -y install python-matplotlib
+pip install --upgrade numpy scipy matplotlib
+pip install XlsxWriter
 export no_proxy="127.0.0.1, localhost, *.intel.com, 10.239.47.*, *.sh.intel.com"
 
 if [ ! -f "/usr/bin/pssh" ]; then

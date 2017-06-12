@@ -47,7 +47,7 @@ spawn ssh $master_ip
 expect {
         "(yes/no)" {send "yes\r"; exp_continue}
         "password:" {send "bdpe123\r"; exp_continue}
-        "~]#" {send "source /home/$project_name/bin/Python_install.sh;source /home/$project_name/bin/setup-env.sh\r"}
+        "~]#" {send "source /home/$project_name/bin/setup-env.sh\r"}
 }
 expect {
         "~]#" {send "cp -r /home/$project_name/conf/ /opt/conf1;echo \"$master_hostname $master_ip root bdpe123 master\" > /opt/conf1/slaves.custom;echo \"$slave1_hostname $slave1_ip root bdpe123 slave\" >> /opt/conf1/slaves.custom;sed -i 's/power_test_0=1-30/power_test_0=1-30/g' /opt/conf1/BB/conf/bigBench.properties\r"}
@@ -56,7 +56,7 @@ expect {
         "~]#" {send "sed -i 's/{\%yarn.nodemanager.resource.memory-mb\%}/20480/g' /opt/conf1/hadoop/yarn-site.xml;sed -i 's/{\%yarn.nodemanager.resource.cpu-vcores\%}/30/g' /opt/conf1/hadoop/yarn-site.xml;sed -i 's/{\%yarn.scheduler.maximum-allocation-mb\%}/20000/g' /opt/conf1/hadoop/yarn-site.xml;echo \"set hive.mapred.mode=nonstrict;\">>/opt/conf1/BB/engines/hive/queries/q24/engineLocalSettings.sql\r"}
 }
 expect {
-        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runBBonHoS.py deploy_run /opt/conf1/\r"}
+        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runBBonHoS.py deploy_run /opt/conf1/ -pat\r"}
 }
 expect {
         "]#" {send "cd /home/$project_name/itest/;source test_utils.sh;service_check;cp log.txt /opt/Beaver/result/;cat log.txt;exit\r"}
