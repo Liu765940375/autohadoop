@@ -3,12 +3,14 @@ ARG PROXY_URL
 ARG PROXY_PORT
 ENV PROXY_URL child-prc.intel.com
 ENV PROXY_PORT 913
+ENV NO_PROXY localhost,127.0.0.1,.intel.com,10.239.47.156
 ENV Container Docker
 ENV http_proxy http://$PROXY_URL:$PROXY_PORT
 ENV ftp_proxy http://$PROXY_URL:$PROXY_PORT
 ENV https_proxy https://$PROXY_URL:$PROXY_PORT
+ENV no_proxy $NO_PROXY
 
-RUN echo -e "http_proxy=http://$PROXY_URL:$PROXY_PORT\nftp_proxy=http://$PROXY_URL:$PROXY_PORT\nhttps_proxy=https://$PROXY_URL:$PROXY_PORT\nexport http_proxy\nexport ftp_proxy\nexport https_proxy\n" >> /etc/profile
+RUN echo -e "http_proxy=http://$PROXY_URL:$PROXY_PORT\nftp_proxy=http://$PROXY_URL:$PROXY_PORT\nhttps_proxy=https://$PROXY_URL:$PROXY_PORT\nexport http_proxy\nexport ftp_proxy\nexport https_proxy\nexport no_proxy=$NO_PROXY" >> /etc/profile
 RUN source /etc/profile
 
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
@@ -19,6 +21,8 @@ rm -f /lib/systemd/system/multi-user.target.wants/* \
 /lib/systemd/system/sockets.target.wants/*initctl* \
 /lib/systemd/system/basic.target.wants/* \
 /lib/systemd/system/anaconda.target.wants/*;
+
+RUN rm /etc/yum.repos.d/* -rf && cd /etc/yum.repos.d/ && curl http://10.239.47.156/docker/os.repo --output os.repo
 
 RUN yum -y upgrade
 RUN yum -y update
