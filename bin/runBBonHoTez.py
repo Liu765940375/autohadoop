@@ -5,6 +5,7 @@ import re
 from cluster.HiveOnTez import *
 from infra.bigbench import *
 
+spark_Phive_component="spark-Phive"
 def deploy_run(custom_conf, use_pat):
     print (colors.LIGHT_BLUE + "Deploy BigBench" + colors.ENDC)
     cluster_file = os.path.join(custom_conf, "slaves.custom")
@@ -25,7 +26,7 @@ def deploy_bigbench(custom_conf):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     update_tez_bb(custom_conf)
-    deploy_bb(default_conf, custom_conf, master, slaves)
+    deploy_bb_(default_conf, custom_conf, master, spark_Phive_component)
 
 def update_tez_bb(custom_conf):
     bb_custom_hive_engineSettings_sql = os.path.join(custom_conf, "BB/engines/hive/conf/engineSettings.sql")
@@ -45,8 +46,11 @@ def replace_conf_run(custom_conf, use_pat):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
     populate_hive_on_tez_conf(custom_conf)
     restart_hive_on_tez(custom_conf)
+    undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
+    deploy_bigbench(custom_conf)
     populate_bb_conf(master, default_conf, custom_conf, beaver_env)
     if use_pat:
         run_BB_PAT(master,slaves, beaver_env)
@@ -57,8 +61,10 @@ def undeploy_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
     undeploy_hive_on_tez(custom_conf)
-    undeploy_bb(master)
+    undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
 
 def usage():
     print("Usage: sbin/runBBonHoTez.sh [action] [path/to/conf] [-pat]/n")

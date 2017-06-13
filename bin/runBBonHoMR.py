@@ -6,12 +6,13 @@ from cluster.HiveOnMR import *
 from cluster.SparkSQL import *
 from infra.bigbench import *
 
+spark_Phive_component="spark-Phive"
 def deploy_bigbench(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     update_mr_bb(custom_conf)
-    deploy_bb(default_conf, custom_conf, master, slaves)
+    deploy_bb_(default_conf, custom_conf, master, spark_Phive_component)
 
 def update_mr_bb(custom_conf):
     bb_custom_hive_engineSettings_sql = os.path.join(custom_conf, "BB/engines/hive/conf/engineSettings.sql")
@@ -26,14 +27,17 @@ def update_mr_bb_settings_sql(conf_file):
     with open(conf_file, 'w') as file_write:
         file_write.write(new_total_line)
 
+
 def replace_conf_run(custom_conf, use_pat):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
     populate_hive_on_mr_conf(custom_conf)
     restart_hive_on_mr(custom_conf)
-    populate_bb_conf(master, default_conf, custom_conf, beaver_env)
+    undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
+    deploy_bigbench(custom_conf)
     if use_pat:
         run_BB_PAT(master, slaves, beaver_env)
     else:
@@ -59,9 +63,10 @@ def undeploy_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
     undeploy_hive_on_mr(custom_conf)
-    undeploy_spark_sql(custom_conf)
-    undeploy_bb(master)
+    undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
 
 def usage():
     print("Usage: sbin/runBBonHoS.sh [action] [path/to/conf] [-pat]/n")
@@ -89,5 +94,5 @@ if __name__ == '__main__':
         undeploy_run(conf_p)
     else:
         usage()
-	exit(0)
+    exit(0)
 

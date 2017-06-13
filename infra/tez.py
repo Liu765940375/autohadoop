@@ -39,7 +39,8 @@ def copy_tez_lib_to_hive(node):
 
 def copy_tez_package_to_hadoop(node):
     print (colors.LIGHT_BLUE + "Copy Tez package to Hadoop" + colors.ENDC)
-    cmd = "$HADOOP_HOME/bin/hadoop fs -mkdir /apps;"
+    cmd = "hadoop dfsadmin -safemode wait;"
+    cmd += "$HADOOP_HOME/bin/hadoop fs -mkdir /apps;"
     cmd += "$HADOOP_HOME/bin/hadoop fs -copyFromLocal /opt/Beaver/tez/share/tez.tar.gz /apps/"
     ssh_execute(node, cmd)
 

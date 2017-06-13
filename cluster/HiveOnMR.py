@@ -42,6 +42,7 @@ def populate_hive_on_mr_conf(custom_conf):
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     update_copy_hadoop_conf(default_conf, custom_conf, master, slaves, beaver_env)
     update_copy_hive_conf(default_conf, custom_conf, master, beaver_env)
+    update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env)
 
 def deploy_hive_on_mr(custom_conf):
     # Deploy Hadoop

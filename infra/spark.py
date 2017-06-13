@@ -50,6 +50,8 @@ def create_related_hdfs_dir(spark_output_conf, master, slaves, beaver_env):
     if spark_eventLog is not None or spark_history is not None:
         start_hadoop_service(master, slaves, beaver_env)
         hadoop_home = beaver_env.get("HADOOP_HOME")
+        print (colors.LIGHT_BLUE + "\nCreate spark eventlog HDFS directory: Waiting for safe mode" + colors.ENDC)
+        ssh_execute(master, hadoop_home + "bin/hadoop dfsadmin -safemode wait")
         if spark_eventLog is not None:
             print (colors.LIGHT_BLUE+ "\nCreate spark eventlog HDFS directory" + colors.ENDC)
             ssh_execute(master, hadoop_home + "/bin/hadoop fs -mkdir -p " + spark_eventLog)

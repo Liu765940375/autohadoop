@@ -178,26 +178,20 @@ def copy_packages(nodes, component, version):
 # Copy "spark-<version>-yarn-shuffle.jar" to all of Hadoop nodes
 def copy_spark_shuffle(slaves, spark_version, hadoop_home):
     package = "spark-" + spark_version + "-yarn-shuffle.jar"
-    download_url = "http://" + download_server + "/software"
-    # if not os.path.isfile(os.path.join(package_path, package)):
-    #     download_url = "http://" + download_server + "/software"
-    #     print (colors.LIGHT_BLUE + "Downloading " + package + " from our repo..." + colors.ENDC)
-    #     os.system("wget --no-proxy -P " + package_path + " " + download_url + "/" + package)
-    # else:
-    #     print (colors.LIGHT_GREEN + "\t" + package + " has already exists in Beaver package" + colors.ENDC)
-    spark_shuffle_lib_dir= "/opt/Beaver/spark"
-    spark_shuffle_lib_path= os.path.join(spark_shuffle_lib_dir,package)
-    download_cmd ="wget --no-proxy -P " + spark_shuffle_lib_dir + " " + download_url + "/" + package
-    des_path = os.path.join(hadoop_home, "share/hadoop/yarn/lib/spark-yarn-shuffle.jar")
-    #cmd = "rm -rf " + des_path + "/spark-*-yarn-shuffle.jar"
-    #des = os.path.join(des_path, package)
-    cmd = "ln -s " + spark_shuffle_lib_path + " " + des_path
+    if not os.path.isfile(os.path.join(package_path, package)):
+        download_url = "http://" + download_server + "/software"
+        print (colors.LIGHT_BLUE + "Downloading " + package + " from our repo..." + colors.ENDC)
+        os.system("wget --no-proxy -P " + package_path + " " + download_url + "/" + package)
+    else:
+        print (colors.LIGHT_GREEN + "\t" + package + " has already exists in Beaver package" + colors.ENDC)
+    des_path = os.path.join(hadoop_home, "share/hadoop/yarn/lib")
+    cmd = "rm -rf " + des_path + "/spark-*-yarn-shuffle.jar"
+    des = os.path.join(des_path, package)
     for node in slaves:
-        print (colors.LIGHT_BLUE + "\tDownload spark-shuffle jar on " + node.hostname + "..." + colors.ENDC)
-       # ssh_execute(node, cmd)
-       # ssh_copy(node, os.path.join(package_path, package), des)
-        ssh_execute(node,download_cmd)
-        ssh_execute(node,cmd)
+        print (colors.LIGHT_BLUE + "\tCopy spark-shuffle jar to " + node.hostname + "..." + colors.ENDC)
+        ssh_execute(node, cmd)
+        ssh_copy(node, os.path.join(package_path, package), des)
+
 
 # Generate final configuration file and copy this files to destination node
 def copy_configurations(nodes, config_path, component, home_path):

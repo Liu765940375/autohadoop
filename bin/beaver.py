@@ -16,7 +16,7 @@ sys.path.append(project_path)
 
 
 default_conf = os.path.join(project_path, "conf")
-
+spark_Phive_component = "spark-Phive"
 
 def undeploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
@@ -29,7 +29,7 @@ def undeploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
     if spark_flg:
         undeploy_spark(master)
     if bb_flg:
-        undeploy_bb(master)
+        deploy_bb_(default_conf, custom_conf, master, spark_Phive_component)
 
 
 def deploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
@@ -45,7 +45,7 @@ def deploy_components(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):
         deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
         copy_lib_for_spark(master, slaves, beaver_env, custom_conf, True)
     if bb_flg:
-        deploy_bb(default_conf, custom_conf, master)
+        deploy_bb_(default_conf, custom_conf, master, spark_Phive_component)
 
 
 def update_component_conf(custom_conf, hadoop_flg, hive_flg, spark_flg, bb_flg):

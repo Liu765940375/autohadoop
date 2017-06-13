@@ -8,43 +8,12 @@ from infra.bigbench import *
 #following package is http://10.239.47.156/spark-Phive/spark-Phive-2.0.0.tar.gz,
 #this package is for to make q05(with ML case) pass
 spark_Phive_component="spark-Phive"
-spark_Phive_version= "2.0.0"
-spark_Phive_pkg=  spark_Phive_component+"-"+spark_Phive_version
 def deploy_bigbench(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
-    deploy_sparkPhive(custom_conf,master)
-    deploy_bb(default_conf, custom_conf, master, slaves)
+    deploy_bb_(default_conf, custom_conf, master, spark_Phive_component)
 
-
-def deploy_sparkPhive(custom_conf,master):
-    download_spark_Phive_pkg(master)
-    update_spark_ml(custom_conf)
-    copy_hive_site(master)
-
-def copy_hive_site(master):
-    ssh_execute(master, "cp /opt/Beaver/hive/conf/hive-site.xml /opt/Beaver/"+spark_Phive_pkg+"/conf")
-
-
-def download_spark_Phive_pkg(master):
-    copy_packages([master],spark_Phive_component,spark_Phive_version)
-
-def update_spark_ml(custom_conf):
-    bb_custom_hive_engineSettings_conf = os.path.join(custom_conf, BB_COMPONENT+"/engines/hive/conf/engineSettings.conf")
-    update_spark_ml_setting(bb_custom_hive_engineSettings_conf)
-
-def update_spark_ml_setting(conf_file):
-    tmp_filename = conf_file + '.tmp'
-    os.system("mv " + conf_file + " " + tmp_filename)
-    with open(tmp_filename, 'r') as file_read:
-        total_line = file_read.read()
-    origin_pattern=r'export BIG_BENCH_ENGINE_HIVE_ML_FRAMEWORK_SPARK_BINARY="spark-submit"'
-    replace_pattern= r'export BIG_BENCH_ENGINE_HIVE_ML_FRAMEWORK_SPARK_BINARY="/opt/Beaver/'+spark_Phive_pkg+'/bin/spark-submit"'
-    new_total_line=re.sub(origin_pattern,replace_pattern,total_line)
-    with open(conf_file, 'w') as file_write:
-        file_write.write(new_total_line)
-    os.system("rm -rf " + tmp_filename)
 
 def replace_conf_run(custom_conf, use_pat):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
@@ -52,7 +21,12 @@ def replace_conf_run(custom_conf, use_pat):
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     populate_hive_on_spark_conf(custom_conf)
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
+    undeploy_spark(master)
+    deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
     restart_hive_on_spark(custom_conf)
+    undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
+    deploy_bigbench(custom_conf)
     populate_bb_conf(master, default_conf, custom_conf, beaver_env)
     if use_pat:
         run_BB_PAT(master, slaves, beaver_env)
@@ -79,12 +53,11 @@ def undeploy_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
-    undeploy_hive_on_spark(custom_conf)
-    undeploy_sparkPhive(master)
-    undeploy_bb(master)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
 
-def undeploy_sparkPhive(master):
-    ssh_execute(master, "rm -rf /opt/Beaver/"+spark_Phive_pkg)
+    undeploy_hive_on_spark(custom_conf)
+    undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
 
 def usage():
     print("Usage: sbin/runBBonHoS.sh [action] [path/to/conf] [-pat]/n")

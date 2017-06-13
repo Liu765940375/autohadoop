@@ -41,7 +41,7 @@ def update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
     ssh_execute(master, "ln -s " + conf_path + "/testbench.settings " + os.path.join(beaver_env.get("TPC_DS_HOME"),"sample-queries-tpcds/testbench.settings"))
     ssh_execute(master, "rm -f " + os.path.join(beaver_env.get("TPC_DS_HOME"),"runSuite.pl"))
     ssh_execute(master, "ln -s " + conf_path + "/runSuite.pl " + os.path.join(beaver_env.get("TPC_DS_HOME"),"runSuite.pl"))
-    ssh_execute(master, "\cp -f " + conf_path + "/settings.xml.bak ~/.m2/settings.xml" )
+    ssh_execute(master, "mkdir ~/.m2;\cp -f " + conf_path + "/settings.xml.bak ~/.m2/settings.xml" )
 #    ssh_execute(master, "\cp -f " + conf_path + "/config " + beaver_env.get("TPC_DS_HOME"))
 
 

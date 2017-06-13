@@ -4,13 +4,16 @@ import sys
 from cluster.SparkSQL import *
 from infra.bigbench import *
 
-
+spark_Phive_component="spark-Phive"
 def deploy_bigbench(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
-    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    deploy_bb(default_conf, custom_conf, master, slaves)
+    #beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    #spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
+    #update_spark_ml(custom_conf)
+    #copy_hive_site(master,spark_Phive_version)
+    deploy_bb_(default_conf, custom_conf, master, spark_Phive_component)
 
 
 def replace_conf_run(custom_conf, use_pat):
@@ -18,8 +21,13 @@ def replace_conf_run(custom_conf, use_pat):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
+    undeploy_spark(master)
+    deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
     populate_spark_sql_conf(custom_conf)
     restart_spark_sql(custom_conf)
+    undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
+    deploy_bigbench(custom_conf)
     populate_bb_conf(master, default_conf, custom_conf, beaver_env)
     if use_pat:
         run_BB_PAT(master, slaves, beaver_env)

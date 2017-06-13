@@ -39,9 +39,11 @@ def populate_hive_on_tez_conf(custom_conf):
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    deploy_tez_internal(default_conf, custom_conf, master, beaver_env)
     update_copy_hadoop_conf(default_conf, custom_conf, master, slaves, beaver_env)
     update_copy_hive_conf(default_conf, custom_conf, master, beaver_env)
-    copy_tez_conf_to_hadoop(default_conf, custom_conf, master, beaver_env)
+    update_copy_spark_conf(master, slaves, default_conf, custom_conf, beaver_env)
+    #copy_tez_conf_to_hadoop(default_conf, custom_conf, master, beaver_env)
 
 def start_hive_on_tez(custom_conf):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")

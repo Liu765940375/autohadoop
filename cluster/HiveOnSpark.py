@@ -14,8 +14,10 @@ def copy_lib_for_spark(master, slaves, beaver_env, custom_conf,  hos):
     defaultFS_value = get_config_value(core_site_file, "fs.defaultFS")
     spark_lib_dir = ""
     if spark_version[0:3] == "1.6" and hos:
+        print("Detected spark version is 1.6")
         spark_lib_dir = "/lib"
     elif spark_version[0:3] == "2.0":
+        print("Detected spark version is 2.0")
         spark_lib_dir = "/jars"
         start_hadoop_service(master, slaves, beaver_env)
         ssh_execute(master, "$HADOOP_HOME/bin/hadoop fs -mkdir /spark-2.0.0-bin-hadoop")
@@ -23,6 +25,8 @@ def copy_lib_for_spark(master, slaves, beaver_env, custom_conf,  hos):
         stop_hadoop_service(master, slaves)
         ssh_execute(master,
                     "echo \"spark.yarn.jars " + defaultFS_value + "/spark-2.0.0-bin-hadoop/*\" >> $SPARK_HOME/conf/spark-defaults.conf")
+    else:
+        print("Couldn't detect spark version, HoS may can't run correctly.")
     ssh_execute(master, "cp -f " + beaver_env.get("SPARK_HOME") + spark_lib_dir + "/*" + " " + beaver_env.get("HIVE_HOME") + "/lib")
 
 

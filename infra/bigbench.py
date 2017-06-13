@@ -7,10 +7,11 @@ BB_COMPONENT = "BB"
 PAT_COMPONENT = "pat"
 
 
-def deploy_bb(default_conf, custom_conf, master, slaves):
+def deploy_bb_(default_conf, custom_conf, master, spark_Phive_component):
     clean_bb(master)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     copy_packages([master], BB_COMPONENT, beaver_env.get("BB_VERSION"))
+    deploy_sparkPhiveI(custom_conf, master, spark_Phive_component)
     update_copy_bb_conf(master, default_conf, custom_conf, beaver_env)
     deploy_pat(custom_conf, master)
 
@@ -46,12 +47,13 @@ def clean_bb(master):
     ssh_execute(master, "rm -rf /opt/Beaver/BB*")
 
 
+def undeploy_bb_(master,spark_Phive_version,spark_Phive_component):
+    clean_bb(master)
+    undeploy_sparkPhiveI(master,spark_Phive_version,spark_Phive_component)
+
+
 def clean_pat(master):
     ssh_execute(master, "rm -rf /opt/Beaver/pat*")
-
-
-def undeploy_bb(master):
-    clean_bb(master)
 
 
 def run_BB(master, beaver_env):
@@ -74,6 +76,44 @@ def get_bb_log_dir(beaver_env):
 def copy_res(master, log_dir, res_dir):
     print("Copying result from " + log_dir + "to dir " + res_dir)
     ssh_execute(master, "mkdir -p " + res_dir + " && cp -r " + log_dir + " " + res_dir)
+
+def deploy_sparkPhiveI(custom_conf,master,spark_Phive_component):
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
+    print (colors.LIGHT_BLUE + "/tDeploying " + spark_Phive_component + "Version: " + spark_Phive_version + " from our repo..." + colors.ENDC)
+    download_spark_Phive_pkg(master,spark_Phive_version,spark_Phive_component)
+    update_spark_ml(custom_conf,spark_Phive_component)
+    copy_hive_site(master,spark_Phive_version,spark_Phive_component)
+
+def copy_hive_site(master,spark_Phive_version,spark_Phive_component):
+    ssh_execute(master, "ln -s /opt/Beaver/hive/conf/hive-site.xml /opt/Beaver/"+spark_Phive_component+"-"+spark_Phive_version+"/conf/")
+    if spark_Phive_version[0:3] == "1.6":
+        print("Link spark conf to Spark-PHive for 1.6")
+        ssh_execute(master, "ln -s /opt/Beaver/spark/conf/spark-defaults.conf /opt/Beaver/"+spark_Phive_component+"-"+spark_Phive_version+"/conf/")
+
+def download_spark_Phive_pkg(master,spark_Phive_version,spark_Phive_component):
+    copy_packages([master],spark_Phive_component,spark_Phive_version)
+
+def update_spark_ml(custom_conf,spark_Phive_component):
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
+    bb_custom_hive_engineSettings_conf = os.path.join(custom_conf, BB_COMPONENT+"/engines/hive/conf/engineSettings.conf")
+    update_spark_ml_setting(bb_custom_hive_engineSettings_conf,spark_Phive_version,spark_Phive_component)
+
+def update_spark_ml_setting(conf_file,spark_Phive_version,spark_Phive_component):
+    tmp_filename = conf_file + '.tmp'
+    os.system("mv " + conf_file + " " + tmp_filename)
+    with open(tmp_filename, 'r') as file_read:
+        total_line = file_read.read()
+    origin_pattern=r'export BIG_BENCH_ENGINE_HIVE_ML_FRAMEWORK_SPARK_BINARY="spark-submit"'
+    replace_pattern= r'export BIG_BENCH_ENGINE_HIVE_ML_FRAMEWORK_SPARK_BINARY="/opt/Beaver/'+spark_Phive_component+"-"+spark_Phive_version+'/bin/spark-submit"'
+    new_total_line=re.sub(origin_pattern,replace_pattern,total_line)
+    with open(conf_file, 'w') as file_write:
+        file_write.write(new_total_line)
+    os.system("rm -rf " + tmp_filename)
+
+def undeploy_sparkPhiveI(master,spark_Phive_version,spark_Phive_component):
+    ssh_execute(master, "rm -rf /opt/Beaver/"+spark_Phive_component+"-"+spark_Phive_version)
 
 
 def run_BB_PAT(master, slaves, beaver_env):
