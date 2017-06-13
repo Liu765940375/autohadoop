@@ -58,14 +58,21 @@ def run_BB(master, beaver_env):
     print (colors.LIGHT_BLUE + "Run BigBench" + colors.ENDC)
     # in order to pass q05, we can not export SPARK_HOME so here to unset this variable
     ssh_execute(master, "unset SPARK_HOME;" + beaver_env.get("BB_HOME") + "/bin/bigBench runBenchmark")
-    copy_res(master, beaver_env)
+    copy_res(master, get_bb_log_dir(beaver_env), get_res_dir(beaver_env))
 
-
-def copy_res(master, beaver_env):
+def get_res_dir(beaver_env):
     res_dir = os.path.join(beaver_env.get("RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                         time.localtime())))
-    print("Copying result to dir " + res_dir)
+    return res_dir
+
+
+def get_bb_log_dir(beaver_env):
     log_dir = os.path.join(beaver_env.get("BB_HOME"), "logs")
+    return log_dir
+
+
+def copy_res(master, log_dir, res_dir):
+    print("Copying result from " + log_dir + "to dir " + res_dir)
     ssh_execute(master, "mkdir -p " + res_dir + " && cp -r " + log_dir + " " + res_dir)
 
 
@@ -96,3 +103,7 @@ def run_BB_PAT(master, slaves, beaver_env):
             tree.write(pat_config_xml_conf)
             cmd = "cd " + pat_home + "/PAT-post-processing;./pat-post-process.py;"
             ssh_execute(master, cmd)
+    res_dir = get_res_dir(beaver_env)
+    pat_log_dir = os.path.join(pat_home, "/PAT-collecting-data/results/")
+    copy_res(master, get_bb_log_dir(beaver_env), res_dir)
+    copy_res(master, pat_log_dir, res_dir)
