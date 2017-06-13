@@ -46,7 +46,7 @@ spawn ssh $master_ip
 expect {
         "(yes/no)" {send "yes\r"; exp_continue}
         "password:" {send "bdpe123\r"; exp_continue}
-        "~]#" {send "source /home/$project_name/bin/Python_install.sh;source /home/$project_name/bin/setup-env.sh\r"}
+        "~]#" {send "source /home/$project_name/bin/setup-env.sh\r"}
 }
 expect {
         "~]#" {send "cp -r /home/$project_name/conf/  /opt/tezconf;echo \"$master_hostname $master_ip root bdpe123 master\" > /opt/tezconf/slaves.custom;echo \"$slave1_hostname $slave1_ip root bdpe123 slave\" >> /opt/tezconf/slaves.custom;sed -i 's/SPARK_VERSION=2.0.0/SPARK_VERSION=2.0.0-hive/g' /opt/tezconf/env;sed -i 's/power_test_0=1-30/power_test_0=1-30/g' /opt/tezconf/BB/conf/bigBench.properties\r"}
@@ -58,7 +58,7 @@ expect {
 	"~]#" {send "echo \"\rspark.master yarn\">>/opt/tezconf/spark/spark-defaults.conf;echo \"spark.deploy.mode client\">>/opt/tezconf/spark/spark-defaults.conf;echo \"spark.sql.hive.metastore.version 1.2.1\">>/opt/tezconf/spark/spark-defaults.conf;echo \"spark.sql.warehouse.dir hdfs:\/\/master_hostname:9000\/spark-warehouse\">>/opt/tezconf/spark/spark-defaults.conf;echo \"set hive.mapred.mode=nonstrict;\">>/opt/tezconf/BB/engines/hive/queries/q24/engineLocalSettings.sql;sed -i 's/-- set hive.mapjoin.localtask.max.memory.usage=0.999;/set hive.mapjoin.localtask.max.memory.usage=0.999;/g' /opt/tezconf/BB/engines/hive/conf/engineSettings.sql;sed -i 's/set hive.auto.convert.join;/set hive.auto.convert.join=false;/g' /opt/tezconf/BB/engines/hive/conf/engineSettings.sql;sed -i 's%<value>3<\/value>%<value>1<\/value>%g' /opt/tezconf/hadoop/hdfs-site.xml;cp -r /opt/tezconf/hive/hive-site.xml /opt/tezconf/spark/;sed -i 's/local\\\\\[\\\\\*\\\\\]/yarn/g' /opt/tezconf/BB/engines/spark_sql/conf/engineSettings.conf;sed -i 's%\\\$SPARK_HOME%/opt/Beaver/spark%g' /opt/tezconf/BB/engines/spark_sql/conf/engineSettings.conf;sed -i 's%spark-submit%\/opt\/Beaver\/spark\/bin\/spark-submit%g' /opt/tezconf/BB/engines/hive/conf/engineSettings.conf\r"}
 }
 expect {
-        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runBBonHoTez.py deploy_run /opt/tezconf/\r"}
+        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runBBonHoTez.py deploy_run /opt/tezconf/ -pat\r"}
 }
 expect {
         "]#" {send "cd /home/$project_name/itest/;source test_utils.sh;service_check;cp log.txt /opt/Beaver/result/;cat log.txt;exit\r"}

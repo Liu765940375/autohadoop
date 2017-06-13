@@ -46,7 +46,7 @@ spawn ssh $master_ip
 expect {
         "(yes/no)" {send "yes\r"; exp_continue}
         "password:" {send "bdpe123\r"; exp_continue}
-        "~]#" {send "source /home/$project_name/bin/Python_install.sh;source /home/$project_name/bin/setup-env.sh\r"}
+        "~]#" {send "source /home/$project_name/bin/setup-env.sh\r"}
 }
 expect {
         "~]#" {send "cp -r /home/$project_name/conf/  /opt/sqlconf;echo \"$master_hostname $master_ip root bdpe123 master\" > /opt/sqlconf/slaves.custom;echo \"$slave1_hostname $slave1_ip root bdpe123 slave\" >> /opt/sqlconf/slaves.custom;sed -i 's/SPARK_VERSION=2.0.0/SPARK_VERSION=2.0.0-hive/g' /opt/sqlconf/env;sed -i 's/power_test_0=1-30/power_test_0=1-30/g' /opt/sqlconf/BB/conf/bigBench.properties\r"}
@@ -58,7 +58,7 @@ expect {
 	"~]#" {send "echo \"\rspark.master yarn\">>/opt/sqlconf/spark/spark-defaults.conf;echo \"spark.deploy.mode client\">>/opt/sqlconf/spark/spark-defaults.conf;echo \"spark.sql.hive.metastore.version 1.2.1\">>/opt/sqlconf/spark/spark-defaults.conf;echo \"spark.sql.warehouse.dir hdfs:\/\/master_hostname:9000\/spark-warehouse\">>/opt/sqlconf/spark/spark-defaults.conf;sed -i 's%<value>3<\/value>%<value>1<\/value>%g' /opt/sqlconf/hadoop/hdfs-site.xml;sed -i '/<configuration>/a<property><name>hive.metastore.warehouse.dir<\/name><value>hdfs:\/\/master_hostname:9000\/user\/hive\/warehouse<\/value><\/property>' /opt/sqlconf/hive/hive-site.xml;cp -r /opt/sqlconf/hive/hive-site.xml /opt/sqlconf/spark/;sed -i '/<configuration>/a<property><name>mapreduce.jobtracker.http.address<\/name><value>master_hostname:50030<\/value><\/property>' /opt/sqlconf/hadoop/mapred-site.xml;sed -i '/<configuration>/a<property><name>mapred.job.tracker<\/name><value>master_hostname:9001<\/value><\/property>' /opt/sqlconf/hadoop/mapred-site.xml;sed -i 's/local\\\\\[\\\\\*\\\\\]/yarn/g' /opt/sqlconf/BB/engines/spark_sql/conf/engineSettings.conf;sed -i 's%\\\$SPARK_HOME%/opt/Beaver/spark%g' /opt/sqlconf/BB/engines/spark_sql/conf/engineSettings.conf;sed -i 's%spark-submit%\/opt\/Beaver\/spark\/bin\/spark-submit%g' /opt/sqlconf/BB/engines/hive/conf/engineSettings.conf;sed -i 's%hive%spark_sql%g' /opt/sqlconf/BB/conf/userSettings.conf\r"}
 }
 expect {
-        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runBBonSparkSQL.py deploy_run /opt/sqlconf/\r"}
+        "~]#" {send "rm -rf /etc/yum.repos.d/CentOS-*;cd /home/$project_name/;bin/runBBonSparkSQL.py deploy_run /opt/sqlconf/ -pat\r"}
 }
 expect {
         "]#" {send "cd /home/$project_name/itest/;source test_utils.sh;service_check;cp log.txt /opt/Beaver/result/;cat log.txt;exit\r"}
