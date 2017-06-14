@@ -128,7 +128,7 @@ def undeploy_sparkPhiveI(master,spark_Phive_version,spark_Phive_component):
 
 
 def run_BB_PAT(master, slaves, beaver_env, custom_conf):
-    print (colors.LIGHT_BLUE + "run pat " + colors.ENDC)
+    print (colors.LIGHT_BLUE + "Run BB with PAT: " + colors.ENDC)
     pat_home = beaver_env.get("PAT_HOME")
     output_conf = os.path.join(custom_conf, "output/")
     bb_out_path = os.path.join(output_conf, BB_COMPONENT)
@@ -149,11 +149,13 @@ def run_BB_PAT(master, slaves, beaver_env, custom_conf):
     for i in range(len(bigBench_command)/2):
         cmd = "sed -i 's/CMD_PATH/#CMD_PATH/g' " + pat_home + "/PAT-collecting-data/config;"
         if bigBench_command[i*2+1] != " ":
+            print (colors.LIGHT_BLUE + "Running Benchmark with PAT: " + bigBench_command[i*2] + colors.ENDC)
             cmd += "echo CMD_PATH: " + bigBench_command[i*2+1]+ " >> " + pat_home + "/PAT-collecting-data/config;"
             cmd += "unset SPARK_HOME;cd " + pat_home + "/PAT-collecting-data;./pat run " + bigBench_command[i*2]
             ssh_execute(master, cmd)
     for i in range(len(bigBench_command) / 2):
         if bigBench_command[i * 2 + 1] != " ":
+            print (colors.LIGHT_BLUE + "Generating PAT report: " + bigBench_command[i * 2] + colors.ENDC)
             root.find("source").text = pat_home + "/PAT-collecting-data/results/" + bigBench_command[i*2] + "/instruments"
             tree.write(pat_config_xml_conf)
             ssh_copy(master, pat_config_xml_conf, pat_home + "/PAT-post-processing/config.xml")
