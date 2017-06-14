@@ -12,8 +12,8 @@ def deploy_bb_(default_conf, custom_conf, master, spark_Phive_component):
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     copy_packages([master], BB_COMPONENT, beaver_env.get("BB_VERSION"))
     deploy_sparkPhiveI(custom_conf, master, spark_Phive_component)
-    update_copy_bb_conf(master, default_conf, custom_conf, beaver_env)
     deploy_pat(custom_conf, master)
+    update_copy_bb_conf(master, default_conf, custom_conf, beaver_env)
 
 
 def deploy_pat(custom_conf, master):
@@ -41,7 +41,18 @@ def update_copy_bb_conf(master, default_conf, custom_conf, beaver_env):
     remote_tar_file = os.path.join(bb_home, bb_tar_file_name)
     ssh_copy(master, bb_tar_file, remote_tar_file)
     ssh_execute(master, "tar xf " + remote_tar_file + " -C " + bb_home)
+    populate_pat_conf(default_conf, custom_conf)
 
+
+def populate_pat_conf(default_conf, custom_conf):
+    pat_custom_conf = os.path.join(custom_conf, PAT_COMPONENT)
+    pat_default_conf = os.path.join(default_conf, PAT_COMPONENT)
+    output_conf = os.path.join(custom_conf, "output/")
+    pat_output_conf = os.path.join(output_conf, PAT_COMPONENT)
+    os.system("rm -rf " + pat_output_conf)
+    os.system("cp -r " + pat_default_conf + " " + pat_output_conf)
+    os.system("cp -r " + pat_custom_conf + " " + pat_output_conf)
+    return pat_output_conf
 
 def clean_bb(master):
     ssh_execute(master, "rm -rf /opt/Beaver/BB*")
@@ -116,12 +127,14 @@ def undeploy_sparkPhiveI(master,spark_Phive_version,spark_Phive_component):
     ssh_execute(master, "rm -rf /opt/Beaver/"+spark_Phive_component+"-"+spark_Phive_version)
 
 
-def run_BB_PAT(master, slaves, beaver_env):
+def run_BB_PAT(master, slaves, beaver_env, custom_conf):
     print (colors.LIGHT_BLUE + "run pat " + colors.ENDC)
     pat_home = beaver_env.get("PAT_HOME")
+    output_conf = os.path.join(custom_conf, "output/")
+    bb_out_path = os.path.join(output_conf, BB_COMPONENT)
     bb_home = beaver_env.get("BB_HOME")
-    pat_config_xml_conf = os.path.join(pat_home, "PAT-post-processing/config.xml")
-    print pat_config_xml_conf
+    pat_output_path = os.path.join(output_conf, PAT_COMPONENT)
+    pat_config_xml_conf = os.path.join(pat_output_path, "PAT-post-processing/config.xml")
     tree = ET.parse(pat_config_xml_conf)
     root = tree.getroot()
     all_nodes_content = "ALL_NODES: "
@@ -131,7 +144,7 @@ def run_BB_PAT(master, slaves, beaver_env):
     cmd += "sed -i 's/ALL_NODES/#ALL_NODES/g' " + pat_home + "/PAT-collecting-data/config;"
     cmd += "echo " + all_nodes_content + " >> " + pat_home + "/PAT-collecting-data/config;"
     ssh_execute(master, cmd)
-    bigBench_properties = get_env_list(bb_home + "/conf/bigBench.properties")
+    bigBench_properties = get_env_list(bb_out_path + "/conf/bigBench.properties")
     bigBench_command = read_bigBench_workloads(bigBench_properties, bb_home)
     for i in range(len(bigBench_command)/2):
         cmd += "sed -i 's/CMD_PATH/#CMD_PATH/g' " + pat_home + "/PAT-collecting-data/config;"
@@ -141,6 +154,7 @@ def run_BB_PAT(master, slaves, beaver_env):
             ssh_execute(master, cmd)
             root.find("source").text = pat_home + "/PAT-collecting-data/results/" + bigBench_command[i*2] + "/instruments"
             tree.write(pat_config_xml_conf)
+            ssh_copy(master, pat_config_xml_conf, pat_home + "/PAT-post-processing/config.xml")
             cmd = "cd " + pat_home + "/PAT-post-processing;./pat-post-process.py;"
             ssh_execute(master, cmd)
     res_dir = get_res_dir(beaver_env)

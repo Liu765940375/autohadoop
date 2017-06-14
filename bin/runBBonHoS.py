@@ -40,12 +40,12 @@ def deploy_run(custom_conf, use_pat):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    undeploy_hive_on_spark(custom_conf)
-    deploy_hive_on_spark(custom_conf)
-    start_hive_on_spark(custom_conf)
+    #undeploy_hive_on_spark(custom_conf)
+    #deploy_hive_on_spark(custom_conf)
+    #start_hive_on_spark(custom_conf)
     deploy_bigbench(custom_conf)
     if use_pat:
-        run_BB_PAT(master, slaves, beaver_env)
+        run_BB_PAT(master, slaves, beaver_env, custom_conf)
     else:
         run_BB(master, beaver_env)
 
