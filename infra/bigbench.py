@@ -147,11 +147,13 @@ def run_BB_PAT(master, slaves, beaver_env, custom_conf):
     bigBench_properties = get_env_list(bb_out_path + "/conf/bigBench.properties")
     bigBench_command = read_bigBench_workloads(bigBench_properties, bb_home)
     for i in range(len(bigBench_command)/2):
-        cmd += "sed -i 's/CMD_PATH/#CMD_PATH/g' " + pat_home + "/PAT-collecting-data/config;"
+        cmd = "sed -i 's/CMD_PATH/#CMD_PATH/g' " + pat_home + "/PAT-collecting-data/config;"
         if bigBench_command[i*2+1] != " ":
             cmd += "echo CMD_PATH: " + bigBench_command[i*2+1]+ " >> " + pat_home + "/PAT-collecting-data/config;"
             cmd += "unset SPARK_HOME;cd " + pat_home + "/PAT-collecting-data;./pat run " + bigBench_command[i*2]
             ssh_execute(master, cmd)
+    for i in range(len(bigBench_command) / 2):
+        if bigBench_command[i * 2 + 1] != " ":
             root.find("source").text = pat_home + "/PAT-collecting-data/results/" + bigBench_command[i*2] + "/instruments"
             tree.write(pat_config_xml_conf)
             ssh_copy(master, pat_config_xml_conf, pat_home + "/PAT-post-processing/config.xml")
