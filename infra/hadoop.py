@@ -55,8 +55,8 @@ def display_hadoop_perf(project_path, hadoop_home):
 def generate_slaves(slaves, conf_dir):
     with open(os.path.join(conf_dir, "slaves"), "w") as f:
         for node in slaves:
-            if node.role == "slave":
-                f.write(node.ip + "\n")
+            #if node.role == "slave":
+            f.write(node.ip + "\n")
 
 # merge configuration file
 def update_hadoop_conf(default_conf, custom_conf, master, slaves):
