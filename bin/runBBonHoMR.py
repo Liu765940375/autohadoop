@@ -39,7 +39,7 @@ def replace_conf_run(custom_conf, use_pat):
     undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
     deploy_bigbench(custom_conf)
     if use_pat:
-        run_BB_PAT(master, slaves, beaver_env)
+        run_BB_PAT(master, slaves, beaver_env, custom_conf)
     else:
         run_BB(master, beaver_env)
 
@@ -55,7 +55,7 @@ def deploy_run(custom_conf, use_pat):
     start_hive_on_mr(custom_conf)
     deploy_bigbench(custom_conf)
     if use_pat:
-        run_BB_PAT(master, slaves, beaver_env)
+        run_BB_PAT(master, slaves, beaver_env, custom_conf)
     else:
         run_BB(master, beaver_env)
 

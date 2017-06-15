@@ -17,7 +17,7 @@ def deploy_run(custom_conf, use_pat):
     start_hive_on_tez(custom_conf)
     deploy_bigbench(custom_conf)
     if use_pat:
-        run_BB_PAT(master, slaves, beaver_env)
+        run_BB_PAT(master, slaves, beaver_env, custom_conf)
     else:
         run_BB(master, beaver_env)
 
@@ -53,7 +53,7 @@ def replace_conf_run(custom_conf, use_pat):
     deploy_bigbench(custom_conf)
     populate_bb_conf(master, default_conf, custom_conf, beaver_env)
     if use_pat:
-        run_BB_PAT(master,slaves, beaver_env)
+        run_BB_PAT(master,slaves, beaver_env, custom_conf)
     else:
         run_BB(master, beaver_env)
 
