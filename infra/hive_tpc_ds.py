@@ -29,20 +29,23 @@ def populate_hive_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
 
 
 def update_copy_tpc_ds_conf(master, default_conf, custom_conf, beaver_env):
-    tpc_ds_custom_conf = os.path.join(custom_conf, TPC_DS_COMPONENT)
-    tpc_ds_default_conf = os.path.join(default_conf, TPC_DS_COMPONENT)
-    output_tpc_ds_conf = update_conf(TPC_DS_COMPONENT, default_conf, custom_conf)
-    conf_path = os.path.join(beaver_env.get("TPC_DS_HOME"), str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())))
-    ssh_execute(master, "mkdir -p " + conf_path)
-    tpc_ds_output_conf = glob.glob(output_tpc_ds_conf + "/*")
-    for file in tpc_ds_output_conf:
-        ssh_copy(master, file, conf_path + "/" + os.path.basename(file))
-    ssh_execute(master, "rm -f " + os.path.join(beaver_env.get("TPC_DS_HOME"),"sample-queries-tpcds/testbench.settings"))
-    ssh_execute(master, "ln -s " + conf_path + "/testbench.settings " + os.path.join(beaver_env.get("TPC_DS_HOME"),"sample-queries-tpcds/testbench.settings"))
-    ssh_execute(master, "rm -f " + os.path.join(beaver_env.get("TPC_DS_HOME"),"runSuite.pl"))
-    ssh_execute(master, "ln -s " + conf_path + "/runSuite.pl " + os.path.join(beaver_env.get("TPC_DS_HOME"),"runSuite.pl"))
-    ssh_execute(master, "mkdir ~/.m2;\cp -f " + conf_path + "/settings.xml.bak ~/.m2/settings.xml" )
-#    ssh_execute(master, "\cp -f " + conf_path + "/config " + beaver_env.get("TPC_DS_HOME"))
+    ds_custom_conf = os.path.join(custom_conf, TPC_DS_COMPONENT)
+    ds_default_conf = os.path.join(default_conf, TPC_DS_COMPONENT)
+    output_conf = os.path.join(custom_conf, "output/")
+    ds_output_conf = os.path.join(output_conf, TPC_DS_COMPONENT)
+
+    os.system("rm -rf " + ds_output_conf)
+    os.system("cp -r " + ds_default_conf + " " + output_conf)
+    os.system("cp -r " + ds_custom_conf + " " + output_conf)
+    ds_tar_file_name = "ds.conf.tar"
+    ds_tar_file = os.path.join(output_conf, ds_tar_file_name)
+    os.system("cd " + ds_output_conf + ";" + "tar cf " + ds_tar_file + " *")
+    ds_home = beaver_env.get("TPC_DS_HOME")
+    remote_tar_file = os.path.join(ds_home, ds_tar_file_name)
+    ssh_copy(master, ds_tar_file, remote_tar_file)
+    ssh_execute(master, "tar xf " + remote_tar_file + " -C " + ds_home)
+
+    ssh_execute(master, "mkdir ~/.m2;\cp -f " + ds_home + "/settings.xml.bak ~/.m2/settings.xml" )
 
 
 '''
