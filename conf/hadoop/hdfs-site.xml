@@ -33,4 +33,37 @@
                 <name>dfs.permissions</name>
                 <value>false</value>
         </property>
+<!--2017-07-06  Baseline performance-->
+  <property>
+    <name>dfs.datanode.handler.count</name>
+    <value>30</value>
+  </property>
+  <property>
+    <name>dfs.namenode.handler.count</name>
+    <value>60</value>
+  </property>
+  <property>
+    <name>dfs.namenode.service.handler.count</name>
+    <value>30</value>
+  </property>
+  <property>
+    <name>dfs.datanode.max.xcievers</name>
+    <value>8192</value>
+  </property>
+  <property>
+        <name>dfs.datanode.max.transfer.threads</name>
+        <value>65536</value>
+    </property>
+  <property>
+        <name>dfs.socket.timeout</name>
+        <value>1200000</value>
+    </property>
+    <property>
+        <name>dfs.datanode.socket.write.timeout</name>
+        <value>1200000</value>
+    </property>
+    <property>
+        <name>dfs.block.size</name>
+        <value>268435456</value>
+    </property>
 </configuration>

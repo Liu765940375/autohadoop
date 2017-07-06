@@ -31,5 +31,9 @@
         <name>hadoop.proxyuser.root.hosts</name>
         <value>*</value>
     </property>
-
+<!-- 2017-07-06  Baseline performance. -->
+  <property>
+        <name>io.file.buffer.size</name>
+        <value>131072</value>
+    </property>
 </configuration>
