@@ -24,14 +24,21 @@ def replace_conf_run(custom_conf):
 
 
 def deploy_run(custom_conf):
+    deploy_run_internal(custom_conf, True)
+
+def deploy_run_without_hadoop(custom_conf):
+    deploy_run_internal(custom_conf, False)
+
+def deploy_run_internal(custom_conf, with_hadoop):
     print (colors.LIGHT_BLUE + "Deploy TPC-DS" + colors.ENDC)
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    undeploy_hive_on_spark(custom_conf)
-    deploy_hive_on_spark(custom_conf)
-    start_hive_on_spark(custom_conf)
+    if with_hadoop:
+        undeploy_hive_on_spark(custom_conf)
+    deploy_hive_on_spark_internal(custom_conf, with_hadoop)
+    start_hive_on_spark_internal(custom_conf, with_hadoop)
     deploy_hive_tpc_ds(default_conf, custom_conf, master)
     run_hive_tpc_ds(master, custom_conf, beaver_env)
 
@@ -62,6 +69,8 @@ if __name__ == '__main__':
         replace_conf_run(conf_p)
     elif action == "deploy_run":
         deploy_run(conf_p)
+    elif action == "deploy_run_without_hadoop":
+        deploy_run_without_hadoop(conf_p)
     elif action == "undeploy":
         undeploy_run(conf_p)
     else:
