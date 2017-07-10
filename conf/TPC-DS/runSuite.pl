@@ -15,6 +15,7 @@ my $SCRIPT_PATH = dirname( __FILE__ );
 dieWithUsage("one or more parameters not defined") unless @ARGV >= 1;
 my $suite = shift;
 my $scale = shift || 2;
+my $number = shift;
 dieWithUsage("suite name required") unless $suite eq "tpcds" or $suite eq "tpch";
 
 chdir $SCRIPT_PATH;
@@ -23,20 +24,28 @@ if( $suite eq 'tpcds' ) {
 } else {
 	chdir 'sample-queries-tpch';
 } # end if
-my @queries = glob '*.sql';
-
-my $db = { 
+#my @queries = glob '*.sql';
+my @queries = ();
+if ( $number ) {
+    push @queries, split(',',$number);
+} else {
+    push @queries, glob '*.sql';
+}
+my $db = {
 	'tpcds' => "tpcds_bin_partitioned_orc_$scale",
 	'tpch' => "tpch_flat_orc_$scale"
 };
 
 print "filename,status,time,rows\n";
 for my $query ( @queries ) {
+	if ( $query =~ /^\d+$/ ) {
+           $query = "query$query.sql";
+    }
 	my $logname = "$query.log";
 	my $cmd="echo 'use $db->{${suite}}; source $query;' | hive -i testbench.settings --hiveconf spark.app.name=$query 2>&1  | tee $query.log";
 #	my $cmd="cat $query.log";
 	#print $cmd ; exit;
-	
+
 	my $hiveStart = time();
 
 	my @hiveoutput=`$cmd`;
@@ -46,12 +55,12 @@ for my $query ( @queries ) {
 	my $hiveTime = $hiveEnd - $hiveStart;
 	foreach my $line ( @hiveoutput ) {
 		if( $line =~ /Time taken:\s+([\d\.]+)\s+seconds,\s+Fetched:\s+(\d+)\s+row/ ) {
-			print "$query,success,$hiveTime,$2\n"; 
-		} elsif( 
+			print "$query,success,$hiveTime,$2\n";
+		} elsif(
 			$line =~ /^FAILED: /
-			# || /Task failed!/ 
+			# || /Task failed!/
 			) {
-			print "$query,failed,$hiveTime\n"; 
+			print "$query,failed,$hiveTime\n";
 		} # end if
 	} # end while
 } # end for
