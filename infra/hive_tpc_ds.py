@@ -109,12 +109,8 @@ def run_hive_tpc_ds(master, custom_conf, beaver_env):
         generate_tpc_ds_data(master, tpc_ds_home, scale, data_format)
     tpc_ds_result = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",
                                                                      time.localtime())))
-<<<<<<< HEAD
-    cmd = "mkdir -p " + tpc_ds_result + ";cd " + tpc_ds_home + ";perl runSuite.pl tpcds " + scale + " >> " + tpc_ds_result + "/result.log;"
-=======
     # cmd = "mkdir -p " + tpc_ds_result + ";cd " + tpc_ds_home + ";perl runSuite.pl tpcds " + scale + " >> " + tpc_ds_result + "/result.log;" + "\cp -rf " +tpc_ds_result + "/result.log" + " /opt/Beaver/;"
     cmd = "mkdir -p " + tpc_ds_result + ";cd " + tpc_ds_home + ";perl runSuite.pl tpcds " + scale +" " + queries + " >> " + tpc_ds_result + "/result.log;" + "\cp -rf " +tpc_ds_result + "/result.log" + " /opt/Beaver/;"
->>>>>>> 6c31e15... To specify a separate query to run for TPC-DS
     ssh_execute(master, cmd)
     copy_res_hive_tpc_ds(master, beaver_env, tpc_ds_result)
 

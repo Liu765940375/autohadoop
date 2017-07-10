@@ -3,7 +3,4 @@ queries 2,3,4
 format orc
 build yes
 generate yes
-<<<<<<< HEAD
-table_dir tpcds
-=======
->>>>>>> 6c31e15... To specify a separate query to run for TPC-DS
+
