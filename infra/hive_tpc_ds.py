@@ -115,6 +115,25 @@ def run_hive_tpc_ds(master, custom_conf, beaver_env):
     copy_res_hive_tpc_ds(master, beaver_env, tpc_ds_result)
 
 
+def generate_tpc_ds_data_onhive(master, custom_conf, beaver_env):
+    tpc_ds_home = beaver_env.get("TPC_DS_HOME")
+    tpc_ds_config_file = os.path.join(custom_conf, "TPC-DS/config")
+    config_dict = get_configs_from_properties(tpc_ds_config_file)
+    scale = config_dict.get("scale")
+    build_flg = config_dict.get("build")
+    generate_flg = config_dict.get("generate")
+    data_format = config_dict.get("format")
+    if build_flg == "yes":
+        build_tpc_ds(master, tpc_ds_home)
+    if generate_flg == "yes":
+        if data_format == "":
+            print(colors.LIGHT_RED + "Please set the format in <custom_conf>/TPC-DS/config file" + colors.ENDC)
+            return
+        if int(scale) < 2:
+            print(colors.LIGHT_RED + "The scale in <custom_conf>/TPC-DS/config file must greater than 1" + colors.ENDC)
+            return
+        generate_tpc_ds_data(master, tpc_ds_home, scale, data_format)
+
 def copy_res_hive_tpc_ds(master, beaver_env, res_dir):
     print("Collect Hive TPC_DS benchmark result")
     tpc_ds_home = beaver_env.get("TPC_DS_HOME")

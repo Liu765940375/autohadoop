@@ -46,7 +46,7 @@ def update_copy_presto_conf(default_conf, custom_conf, master, slaves):
     for node in slaves:
         if node is master:
             conf_path = "/opt/Beaver/presto/" + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
-            cmd = "mkdir -p " + conf_path + ";ln -s " + conf_path + " /opt/Beaver/presto/etc"
+            cmd = "mkdir -p " + conf_path + "/catalog;ln -s " + conf_path + " /opt/Beaver/presto/etc"
             ssh_execute(node, cmd)
             ssh_copy(node, os.path.join(output_presto_conf, "log.properties"), "/opt/Beaver/presto/etc/log.properties")
             for file in os.listdir(output_presto_conf):
@@ -59,9 +59,19 @@ def update_copy_presto_conf(default_conf, custom_conf, master, slaves):
                 if file.__eq__("node.properties"):
                     replace_line_in_bak(os.path.join(output_presto_conf, file), os.path.join(output_presto_conf, file + ".bak"), {"xxxxxx":node.hostname})
                     ssh_copy(node, os.path.join(output_presto_conf, file + ".bak"), "/opt/Beaver/presto/etc/node.properties")
+                if file.__eq__("suite.json"):
+                    tpc_ds_config_file = os.path.join(custom_conf, "TPC-DS/config")
+                    config_array = get_configs_from_properties(tpc_ds_config_file)
+                    scale = config_array.get("scale")
+                    data_format = config_array.get("format")
+                    replace_line_in_bak(os.path.join(output_presto_conf, file),os.path.join(output_presto_conf, file + ".bak"), {"{fileformat}":data_format, "{scale}":scale})
+                    ssh_copy(node, os.path.join(output_presto_conf, file + ".bak"),"/opt/Beaver/presto/suite.json")
+                if file.__eq__("hive.properties"):
+                    replace_line_in_bak(os.path.join(output_presto_conf, file), os.path.join(output_presto_conf, file + ".bak"), {"{master_hostname}":node.hostname})
+                    ssh_copy(node, os.path.join(output_presto_conf, file + ".bak"),"/opt/Beaver/presto/etc/catalog/hive.properties")
         else:
             conf_path = "/opt/Beaver/presto/" + str(time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
-            cmd = "mkdir -p " + conf_path + ";ln -s " + conf_path + " /opt/Beaver/presto/etc"
+            cmd = "mkdir -p " + conf_path + "/catalog;ln -s " + conf_path + " /opt/Beaver/presto/etc"
             ssh_execute(node, cmd)
             ssh_copy(node, os.path.join(output_presto_conf, "log.properties"), "/opt/Beaver/presto/etc/log.properties")
             for file in os.listdir(output_presto_conf):
@@ -93,3 +103,10 @@ def start_presto_service(slaves):
     print (colors.LIGHT_BLUE + "Start presto related services, it may take a while..." + colors.ENDC)
     for node in slaves:
         ssh_execute(node, "$PRESTO_HOME/bin/launcher start")
+
+def run_presto_tpc_ds(master, beaver_env):
+    cmd = "mkdir -p /opt/Beaver/presto/sql;yes|cp -r /opt/Beaver/TPC-DS/sample-queries-tpcds/query*.sql /opt/Beaver/presto/sql/;sed -i 's/;//g' /opt/Beaver/presto/sql/query*.sql"
+    ssh_execute(master,cmd)
+    tpc_ds_result = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",time.localtime())))
+    cmd = "chmod +x /opt/Beaver/presto/presto-benchmark-driver;cd /opt/Beaver/presto;sleep 15;nohup ./presto-benchmark-driver --catalog hive --runs 1 --warm 0 >> " + tpc_ds_result + " &"
+    ssh_execute(master,cmd)
