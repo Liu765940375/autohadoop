@@ -98,9 +98,7 @@ def deploy_sparkPhiveI(custom_conf,master,spark_Phive_component):
 
 def copy_hive_site(master,spark_Phive_version,spark_Phive_component):
     ssh_execute(master, "ln -s /opt/Beaver/hive/conf/hive-site.xml /opt/Beaver/"+spark_Phive_component+"-"+spark_Phive_version+"/conf/")
-    if spark_Phive_version[0:3] == "1.6":
-        print("Link spark conf to Spark-PHive for 1.6")
-        ssh_execute(master, "ln -s /opt/Beaver/spark/conf/spark-defaults.conf /opt/Beaver/"+spark_Phive_component+"-"+spark_Phive_version+"/conf/")
+    ssh_execute(master, "ln -s /opt/Beaver/spark/conf/spark-defaults.conf /opt/Beaver/"+spark_Phive_component+"-"+spark_Phive_version+"/conf/")
 
 def download_spark_Phive_pkg(master,spark_Phive_version,spark_Phive_component):
     copy_packages([master],spark_Phive_component,spark_Phive_version)
