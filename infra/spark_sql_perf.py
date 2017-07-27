@@ -41,6 +41,7 @@ def run_tpcds(master, custom_conf, spark_sql_home, spark_sql_perf_home, tpcds_ki
     tpc_ds_config_file = os.path.join(custom_conf, "TPC-DS/config")
     config_dict = get_configs_from_properties(tpc_ds_config_file)
     scale = config_dict.get("scale")
+    data_format = config_dict.get("format")
     table_dir = config_dict.get("table_dir")
     user = master.username
     ip = master.ip
@@ -52,8 +53,8 @@ def run_tpcds(master, custom_conf, spark_sql_home, spark_sql_perf_home, tpcds_ki
     pexpect_child.sendline('import sqlContext.implicits._')
     pexpect_child.sendline('import com.databricks.spark.sql.perf.tpcds.Tables')
     pexpect_child.sendline('val tables = new Tables(sqlContext, "' + tpcds_kit_home + '/tools", ' + scale + ')')
-    pexpect_child.sendline('tables.genData("hdfs://'+ ip +':9000/' + table_dir +'", "parquet", true, false, false, false, false)')
-    pexpect_child.sendline('tables.createExternalTables("hdfs://' + ip +':9000/tpcds", "parquet", "finaltest", false)')
+    pexpect_child.sendline('tables.genData("hdfs://'+ ip +':9000/' + table_dir +'","' + data_format + '", true, false, false, false, false)')
+    pexpect_child.sendline('tables.createExternalTables("hdfs://' + ip +':9000/' + table_dir + '","' + data_format +'","finaltest", false)')
     pexpect_child.sendline('import com.databricks.spark.sql.perf.tpcds.TPCDS')
     pexpect_child.sendline('val tpcds = new TPCDS (sqlContext = sqlContext)')
     pexpect_child.sendline('val experiment = tpcds.runExperiment(tpcds.tpcds1_4Queries)')
