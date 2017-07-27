@@ -52,17 +52,26 @@ def display_hadoop_perf(project_path, hadoop_home):
     os.system(cmd)
 
 # Generate Hadoop slaves config file
-def generate_slaves(slaves, conf_dir):
+def generate_slaves(slaves, conf_dir, run_master_datanode):
     with open(os.path.join(conf_dir, "slaves"), "w") as f:
-        for node in slaves:
-            #if node.role == "slave":
-            f.write(node.ip + "\n")
+        if len(slaves) == 1:
+            for node in slaves:
+                f.write(node.ip + "\n")
+        else:
+            if run_master_datanode == "TRUE":
+                for node in slaves:
+                    f.write(node.ip + "\n")
+            else:
+                for node in slaves:
+                    if node.role != "master":
+                        f.write(node.ip + "\n")
+
 
 # merge configuration file
-def update_hadoop_conf(default_conf, custom_conf, master, slaves):
+def update_hadoop_conf(default_conf, custom_conf, master, slaves, beaver_env):
     output_hadoop_conf = update_conf(HADOOP_COMPONENT, default_conf, custom_conf)
     # generate slaves file
-    generate_slaves(slaves, output_hadoop_conf)
+    generate_slaves(slaves, output_hadoop_conf, beaver_env.get("run_master_datanode"))
     # for all conf files, replace the related value, eg, replace master_hostname with real hostname
     for conf_file in [file for file in os.listdir(output_hadoop_conf) if fnmatch.fnmatch(file, '*.xml')]:
         output_conf_file = os.path.join(output_hadoop_conf, conf_file)
@@ -128,7 +137,7 @@ def start_hadoop_service(master, slaves, beaver_env):
     ssh_execute(master, hadoop_home + "/sbin/mr-jobhistory-daemon.sh start historyserver")
 
 def update_copy_hadoop_conf(default_conf, custom_conf, master, slaves, beaver_env):
-    output_hadoop_conf = update_hadoop_conf(default_conf, custom_conf, master, slaves)
+    output_hadoop_conf = update_hadoop_conf(default_conf, custom_conf, master, slaves, beaver_env)
     copy_configurations(slaves, output_hadoop_conf, HADOOP_COMPONENT, beaver_env.get("HADOOP_HOME"))
 
 def hdfs_format(master, hadoop_home):

@@ -32,3 +32,4 @@ PAT_HOME=/opt/Beaver/pat
 PAT_VERSION=1.0
 PRESTO_HOME=/opt/Beaver/presto
 PRESTO_VERSION=0.180
+run_master_datanode=TRUE

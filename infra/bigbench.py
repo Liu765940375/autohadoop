@@ -162,6 +162,6 @@ def run_BB_PAT(master, slaves, beaver_env, custom_conf):
             cmd = "cd " + pat_home + "/PAT-post-processing;./pat-post-process.py;"
             ssh_execute(master, cmd)
     res_dir = get_res_dir(beaver_env)
-    pat_log_dir = os.path.join(pat_home, "/PAT-collecting-data/results/")
+    pat_log_dir = os.path.join(pat_home, "PAT-collecting-data/results/")
     copy_res(master, get_bb_log_dir(beaver_env), res_dir)
     copy_res(master, pat_log_dir, res_dir)
