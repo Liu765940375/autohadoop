@@ -135,9 +135,19 @@ def run_BB_PAT(master, slaves, beaver_env, custom_conf):
     pat_config_xml_conf = os.path.join(pat_output_path, "PAT-post-processing/config.xml")
     tree = ET.parse(pat_config_xml_conf)
     root = tree.getroot()
+    run_master_datanode = beaver_env.get("run_master_datanode")
     all_nodes_content = "ALL_NODES: "
-    for node in slaves:
-        all_nodes_content += node.hostname + ":22 "
+    if len(slaves) == 1:
+        for node in slaves:
+            all_nodes_content += node.hostname + ":22 "
+    else:
+        if run_master_datanode == "TRUE":
+            for node in slaves:
+                all_nodes_content += node.hostname + ":22 "
+        else:
+            for node in slaves:
+                if node.role != "master":
+                    all_nodes_content += node.hostname + ":22 "
     cmd = "cp -r " + pat_home + "/PAT-collecting-data/config.template " + pat_home + "/PAT-collecting-data/config;"
     cmd += "sed -i 's/ALL_NODES/#ALL_NODES/g' " + pat_home + "/PAT-collecting-data/config;"
     cmd += "echo " + all_nodes_content + " >> " + pat_home + "/PAT-collecting-data/config;"
