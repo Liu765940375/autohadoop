@@ -174,7 +174,7 @@ def run_BB_PAT(master, slaves, beaver_env, custom_conf):
     else:
         print (colors.LIGHT_BLUE + "Running Benchmark with ALL_PAT: " + colors.ENDC)
         cmd = "sed -i 's/CMD_PATH/#CMD_PATH/g' " + pat_home + "/PAT-collecting-data/config;"
-        cmd += "echo CMD_PATH: cd /opt/Beaver/BB \&\&  bin/bigBench runBenchmark >> " + pat_home + "/PAT-collecting-data/config;"
+        cmd += "echo CMD_PATH: /opt/Beaver/BB/bin/bigBench runBenchmark >> " + pat_home + "/PAT-collecting-data/config;"
         cmd += "unset SPARK_HOME;cd " + pat_home + "/PAT-collecting-data;./pat run all_pat"
         ssh_execute(master, cmd)
         print (colors.LIGHT_BLUE + "Generating ALL_PAT report: " + colors.ENDC)
