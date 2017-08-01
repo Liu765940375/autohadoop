@@ -136,6 +136,7 @@ def run_BB_PAT(master, slaves, beaver_env, custom_conf):
     tree = ET.parse(pat_config_xml_conf)
     root = tree.getroot()
     run_master_datanode = beaver_env.get("run_master_datanode")
+    pat_split_query = beaver_env.get("PAT_SPLIT_QUERY")
     all_nodes_content = "ALL_NODES: "
     if len(slaves) == 1:
         for node in slaves:
@@ -152,23 +153,36 @@ def run_BB_PAT(master, slaves, beaver_env, custom_conf):
     cmd += "sed -i 's/ALL_NODES/#ALL_NODES/g' " + pat_home + "/PAT-collecting-data/config;"
     cmd += "echo " + all_nodes_content + " >> " + pat_home + "/PAT-collecting-data/config;"
     ssh_execute(master, cmd)
-    bigBench_properties = get_env_list(bb_out_path + "/conf/bigBench.properties")
-    bigBench_command = read_bigBench_workloads(bigBench_properties, bb_home)
-    for i in range(len(bigBench_command)/2):
+    if pat_split_query == "TRUE":
+        bigBench_properties = get_env_list(bb_out_path + "/conf/bigBench.properties")
+        bigBench_command = read_bigBench_workloads(bigBench_properties, bb_home)
+        for i in range(len(bigBench_command)/2):
+            cmd = "sed -i 's/CMD_PATH/#CMD_PATH/g' " + pat_home + "/PAT-collecting-data/config;"
+            if bigBench_command[i*2+1] != " ":
+                print (colors.LIGHT_BLUE + "Running Benchmark with PAT: " + bigBench_command[i*2] + colors.ENDC)
+                cmd += "echo CMD_PATH: " + bigBench_command[i*2+1]+ " >> " + pat_home + "/PAT-collecting-data/config;"
+                cmd += "unset SPARK_HOME;cd " + pat_home + "/PAT-collecting-data;./pat run " + bigBench_command[i*2]
+                ssh_execute(master, cmd)
+        for i in range(len(bigBench_command) / 2):
+            if bigBench_command[i * 2 + 1] != " ":
+                print (colors.LIGHT_BLUE + "Generating PAT report: " + bigBench_command[i * 2] + colors.ENDC)
+                root.find("source").text = pat_home + "/PAT-collecting-data/results/" + bigBench_command[i*2] + "/instruments"
+                tree.write(pat_config_xml_conf)
+                ssh_copy(master, pat_config_xml_conf, pat_home + "/PAT-post-processing/config.xml")
+                cmd = "cd " + pat_home + "/PAT-post-processing;./pat-post-process.py;"
+                ssh_execute(master, cmd)
+    else:
+        print (colors.LIGHT_BLUE + "Running Benchmark with ALL_PAT: " + colors.ENDC)
         cmd = "sed -i 's/CMD_PATH/#CMD_PATH/g' " + pat_home + "/PAT-collecting-data/config;"
-        if bigBench_command[i*2+1] != " ":
-            print (colors.LIGHT_BLUE + "Running Benchmark with PAT: " + bigBench_command[i*2] + colors.ENDC)
-            cmd += "echo CMD_PATH: " + bigBench_command[i*2+1]+ " >> " + pat_home + "/PAT-collecting-data/config;"
-            cmd += "unset SPARK_HOME;cd " + pat_home + "/PAT-collecting-data;./pat run " + bigBench_command[i*2]
-            ssh_execute(master, cmd)
-    for i in range(len(bigBench_command) / 2):
-        if bigBench_command[i * 2 + 1] != " ":
-            print (colors.LIGHT_BLUE + "Generating PAT report: " + bigBench_command[i * 2] + colors.ENDC)
-            root.find("source").text = pat_home + "/PAT-collecting-data/results/" + bigBench_command[i*2] + "/instruments"
-            tree.write(pat_config_xml_conf)
-            ssh_copy(master, pat_config_xml_conf, pat_home + "/PAT-post-processing/config.xml")
-            cmd = "cd " + pat_home + "/PAT-post-processing;./pat-post-process.py;"
-            ssh_execute(master, cmd)
+        cmd += "echo CMD_PATH: cd /opt/Beaver/BB \&\&  bin/bigBench runBenchmark >> " + pat_home + "/PAT-collecting-data/config;"
+        cmd += "unset SPARK_HOME;cd " + pat_home + "/PAT-collecting-data;./pat run all_pat"
+        ssh_execute(master, cmd)
+        print (colors.LIGHT_BLUE + "Generating ALL_PAT report: " + colors.ENDC)
+        root.find("source").text = pat_home + "/PAT-collecting-data/results/all_pat/instruments"
+        tree.write(pat_config_xml_conf)
+        ssh_copy(master, pat_config_xml_conf, pat_home + "/PAT-post-processing/config.xml")
+        cmd = "cd " + pat_home + "/PAT-post-processing;./pat-post-process.py;"
+        ssh_execute(master, cmd)
     res_dir = get_res_dir(beaver_env)
     pat_log_dir = os.path.join(pat_home, "PAT-collecting-data/results/")
     copy_res(master, get_bb_log_dir(beaver_env), res_dir)
