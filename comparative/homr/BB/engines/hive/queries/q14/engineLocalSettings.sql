@@ -9,3 +9,6 @@ set hive.mapred.mode=nonstrict;
 -- ###########################
 -- Tuning options
 -- ###########################
+set hive.exec.reducers.bytes.per.reducer=128000000;
+set hive.exec.parallel=true;
+set mapreduce.input.fileinputformat.split.maxsize=2147483648;
