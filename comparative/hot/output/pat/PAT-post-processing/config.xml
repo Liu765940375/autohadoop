@@ -1,0 +1,30 @@
+<post-config>
+        <pdf enable="yes">
+                <average-cpu>yes</average-cpu>
+                <average-disk>yes</average-disk>
+                <average-net>yes</average-net>
+                <average-perf>yes</average-perf>
+                <average-memory>yes</average-memory>
+                <all-nodes-cpu>yes</all-nodes-cpu>
+                <all-nodes-disk>yes</all-nodes-disk>
+                <all-nodes-net>yes</all-nodes-net>
+                <all-nodes-perf>yes</all-nodes-perf>
+                <all-nodes-memory>yes</all-nodes-memory>
+        </pdf>
+        <excel enable="yes">
+                <cpu>yes</cpu>
+                <disk>yes</disk>
+                <net>yes</net>
+                <perf>yes</perf>
+                <memory>yes</memory>
+        </excel>
+        <csv-format enable="yes">
+                <csv-cpu>yes</csv-cpu>
+                <csv-disk>yes</csv-disk>
+                <csv-net>yes</csv-net>
+                <csv-perf>yes</csv-perf>
+                <csv-memory>yes</csv-memory>
+        </csv-format>
+    <source>/opt/Beaver/pat/PAT-collecting-data/results/all_pat/instruments</source>
+    <exclude-node>exclude-node</exclude-node>
+</post-config>
