@@ -16,5 +16,10 @@
 -- Tuning options
 -- ###########################
 set mapreduce.input.fileinputformat.split.maxsize=16777216;
---set hive.vectorized.execution.enabled=false;
+set hive.vectorized.execution.enabled=false;
+--set hive.vectorized.execution.enabled=true;
+--set hive.vectorized.execution.reduce.enabled=true;
+--set hive.vectorized.use.row.serde.deserialize=false;
+--set hive.vectorized.use.vector.serde.deserialize=true;
+--set hive.vectorized.execution.reduce.groupby.enabled=true;
 
