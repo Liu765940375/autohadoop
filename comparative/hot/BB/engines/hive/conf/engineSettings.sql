@@ -38,7 +38,8 @@
 --###########################
 -- values: mr, tez, spark
 set hive.execution.engine=tez;
-
+set tez.am.resource.memory.mb=4096;
+set hive.tez.container.size=4096;
 -- ###########################
 -- parallel order by. required by queries:
 -- Note the "bigbench." prefix! Actual enabling is query statement specific and 
