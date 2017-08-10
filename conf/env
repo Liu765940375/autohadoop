@@ -34,3 +34,4 @@ PRESTO_HOME=/opt/Beaver/presto
 PRESTO_VERSION=0.180
 run_master_datanode=TRUE
 PAT_SPLIT_QUERY=FALSE
+deploy_mysql=TRUE

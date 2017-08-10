@@ -39,7 +39,9 @@ def clean_hive(master):
 
 def deploy_hive(default_conf, custom_conf, master, beaver_env):
     hive_home = beaver_env.get("HIVE_HOME")
-    deploy_mysql(master, default_conf)
+    is_deploy_mysql=beaver_env.get("deploy_mysql")
+    if is_deploy_mysql == "TRUE":
+        deploy_mysql(master, default_conf)
     stop_hive_service(master)
     deploy_hive_internal(default_conf, custom_conf, master, beaver_env)
     hive_init_schema(master, hive_home)
