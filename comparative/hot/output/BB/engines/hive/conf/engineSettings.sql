@@ -38,7 +38,8 @@
 --###########################
 -- values: mr, tez, spark
 set hive.execution.engine=tez;
-
+set tez.am.resource.memory.mb=4096;
+set hive.tez.container.size=4096;
 -- ###########################
 -- parallel order by. required by queries:
 -- Note the "bigbench." prefix! Actual enabling is query statement specific and 
@@ -187,9 +188,9 @@ set spark.yarn.am.extraLibraryPath=/opt/Beaver/hadoop/lib/native;
 -- /opt/hadoop273/lib/native;
 
 -- PARQUET compression options: UNCOMPRESSED,GZIP,SNAPPY
---set parquet.compression=SNAPPY;
+set parquet.compression=GZIP;
 -- ORC compression options: NONE,ZLIB,SNAPPY
-set orc.compress=ZLIB;
+--set orc.compress=ZLIB;
 
 -- set parquet.block.size=32M
 set parquet.block.size=33554432;

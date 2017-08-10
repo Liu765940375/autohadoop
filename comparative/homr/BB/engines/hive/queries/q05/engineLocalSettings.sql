@@ -8,5 +8,5 @@
 -- ###########################
 -- Tuning options
 -- ###########################
-set hive.mapjoin.smalltable.filesize=1000000000;
-set hive.auto.convert.join.noconditionaltask.size=2000000000;
+set hive.mapjoin.smalltable.filesize=100000000;
+set hive.auto.convert.join.noconditionaltask.size=10000;

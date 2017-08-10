@@ -144,11 +144,11 @@ set hive.default.fileformat=${env:BIG_BENCH_hive_default_fileformat_tmp_table};
 --set hive.execution.engine=mr; // set above
 set hive.merge.mapfiles=false;
 set hive.merge.sparkfiles=false;
-set hive.vectorized.execution.enabled=true;
-set hive.vectorized.execution.reduce.enabled=true;
-set hive.vectorized.use.row.serde.deserialize=false;
-set hive.vectorized.use.vector.serde.deserialize=true;
-set hive.vectorized.execution.reduce.groupby.enabled=true;
+--set hive.vectorized.execution.enabled=true;
+--set hive.vectorized.execution.reduce.enabled=true;
+--set hive.vectorized.use.row.serde.deserialize=false;
+--set hive.vectorized.use.vector.serde.deserialize=true;
+--set hive.vectorized.execution.reduce.groupby.enabled=true;
 
 set spark.home=/opt/Beaver/spark;
 -- 	    /opt/spark163_noPhive;

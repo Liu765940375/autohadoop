@@ -68,4 +68,20 @@
     <name>yarn.nodemanager.vmem-check-enabled</name>
     <value>false</value>
   </property>
+  <property>
+    <name>yarn.timeline-service.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>yarn.timeline-service.hostname</name>
+    <value>bdpe101</value>
+  </property>
+  <property>
+    <name>yarn.timeline-service.http-cross-origin.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name> yarn.resourcemanager.system-metrics-publisher.enabled</name>
+    <value>true</value>
+  </property>
 </configuration>

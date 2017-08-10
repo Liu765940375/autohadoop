@@ -10,7 +10,8 @@
 -- ###########################
 set mapreduce.input.fileinputformat.split.maxsize=67108864;
 --set mapreduce.input.fileinputformat.split.maxsize=536870912;
-set hive.exec.reducers.bytes.per.reducer=8388608;
+--set hive.exec.reducers.bytes.per.reducer=8388608;
+set hive.exec.reducers.bytes.per.reducer=612368384;
 --set hive.exec.reducers.bytes.per.reducer=32000000;
 --set hive.exec.reducers.bytes.per.reducer=128000000;
 set hive.exec.reducers.max=1000000000;
