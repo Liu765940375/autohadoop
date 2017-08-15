@@ -51,6 +51,9 @@ def replace_conf_run(custom_conf, use_pat):
     restart_hive_on_tez(custom_conf)
     undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
     deploy_bigbench(custom_conf)
+    ssh_execute(master, "cp -r /opt/Beaver/hadoop/share/hadoop/yarn/lib/jersey-client-1.9.jar /opt/Beaver/spark-Phive/jars")
+    ssh_execute(master, "cp -r /opt/Beaver/hadoop/share/hadoop/yarn/lib/jersey-core-1.9.jar /opt/Beaver/spark-Phive/jars")
+    ssh_execute(master, "mv /opt/Beaver/spark-Phive/jars/jersey-client-2.22.2.jar /opt/Beaver/spark-Phive/jars/jersey-client-2.22.2.jar.bak")
     populate_bb_conf(master, default_conf, custom_conf, beaver_env)
     if use_pat:
         run_BB_PAT(master,slaves, beaver_env, custom_conf)

@@ -22,8 +22,14 @@ def replace_conf_run(custom_conf, use_pat):
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     populate_hive_on_spark_conf(custom_conf)
     spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
+
+    undeploy_hive(master)
     undeploy_spark(master)
     deploy_spark(default_conf, custom_conf, master, slaves, beaver_env)
+    # Deploy Hive
+    deploy_hive(default_conf, custom_conf, master, beaver_env)
+    copy_lib_for_spark(master, slaves, beaver_env, custom_conf, True)
+    link_spark_defaults(custom_conf)
     restart_hive_on_spark(custom_conf)
     undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
     deploy_bigbench(custom_conf)
