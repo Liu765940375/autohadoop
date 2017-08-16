@@ -29,7 +29,7 @@ def deploy_run(custom_conf):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    undeploy_hive_on_spark(custom_conf)
+    undeploy_hive_on_spark(custom_conf, beaver_env)
     deploy_hive_on_spark(custom_conf)
     start_hive_on_spark(custom_conf)
     deploy_hive_tpc_ds(default_conf, custom_conf, master)
@@ -40,7 +40,8 @@ def undeploy_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
-    undeploy_hive_on_spark(custom_conf)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    undeploy_hive_on_spark(custom_conf, beaver_env)
     undeploy_hive_tpc_ds(master)
 
 
@@ -64,6 +65,8 @@ if __name__ == '__main__':
         deploy_run(conf_p)
     elif action == "undeploy":
         undeploy_run(conf_p)
+    elif action == "run_tpcds":
+        run_tpcds_direct(conf_p)
     else:
         usage()
 

@@ -12,7 +12,7 @@ def deploy_run(custom_conf):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    undeploy_spark_sql(custom_conf)
+    undeploy_spark_sql(custom_conf, beaver_env)
     deploy_spark_sql(custom_conf)
     start_spark_sql(custom_conf)
     deploy_tpcds_kit(custom_conf, master, slaves)

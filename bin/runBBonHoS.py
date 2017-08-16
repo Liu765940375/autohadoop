@@ -40,7 +40,7 @@ def deploy_run(custom_conf, use_pat):
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    undeploy_hive_on_spark(custom_conf)
+    undeploy_hive_on_spark(custom_conf, beaver_env)
     deploy_hive_on_spark(custom_conf)
     start_hive_on_spark(custom_conf)
     deploy_bigbench(custom_conf)
@@ -56,7 +56,7 @@ def undeploy_run(custom_conf):
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
 
-    undeploy_hive_on_spark(custom_conf)
+    undeploy_hive_on_spark(custom_conf, beaver_env)
     undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
 
 def usage():
@@ -84,6 +84,8 @@ if __name__ == '__main__':
         deploy_run(conf_p, use_pat)
     elif action == "undeploy":
         undeploy_run(conf_p)
+    elif action == "run_bb":
+        run_BB_direct(conf_p, use_pat)
     else:
         usage()
 

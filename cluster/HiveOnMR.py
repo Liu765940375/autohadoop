@@ -6,11 +6,11 @@ from utils.config_utils import *
 
 default_conf = os.path.join(project_path, "conf")
 
-def undeploy_hive_on_mr(custom_conf):
+def undeploy_hive_on_mr(custom_conf, beaver_env):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
-    undeploy_hadoop(master, slaves, custom_conf)
+    undeploy_hadoop(master, slaves, custom_conf, beaver_env)
     undeploy_hive(master)
     undeploy_spark(master)
 

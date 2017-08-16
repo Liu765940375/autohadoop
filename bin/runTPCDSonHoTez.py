@@ -16,7 +16,7 @@ def deploy_run(custom_conf):
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     update_mr_tpcds(custom_conf)
-    undeploy_hive_on_tez(custom_conf)
+    undeploy_hive_on_tez(custom_conf, beaver_env)
     deploy_hive_on_tez(custom_conf)
     start_hive_on_tez(custom_conf)
     deploy_hive_tpc_ds(default_conf, custom_conf, master)
@@ -74,5 +74,7 @@ if __name__ == '__main__':
         deploy_run(conf_p)
     elif action == "undeploy":
         undeploy_run(conf_p)
+    elif action == "run_tpcds":
+        run_tpcds_direct(conf_p)
     else:
         usage()

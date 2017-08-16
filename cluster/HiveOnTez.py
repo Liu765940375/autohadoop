@@ -25,11 +25,11 @@ def deploy_hive_on_tez(custom_conf):
     # Deploy Tez
     deploy_tez_internal(default_conf, custom_conf, master, beaver_env)
 
-def undeploy_hive_on_tez(custom_conf):
+def undeploy_hive_on_tez(custom_conf, beaver_env):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
-    undeploy_hadoop(master, slaves, custom_conf)
+    undeploy_hadoop(master, slaves, custom_conf, beaver_env)
     undeploy_hive(master)
     undeploy_tez(master)
     undeploy_spark(master)

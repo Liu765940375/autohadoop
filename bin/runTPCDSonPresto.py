@@ -14,7 +14,7 @@ def deploy_run(custom_conf):
     undeploy_presto(slaves)
     deploy_presto(default_conf, custom_conf, master, slaves, beaver_env)
     stop_presto_service(slaves)
-    undeploy_hive_on_spark(custom_conf)
+    undeploy_hive_on_spark(custom_conf, beaver_env)
     deploy_hive_on_spark(custom_conf)
     start_hive_on_spark(custom_conf)
     deploy_hive_tpc_ds(default_conf, custom_conf, master)
@@ -34,8 +34,9 @@ def undeploy_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     undeploy_presto(slaves)
-    undeploy_hive_on_spark(custom_conf)
+    undeploy_hive_on_spark(custom_conf, beaver_env)
     undeploy_hive_tpc_ds(master)
 
 

@@ -2,6 +2,7 @@
 
 from utils.util import *
 from utils.ssh import *
+from utils.node import *
 
 BB_COMPONENT = "BB"
 PAT_COMPONENT = "pat"
@@ -65,6 +66,17 @@ def undeploy_bb_(master,spark_Phive_version,spark_Phive_component):
 
 def clean_pat(master):
     ssh_execute(master, "rm -rf /opt/Beaver/pat*")
+
+
+def run_BB_direct(custom_conf, use_pat):
+    cluster_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    if use_pat:
+        run_BB_PAT(master, slaves, beaver_env, custom_conf)
+    else:
+        run_BB(master, beaver_env)
 
 
 def run_BB(master, beaver_env):

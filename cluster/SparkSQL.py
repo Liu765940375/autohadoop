@@ -54,11 +54,11 @@ def restart_spark_sql(custom_conf):
     start_spark_sql(custom_conf)
 
 
-def undeploy_spark_sql(custom_conf):
+def undeploy_spark_sql(custom_conf, beaver_env):
     cluster_config_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_config_file)
     master = get_master_node(slaves)
-    undeploy_hadoop(master, slaves, custom_conf)
+    undeploy_hadoop(master, slaves, custom_conf, beaver_env)
     undeploy_hive(master)
     undeploy_spark(master)
 

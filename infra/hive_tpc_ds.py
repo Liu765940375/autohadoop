@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from infra.maven import *
+from utils.node import *
 
 TPC_DS_COMPONENT = "TPC-DS"
 
@@ -83,6 +84,14 @@ def generate_tpc_ds_data(master, tpc_ds_home, scale, data_format):
     print("+++++++++++++++++++++++++++++")
     cmd = "cd " + tpc_ds_home + ";FORMAT=" + data_format + " ./tpcds-setup.sh " + scale + ";"
     ssh_execute(master, cmd)
+
+
+def run_tpcds_direct(custom_conf):
+    cluster_file = os.path.join(custom_conf, "slaves.custom")
+    slaves = get_slaves(cluster_file)
+    master = get_master_node(slaves)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    run_hive_tpc_ds(master, custom_conf, beaver_env)
 
 
 def run_hive_tpc_ds(master, custom_conf, beaver_env):

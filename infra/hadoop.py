@@ -6,11 +6,16 @@ from infra.jdk import *
 HADOOP_COMPONENT = "hadoop"
 
 # Deploy Hadoop component
-def deploy_hadoop_internal(default_conf, custom_conf, master, slaves):
-    setup_nopass(slaves)
-    update_etc_hosts(slaves)
-    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
-    clean_hadoop(slaves, custom_conf)
+def deploy_hadoop_internal(default_conf, custom_conf, master, slaves, beaver_env):
+    is_setup_nopass = beaver_env.get("setup_nopass")
+    is_update_etc_hosts = beaver_env.get("update_etc_hosts")
+    format_clean_hadoop = beaver_env.get("format_clean_hadoop")
+    if is_setup_nopass == "TRUE":
+        setup_nopass(slaves)
+    if is_update_etc_hosts == "TRUE":
+        update_etc_hosts(slaves)
+    if format_clean_hadoop == "TRUE":
+        clean_hadoop(slaves, custom_conf)
     setup_env_dist(slaves, beaver_env, HADOOP_COMPONENT)
     set_path(HADOOP_COMPONENT, slaves, beaver_env.get("HADOOP_HOME"))
     copy_packages(slaves, HADOOP_COMPONENT, beaver_env.get("HADOOP_VERSION"))
@@ -147,19 +152,25 @@ def hdfs_format(master, hadoop_home):
 def deploy_hadoop(default_conf, custom_conf, master, slaves, beaver_env):
     deploy_jdk(slaves, beaver_env)
     stop_hadoop_service(master, slaves)
-    deploy_hadoop_internal(default_conf, custom_conf, master, slaves)
-    hdfs_format(master, beaver_env.get("HADOOP_HOME"))
+    deploy_hadoop_internal(default_conf, custom_conf, master, slaves, beaver_env)
+    format_clean_hadoop = beaver_env.get("format_clean_hadoop")
+    if format_clean_hadoop == "TRUE":
+        hdfs_format(master, beaver_env.get("HADOOP_HOME"))
 
 def deploy_start_hadoop(default_conf, custom_conf, master, slaves, beaver_env):
+    format_clean_hadoop = beaver_env.get("format_clean_hadoop")
     deploy_jdk(slaves, beaver_env)
     stop_hadoop_service(master, slaves)
-    deploy_hadoop_internal(default_conf, custom_conf, master, slaves)
-    hdfs_format(master, beaver_env.get("HADOOP_HOME"))
+    deploy_hadoop_internal(default_conf, custom_conf, master, slaves, beaver_env)
+    if format_clean_hadoop == "TRUE":
+        hdfs_format(master, beaver_env.get("HADOOP_HOME"))
     start_hadoop_service(master, slaves, beaver_env)
 
-def undeploy_hadoop(master, slaves, custom_conf):
+def undeploy_hadoop(master, slaves, custom_conf, beaver_env):
+    format_clean_hadoop = beaver_env.get("format_clean_hadoop")
     stop_hadoop_service(master, slaves)
-    clean_hadoop(slaves, custom_conf)
+    if format_clean_hadoop == "TRUE":
+        clean_hadoop(slaves, custom_conf)
 
 '''
 if __name__ == '__main__':
