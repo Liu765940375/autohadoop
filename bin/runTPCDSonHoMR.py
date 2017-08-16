@@ -52,7 +52,8 @@ def undeploy_run(custom_conf):
     cluster_file = os.path.join(custom_conf, "slaves.custom")
     slaves = get_slaves(cluster_file)
     master = get_master_node(slaves)
-    undeploy_hive_on_mr(custom_conf)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    undeploy_hive_on_mr(custom_conf, beaver_env)
     undeploy_hive_tpc_ds(master)
 
 def usage():

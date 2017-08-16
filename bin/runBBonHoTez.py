@@ -66,7 +66,7 @@ def undeploy_run(custom_conf):
     master = get_master_node(slaves)
     beaver_env = get_env_list(os.path.join(custom_conf, "env"))
     spark_Phive_version = beaver_env.get("SPARK_PHIVE_VERSION")
-    undeploy_hive_on_tez(custom_conf)
+    undeploy_hive_on_tez(custom_conf, beaver_env)
     undeploy_bb_(master, spark_Phive_version, spark_Phive_component)
 
 def usage():

@@ -51,7 +51,8 @@ def deploy_run(custom_conf, use_pat):
 
 
 def undeploy_run(custom_conf):
-    undeploy_spark_sql(custom_conf)
+    beaver_env = get_env_list(os.path.join(custom_conf, "env"))
+    undeploy_spark_sql(custom_conf, beaver_env)
 
 
 def usage():
