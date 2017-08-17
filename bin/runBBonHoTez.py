@@ -71,7 +71,7 @@ def undeploy_run(custom_conf):
 
 def usage():
     print("Usage: sbin/runBBonHoTez.sh [action] [path/to/conf] [-pat]/n")
-    print("   Action option includes: deploy_run, replace_conf_run, undeploy /n")
+    print("   Action option includes: deploy_run, replace_conf_run, undeploy, run_bb /n")
     print("           replace_conf_run means just replacing configurations and trigger a run /n")
     print("           deploy_run means remove all and redeploy a new run /n")
     print("           undeploy means remove all components based on the specified configuration /n")
