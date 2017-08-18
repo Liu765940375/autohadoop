@@ -1,1 +1,2 @@
-select a.a1 from default.parquet;
+use nested_column;
+select a.a1 from parquet limit 100;

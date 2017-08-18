@@ -104,9 +104,12 @@ def start_presto_service(slaves):
     for node in slaves:
         ssh_execute(node, "$PRESTO_HOME/bin/launcher start")
 
-def run_presto_tpc_ds(master, beaver_env):
+def run_presto_tpc_ds(master, beaver_env, custom_conf):
     cmd = "mkdir -p /opt/Beaver/presto/sql;yes|cp -r /opt/Beaver/TPC-DS/sample-queries-tpcds/query*.sql /opt/Beaver/presto/sql/;sed -i 's/;//g' /opt/Beaver/presto/sql/query*.sql"
     ssh_execute(master,cmd)
     tpc_ds_result = os.path.join(beaver_env.get("TPC_DS_RES_DIR"), str(time.strftime("%Y-%m-%d-%H-%M-%S",time.localtime())))
-    cmd = "chmod +x /opt/Beaver/presto/presto-benchmark-driver;cd /opt/Beaver/presto;sleep 15;nohup ./presto-benchmark-driver --catalog hive --runs 1 --warm 0 >> " + tpc_ds_result + " &"
+    tpc_ds_config_file = os.path.join(custom_conf, "TPC-DS/config")
+    config_array = get_configs_from_properties(tpc_ds_config_file)
+    master_port = config_array.get("presto_master_port")
+    cmd = "chmod +x /opt/Beaver/presto/presto-benchmark-driver;cd /opt/Beaver/presto;sleep 15;nohup ./presto-benchmark-driver --server "+master.ip+":"+master_port+" --catalog hive --runs 1 --warm 0 >> " + tpc_ds_result + " &"
     ssh_execute(master,cmd)

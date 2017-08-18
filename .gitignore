@@ -18,3 +18,4 @@ conf/*.property
 *.py[cod]
 utils/*.pyc
 package/*
+*/target/*

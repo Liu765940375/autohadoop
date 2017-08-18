@@ -4,3 +4,4 @@ format orc
 build yes
 generate yes
 table_dir tpcds
+presto_master_port 8080

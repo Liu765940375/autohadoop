@@ -20,7 +20,7 @@ def deploy_run(custom_conf):
     deploy_hive_tpc_ds(default_conf, custom_conf, master)
     generate_tpc_ds_data_onhive(master, custom_conf, beaver_env)
     start_presto_service(slaves)
-    run_presto_tpc_ds(master, beaver_env)
+    run_presto_tpc_ds(master, beaver_env, custom_conf)
 
 
 def usage():

@@ -1,1 +1,3 @@
-insert into table default.parquet select * from default.textfile;
+CREATE DATABASE IF NOT EXISTS nested_column;
+use nested_column;
+insert into table parquet select * from textfile;

@@ -1,32 +1,47 @@
-/**
- * Created by root on 4/21/17.
- */
-import java.io.*;
-import java.lang.System;
+package nestedcolumn;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Random;
-public class Datagen {
+
+/**
+ * Created by root on 8/15/17.
+ */
+public class DataGen {
     public static void main(String[] args) throws IOException {
         if(args.length==0||args[0].equals("-h")){
-            System.out.println("usage:\nargs1:filepath(the path where you generate your data)\nargs2:scale(1 means 1g)");
+            System.out.println("usage:\nargs0:hive hostname(like hdfs://bdpe**:9000);\nargs1:scale(1 means 1g)");
         }else{
-            String fileName;
-            fileName = args[0];
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName)), 1024 * 1024);
-            byte[] bytebb = new byte[]{2};
-            byte[] bytecc = new byte[]{3};
-            String bb = new String(bytebb);
-            String cc = new String(bytecc);
+            Configuration conf = new Configuration();
+            conf.set("fs.default.name", args[0]);
+            Path path = new Path("/user/hive/warehouse/extra-nested");
+            FileSystem fs = FileSystem.get(conf);
+            if (fs.exists(path)){
+                fs.delete(path,true);
+            }
+            OutputStream os = fs.create(path);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));
             Random random = new Random();
-            long m,n,y;
+            long m,n;
             if(args.length==1){
                 m=1;
             }else{
                 m = Integer.valueOf(args[1]).intValue();
             }
-            n=(long)1450000*m;
+            byte[] bytebb = new byte[]{2};
+            byte[] bytecc = new byte[]{3};
+            String bb = new String(bytebb);
+            String cc = new String(bytecc);
+            n=(long)1500000*m;
             for (long i = 0; i < n; i++) {
                 StringBuffer s = new StringBuffer();
-                String ss[] = new String[30];
+                String ss[] = new String[27];
                 for (int j=0;j<27;j++){
                     ss[j]=randomString(20);
                 }
@@ -38,6 +53,7 @@ public class Datagen {
                         .append(ss[24]).append(bb).append(ss[25]).append(bb).append(random.nextLong()).append(bb).append(ss[26]).append(bb).append(random.nextLong()).append("\n");
                 bw.write(s.toString());
             }
+            bw.flush();
             bw.close();
         }
     }
@@ -51,5 +67,4 @@ public class Datagen {
         }
         return buf.toString();
     }
-
 }
